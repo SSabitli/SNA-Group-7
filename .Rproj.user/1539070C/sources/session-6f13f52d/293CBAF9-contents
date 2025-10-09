@@ -143,6 +143,48 @@ plot(walktrap_comm, p2p_bondera_network,
 igraph::V(p2p_bondera_network)$Age <- bondera_sample_atts$Age[
   match(igraph::V(p2p_bondera_network)$name, bondera_sample_atts$name)]
 
+bondora_sample$Education <- factor(bondora_sample$Education,
+                                   levels = c(1, 2, 3, 4, 5),
+                                   labels = c("Primary","Basic","Vocational",
+                                              "Secondary", "Higher"))
 
+bondora_sample$Gender <- factor(bondora_sample$Gender,
+                                levels = c(0,1,2),
+                                labels = c("Male","Female","Other"))
 
+bondora_sample$MaritalStatus <- factor(bondora_sample$MaritalStatus,
+                                       levels = c(1,2,3,4,5),
+                                       labels = c("Married","Cohabitant",
+                                                  "Single","Divorced","Widow"))
+
+# Export the Network Object and Other Relevant Objects
+saveRDS(p2p_bondera_network, 'resources/objects/p2p_network.RDS')
+saveRDS(bondora_sample, 'resources/objects/bondora_sample.RDS')
+
+# Descriptives
+snafun::g_summary(p2p_network)
+bootcamp::descriptives(bondora_df)
+
+# --------------------------------------------------------------------------- #
+
+barplot(table(bondora_sample$Gender),
+        col = c("cornsilk2", "cornsilk4", "black"),
+        main = "Gender Distribution",
+        ylab = "Count")
+
+par(mfrow = c(2, 3), mar = c(4, 4, 3, 1)) 
+
+barplot(table(bondora_sample$Gender),
+        col = c("cornsilk2", "cornsilk4"),
+        main = "Gender Distribution",
+        ylab = "Count")
+
+boxplot(bondora_sample$Age, main = "Age", 
+        col = "cornsilk2", horizontal = TRUE)
+boxplot(bondora_sample$LoanDuration, main = "Loan Duration", 
+        col = "cornsilk2", horizontal = TRUE)
+boxplot(bondora_sample$Amount, main = "Loan Amount", 
+        col = "cornsilk2", horizontal = TRUE)
+boxplot(bondora_sample$Interest, main = "Interest Rate", 
+        col = "cornsilk2", horizontal = TRUE)
 

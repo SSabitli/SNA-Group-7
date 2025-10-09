@@ -1,0 +1,81 @@
+{
+    "entries": [
+        {
+            "file": "quarto_templates/SNA4DSprojectTemplate2025.qmd",
+            "type": "fig",
+            "id": "reg_plot",
+            "suffix": "",
+            "title": " Visual Comparison of Model 1 and Model 2"
+        },
+        {
+            "file": "quarto_templates/SNA4DSprojectTemplate2025.qmd",
+            "type": "sec",
+            "id": "methodology",
+            "suffix": "",
+            "title": "Methodology"
+        },
+        {
+            "file": "quarto_templates/SNA4DSprojectTemplate2025.qmd",
+            "type": "sec",
+            "id": "dataset",
+            "suffix": "",
+            "title": "Dataset"
+        },
+        {
+            "file": "quarto_templates/SNA4DSprojectTemplate2025.qmd",
+            "type": "sec",
+            "id": "data-analysis",
+            "suffix": "",
+            "title": "Data analysis (Research Rationale)"
+        },
+        {
+            "file": "quarto_templates/SNA4DSprojectTemplate2025.qmd",
+            "type": "sec",
+            "id": "intro",
+            "suffix": "",
+            "title": "Introduction (1000 words) – 0.5 POINTS"
+        },
+        {
+            "file": "quarto_templates/SNA4DSprojectTemplate2025.qmd",
+            "type": "sec",
+            "id": "conclusion",
+            "suffix": "",
+            "title": "Conclusion"
+        },
+        {
+            "file": "quarto_templates/SNA4DSprojectTemplate2025.qmd",
+            "type": "sec",
+            "id": "model1",
+            "suffix": "",
+            "title": "Model 1"
+        },
+        {
+            "file": "quarto_templates/SNA4DSprojectTemplate2025.qmd",
+            "type": "sec",
+            "id": "ergm",
+            "suffix": "",
+            "title": "ERGM"
+        },
+        {
+            "file": "quarto_templates/SNA4DSprojectTemplate2025.qmd",
+            "type": "tbl",
+            "id": "example",
+            "suffix": "",
+            "title": "Example dataframe printed"
+        },
+        {
+            "file": "quarto_templates/SNA4DSprojectTemplate2025.qmd",
+            "type": "tbl",
+            "id": "model2",
+            "suffix": "",
+            "title": "Comparison of Model 1 and Model 2"
+        },
+        {
+            "file": "quarto_templates/SNA4DSprojectTemplate2025.qmd",
+            "type": "sec",
+            "id": "results",
+            "suffix": "",
+            "title": "Results"
+        }
+    ]
+}
