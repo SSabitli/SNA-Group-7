@@ -78,7 +78,7 @@ knitr::opts_chunk$set(cache.extra = knitr::rand_seed)
 ## Introduction {#sec-intro}
 
 | Hypothesis | ERGM Term | Motivation |
-|----|----|----|
+|------------------------|------------------------|------------------------|
 | H1: Students who I consider friends also consider me their friend | `mutual` | The `mutual` term captures the tendency for outgoing ties to co-occur with incoming ties between actors, capturing the dynamic of reciprocation. |
 
 ## Methodology {#sec-methodology}
@@ -128,7 +128,7 @@ width="100%"}](fig:network_plot)
 \clearpage
 \appendix
 \section{Source Code - Data Processing}
-\lstinputlisting[language=R]{data_processing_bondera.R}
+\lstinputlisting[language=R]{data_processing_bondora.R}
 
 {{< pagebreak >}}
 
