@@ -1,10 +1,10 @@
 
 # --------------------------------------------------------------------------- #
-# Reset WD
-#setwd("../..")
+# Install Relevant Packages
+install.packages("here")
 
 # Import the Bondora P2P Dataset
-bondora_raw <- read.csv("dataset/LoanData_Bondora.csv",
+bondora_raw <- read.csv(here::here("dataset","LoanData_Bondora.csv"),
                         header = TRUE)
 cols <- colnames(bondora_raw)
 

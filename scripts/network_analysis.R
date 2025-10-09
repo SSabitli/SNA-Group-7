@@ -1,7 +1,10 @@
 # --------------------------------------------------------------------------- #
+# If not already Installed
+install.packages("here")
+
 # Import the Network and Other Object
-p2p_network <- readRDS('resources/objects/p2p_network.RDS')
-bondora_df <- readRDS('resources/objects/bondora_sample.RDS')
+p2p_network <- readRDS(here::here("resources","objects","p2p_network.RDS"))
+bondora_df <- readRDS(here::here("resources","objects","bondora_sample.RDS"))
 
 # --------------------------------------------------------------------------- #
 

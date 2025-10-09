@@ -1,3 +1,7 @@
 project:
+  resources:
+    - dataset
+    - resources
+    - scripts
   output-dir: _output
   execute-dir: project
