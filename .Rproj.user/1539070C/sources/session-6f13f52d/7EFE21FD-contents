@@ -1,0 +1,263 @@
+---
+title: Strategy and Business Models - Group Research Project
+subtitle: Group 7
+date: 2025-09-01
+author:
+  - name: Floris 	Vermeulen
+    affiliations:
+      - ref: jads
+      - ref: tiu
+  - name: Martijn van Iterson
+    affiliations:
+      - ref: jads
+      - ref: tiu
+  - name: Niek	Fleerakkers
+    affiliations:
+      - ref: jads
+      - ref: tiu
+  - name: Patryk	Grodek
+    affiliations:
+      - ref: jads
+      - ref: tue
+  - name: Samir Sabitli
+    affiliations:
+      - ref: jads
+      - ref: tue
+affiliations:
+  - id: jads
+    name: Jheronimus Academy of Data Science
+  - id: tiu
+    name: Tilburg University
+  - id: tue
+    name: Eindhoven University of Technology
+include-in-header:
+  - text: |
+      \usepackage{longtable}
+      \usepackage{graphicx}
+      \usepackage{booktabs}
+      \usepackage{dcolumn}
+      \usepackage{float}
+bibliography: r-references.bib
+csl: apa-6th-edition.csl
+toc: true
+toc-depth: 2
+format:
+  pdf: 
+    documentclass: article
+    pagesize: a4
+    number-sections: true
+    df-print: kable
+    fig-cap-location: top
+    geometry:
+      - left=1.5in
+      - right=1.5in
+      - heightrounded
+execute:
+    echo: false
+    cache: true
+editor: 
+  markdown: 
+    wrap: 72
+---
+
+```{r}
+#| label: analysis-preferences
+#| include: false
+
+# Seed for random number generation
+set.seed(42)
+knitr::opts_chunk$set(cache.extra = knitr::rand_seed)
+```
+
+{{< pagebreak >}}
+
+::: callout-note
+## Citations in Quarto
+
+Add the bibtex entry in the .bib file. You can find the entries in
+Google scholar, but double check since it is not always correct.
+
+Call the citations in the text: - Citation within parentheses
+[@R-papaja] - Multiple citations [@R-papaja; @R-base2] - In-text
+citations @R-papaja - Year only [-@R-base2]
+
+Only if your citation appears in the text it will also show up in the
+Reference list. Don't manually modify the Reference list.
+:::
+
+## Abstract (200 words) – 0.3 POINTS {.unnumbered}
+
+*Summarize the report. Write this as the very last thing.*
+
+-   What is the main topic you are addressing?
+-   What are your research questions and hypotheses?
+-   What are your results and the main conclusion?
+
+## Introduction (1000 words) – 0.5 POINTS {#sec-intro}
+
+-   What is the main topic that is going to be studied in this paper?
+-   Why is it important?
+-   What are the existing studies that address it already?
+-   What are your research questions and hypotheses?
+    -   minimum 1 hypothesis for RQ1,
+    -   minimum 2 exogeneous and 2 endogeneous hypotheses for RQ2,
+    -   each hypotheses has to be supported by a citation.
+-   Why are they important? How are they connected to previous work or
+    to a problem you raised?
+-   Which methods are you using? Why?
+-   How is your work going to contribute to the field/or to whom (e.g.,
+    industry)?
+-   What does the rest of the report look like? In one short paragraph,
+    list the topics of the following sections.
+
+For RQ2, provide your hypothesis in the following table format too, for
+a clear overview:
+
+| Hypothesis | ERGM Term | Motivation |
+|------------------------|------------------------|------------------------|
+| H1: Students who I consider friends also consider me their friend | `mutual` | The `mutual` term captures the tendency for outgoing ties to co-occur with incoming ties between actors, capturing the dynamic of reciprocation. |
+
+## Methodology {#sec-methodology}
+
+### Dataset {#sec-dataset}
+
+(about 500 words) 1 POINT (+ BONUS)
+
+-   Which data set are you going to use? Three options:
+    -   Use readily/easily available data (0 bonus points)
+    -   Combine two or more existing datasets (max 0.5 bonus points)
+    -   Scrape or collect your own data (max. 1 bonus point)
+-   Clearly explain where the data is coming from:
+    -   Who collected the data?
+    -   What is the source?
+    -   When was the data produced?
+    -   How was the data collected?
+-   Provide descriptive measures of your data (tables, plots, etc.)
+-   Why is this data useful to study your topic and answer your research
+    questions?
+-   What is the potential bias in the data? How does this affect your
+    results?
+
+### Data analysis (Research Rationale) {#sec-data-analysis}
+
+(about 500 words) – 1 POINTS
+
+-   Why are these two methods suitable for your data?
+-   Why are these two methods suitable for your research questions?
+-   Are there other methods to address these questions? If yes, why are
+    the methods you chose better for this case?
+
+## Results {#sec-results}
+
+(about 2000 words)
+
+### Model 1 {#sec-model1}
+
+(about 1000 words) – 2.5 POINTS
+
+-   Present your results appropriately (plots, tables…) and discuss your
+    findings in plain English
+-   Discuss the meaning of your findings in relation to your hypothesis.
+    (half of the points evaluated in this other part)
+
+```{r}
+#| label: tbl-example
+#| tbl-cap: Example dataframe printed
+
+# table example
+cn <- c("age", "gender", "eyes_col")
+one <- c(7, "M", "BLUE")
+two <- c(8, "F", "BROWN")
+three <- c(8, "M", "GREEN")
+four <- c(7, "F", "PINK")
+tab <- rbind(cn, one, two, three, four)
+rownames(tab) <- NULL
+
+knitr::kable(as.data.frame(tab))
+```
+
+### ERGM {#sec-ergm}
+
+(about 1000) – 2.5 POINTS
+
+-   Present your results appropriately (plots, tables…) and discuss your
+    findings in plain English
+-   Discuss the meaning of your findings in relation to your hypothesis.
+    (half of the points evaluated in this other part)
+
+```{r}
+#| label: ergm-that-takes-long
+#| cache: true # now Quarto will save the objects in this cell in the background, and will only re-compute them, if the source code changes! Make sure to give it a label, so it can keep track of which cell is cached.
+
+ctl <- c(4.17, 5.58, 5.18, 6.11, 4.50, 4.61, 5.17, 4.53, 5.33, 5.14)
+trt <- c(4.81, 4.17, 4.41, 3.59, 5.87, 3.83, 6.03, 4.89, 4.32, 4.69)
+group <- gl(2, 10, 20, labels = c("Ctl", "Trt"))
+weight <- c(ctl, trt)
+lm.D9 <- lm(weight ~ group)
+lm.D90 <- lm(weight ~ group - 1)
+```
+
+```{r}
+#| output: asis
+#| label: tbl-model2
+#| tbl-cap: "Comparison of Model 1 and Model 2"
+
+# model results display example, using the cached variables, so you can tinker with the presentation without re-running any ERGMs :D
+
+# install.packages("texreg") if needed
+texreg::texreg(
+  list(lm.D9, lm.D90), 
+  dcolumn = TRUE, 
+  booktabs = TRUE, 
+  label = NaN, 
+  table = FALSE, 
+  use.packages = FALSE)
+```
+
+```{r}
+#| label: fig-reg_plot
+#| fig-cap: " Visual Comparison of Model 1 and Model 2"
+
+# model results display example, using the cached variables, so you can tinker with the presentation without re-running any ERGMs :D
+
+# install.packages("texreg") if needed
+texreg::plotreg(list(lm.D9, lm.D90))
+```
+
+## Conclusion {#sec-conclusion}
+
+(about 350 words) – 0.7 POINTS
+
+What were your topic and research questions again? (1 sentence)
+
+What did you learn from the two analysis you run? \*\*\* most important
+point to address 0.5 POINTS here
+
+Who benefits from your findings?
+
+What does remain an open problem?
+
+Can you give suggestions for future work in this area?
+
+## References {.unnumbered}
+
+::: {#refs}
+:::
+
+{{< pagebreak >}}
+
+## Technology statement student(s)
+
+For the assignment, you must add the technology statement, using the
+text below. Replace the text in capital letters with the requested
+information.
+
+> During the preparation of this work, I/We used **\[NAME TOOL / SERVICE
+> / VERSION OF AI TOOL\]** in order to **\[REASON\]**. The following
+> parts of the assignment were affected/generated by AI tool usage:
+> **\[INTRODUCTION / METHODS / xxx, DISCUSSION\]**. After using this
+> tool/service, **\[NAME STUDENT(S)\]** evaluated the validity of the
+> tool’s outputs, including the sources that generative AI tools have
+> used, and edited the content as needed. As a consequence, **\[NAME
+> STUDENT(S)\]** take(s) full responsibility for the content of their
+> work.

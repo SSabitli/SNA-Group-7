@@ -1,0 +1,5 @@
+[2,"Registered S3 methods overwritten by 'snafun':\r\n  method        from   \r\n  plot.igraph   igraph \r\n  plot.network  network\r\n  print.igraph  igraph \r\n  print.network network\r\n"]
+[2,"Loading required package: shiny\r\n\r\nAttaching package: 'gradethis'\r\n\r\nThe following objects are masked from 'package:learnr':\r\n\r\n    random_encouragement, random_praise\r\n\r\n\r\nListening on http://127.0.0.1:14123\r\n"]
+[2,"\r\n+------------------------------------------------------------------------+\r\n"]
+[2,"✓ Opened tutorial available at http://127.0.0.1:14123\r\n! Stop or cancel this job to stop running the tutorial\r\n+------------------------------------------------------------------------+\r\n\r\n"]
+[2,"\r\n\r\nExecution halted\r\n"]

@@ -1,0 +1,10 @@
+.quarto
+.venv
+.freeze
+/.quarto/
+.Rproj.user
+.Rhistory
+dataset/
+.gitattributes
+
+
