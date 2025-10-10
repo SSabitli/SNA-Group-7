@@ -1,7 +1,11 @@
 /.quarto/
 .Rproj.user
 .Rhistory
+.gitattributes
 .DS_Store
 _cache/
 _output/
 docs/
+deprecated/
+SNA_Group7_cache/
+quarto_templates/

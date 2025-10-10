@@ -118,10 +118,10 @@ With this, we arrive at our first research problem, aiming to understand
 \textbf{to what extent are borrower networks weak in P2P networks?} More
 specifically, we formulate the hypothesis
 
-+-------------+:----------------------------------------------------+
-| **H** $_    | Borrower networks based on similarity have a low    |
-| 1^a$        | degree of centralisation                            |
-+-------------+-----------------------------------------------------+
+|  |  |
+|----|:---|
+| **H** $_
+1^a$ | Borrower networks based on similarity have a low degree of centralisation |
 
 To understand social capital, we employ techniques related to the
 occurance of dyadic connections rather than studying their structural
@@ -177,52 +177,12 @@ users usually cannot directly observe prestige-related characteristics,
 however, this can be tested by constructing a variable related to latent
 status.
 
-+--------------+-----+-----+-----------+----------------------------+
-| Hypothesis   | T   | D   | ERGM Term | Motivation                 |
-|              | ype | yad |           |                            |
-+==============+=====+=====+===========+============================+
-| **H**        | E   | Ind | `n        | The `nodecov()` term       |
-| $^a_2$:      | xo. | ep. | odecov()` | captures how the age       |
-| Younger      |     |     |           | covariate affects the      |
-| borrowers    |     |     |           | likelihood of edge         |
-| tend to form |     |     |           | formation. Since we want a |
-| more         |     |     |           | numeric range, this term   |
-| r            |     |     |           | is most appropriate.       |
-| elationships |     |     |           |                            |
-| with each    |     |     |           |                            |
-| other        |     |     |           |                            |
-+--------------+-----+-----+-----------+----------------------------+
-| **H**        | E   | Ind | `node     | The `nodefactor()` term    |
-| $^a_3$:      | xo. | ep. | factor()` | captures the tendency of   |
-| Women tend   |     |     |           | women to form more edges,  |
-| to form more |     |     |           | regardless of the other    |
-| r            |     |     |           | gender.                    |
-| elationships |     |     |           |                            |
-| with other   |     |     |           |                            |
-| borrowers    |     |     |           |                            |
-+--------------+-----+-----+-----------+----------------------------+
-| **H**        | En  | Int | `gwesp()` | The `gwesp()` term         |
-| $^a_4$:      | do. | er. |           | captures the tendency for  |
-| Borrowers    |     |     |           | triadic relationships to   |
-| tend to      |     |     |           | form. In other words, for  |
-| exhibit      |     |     |           | ties to form due to the    |
-| herding      |     |     |           | presence of other ties in  |
-| around each  |     |     |           | the dyad's neighbourhood.  |
-| other        |     |     |           |                            |
-+--------------+-----+-----+-----------+----------------------------+
-| **H**        | En  | Int | `gwd()`   | The `gwd()` term describe  |
-| $^a_5$:      | do. | er. | and       | degree distribution,       |
-| Borrowers    |     |     | `n        | indicating whether a       |
-| tend to form |     |     | odecov()` | borrower is popular to the |
-| ties around  |     |     |           | degree specified. It does  |
-| other hi     |     |     |           | not necessarily relate to  |
-| gh-status    |     |     |           | community. It is necessary |
-| borrowers    |     |     |           | to also use an indicator   |
-|              |     |     |           | of prestige to understand  |
-|              |     |     |           | whether pipe or prism      |
-|              |     |     |           | dynamics may be more       |
-|              |     |     |           | prevalent.                 |
-+--------------+-----+-----+-----------+----------------------------+
+| Hypothesis | T ype | D yad | ERGM Term | Motivation |
+|----|----|----|----|----|
+| **H** $^a_2$: Younger borrowers tend to form more r elationships with each other | E xo. | Ind ep. | `n odecov()` | The `nodecov()` term captures how the age covariate affects the likelihood of edge formation. Since we want a numeric range, this term is most appropriate. |
+| **H** $^a_3$: Women tend to form more r elationships with other borrowers | E xo. | Ind ep. | `node factor()` | The `nodefactor()` term captures the tendency of women to form more edges, regardless of the other gender. |
+| **H** $^a_4$: Borrowers tend to exhibit herding around each other | En do. | Int er. | `gwesp()` | The `gwesp()` term captures the tendency for triadic relationships to form. In other words, for ties to form due to the presence of other ties in the dyad's neighbourhood. |
+| **H** $^a_5$: Borrowers tend to form ties around other hi gh-status borrowers | En do. | Int er. | `gwd()` and `n odecov()` | The `gwd()` term describe degree distribution, indicating whether a borrower is popular to the degree specified. It does not necessarily relate to community. It is necessary to also use an indicator of prestige to understand whether pipe or prism dynamics may be more prevalent. |
 
 Our research makes notable contributions to existing research on social
 network analyses on P2P networks. The study primarily expands upon the
@@ -315,35 +275,32 @@ figure, we see that there are indeed prevalent communities, however,
 there is also significant overlap between them.
 
 [![Plot of the Bondera Network with and without Community
-Detection](resources/images/duo_network_plot.png){fig-align="left"}](fig:network_plot)
+Detection](resources/images/draft_1/duo_network_plot.png){fig-align="left"}](fig:network_plot)
 
-+----------------+---------------------------------------------------+
-| Network        | Value                                             |
-| Measure        |                                                   |
-+================+===================================================+
-| Number of      | 495                                               |
-| Vertices       |                                                   |
-+----------------+---------------------------------------------------+
-| Number of      | 14,017                                            |
-| Edges          |                                                   |
-+----------------+---------------------------------------------------+
-| Density        | 0.109                                             |
-+----------------+---------------------------------------------------+
-| Reciprocity    | 1 \footnote{We recognise that this may not be     |
-|                | i                                                 |
-|                | deal and we are looking for ways to deal with the |
-|                | 1                                                 |
-|                | 0                                                 |
-|                | 0\% reciprocity. Potential point for discussion.} |
-+----------------+---------------------------------------------------+
-| Transitivity   | 0.692                                             |
-+----------------+---------------------------------------------------+
-| Mean Distance  | 2.112                                             |
-+----------------+---------------------------------------------------+
-| Dyad Census    | Mutual: 13269                                     |
-|                |                                                   |
-|                | Null: 108,996                                     |
-+----------------+---------------------------------------------------+
++--------------------+---------------------------------------------------+
+| Network Measure    | Value                                             |
++====================+===================================================+
+| Number of Vertices | 495                                               |
++--------------------+---------------------------------------------------+
+| Number of Edges    | 14,017                                            |
++--------------------+---------------------------------------------------+
+| Density            | 0.109                                             |
++--------------------+---------------------------------------------------+
+| Reciprocity        | 1 \footnote{We recognise that this may not be     |
+|                    | i                                                 |
+|                    | deal and we are looking for ways to deal with the |
+|                    | 1                                                 |
+|                    | 0                                                 |
+|                    | 0\% reciprocity. Potential point for discussion.} |
++--------------------+---------------------------------------------------+
+| Transitivity       | 0.692                                             |
++--------------------+---------------------------------------------------+
+| Mean Distance      | 2.112                                             |
++--------------------+---------------------------------------------------+
+| Dyad Census        | Mutual: 13269                                     |
+|                    |                                                   |
+|                    | Null: 108,996                                     |
++--------------------+---------------------------------------------------+
 
 : Network Descriptive Statistics
 
@@ -356,7 +313,7 @@ that the few highly connected nodes are crucial for the connection of
 the wider P2P network.
 
 [![Degree and Betweeness Distribution of the P2P
-Network](resources/images/deg_bet.png){fig-align="left"}](deg_bet_dist)
+Network](resources/images/draft_1/deg_bet.png){fig-align="left"}](deg_bet_dist)
 
 The figure below shows various aspects of the wider dataset. Firstly, we
 observe that there are significantly more males within our subsample
@@ -377,7 +334,7 @@ interest rates, suggesting that the data has users with extraordinary
 circumstances.
 
 [![Descriptive Statistics of the wider
-Dataset](resources/images/distributions.png){fig-align="left"}](fig:dists)
+Dataset](resources/images/draft_1/distributions.png){fig-align="left"}](fig:dists)
 
 \clearpage
 
