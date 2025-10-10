@@ -118,10 +118,9 @@ With this, we arrive at our first research problem, aiming to understand
 \textbf{to what extent are borrower networks weak in P2P networks?} More
 specifically, we formulate the hypothesis
 
-|  |  |
-|----|:---|
-| **H** $_
-1^a$ | Borrower networks based on similarity have a low degree of centralisation |
+\begin{tabular}{ll}
+$\mathrm{\mathbf{H}}_1^a:$ & Borrower networks based on similarity have a low degree of centralisation
+\end{tabular}
 
 To understand social capital, we employ techniques related to the
 occurance of dyadic connections rather than studying their structural
@@ -177,12 +176,18 @@ users usually cannot directly observe prestige-related characteristics,
 however, this can be tested by constructing a variable related to latent
 status.
 
-| Hypothesis | T ype | D yad | ERGM Term | Motivation |
-|----|----|----|----|----|
-| **H** $^a_2$: Younger borrowers tend to form more r elationships with each other | E xo. | Ind ep. | `n odecov()` | The `nodecov()` term captures how the age covariate affects the likelihood of edge formation. Since we want a numeric range, this term is most appropriate. |
-| **H** $^a_3$: Women tend to form more r elationships with other borrowers | E xo. | Ind ep. | `node factor()` | The `nodefactor()` term captures the tendency of women to form more edges, regardless of the other gender. |
-| **H** $^a_4$: Borrowers tend to exhibit herding around each other | En do. | Int er. | `gwesp()` | The `gwesp()` term captures the tendency for triadic relationships to form. In other words, for ties to form due to the presence of other ties in the dyad's neighbourhood. |
-| **H** $^a_5$: Borrowers tend to form ties around other hi gh-status borrowers | En do. | Int er. | `gwd()` and `n odecov()` | The `gwd()` term describe degree distribution, indicating whether a borrower is popular to the degree specified. It does not necessarily relate to community. It is necessary to also use an indicator of prestige to understand whether pipe or prism dynamics may be more prevalent. |
+\begin{table}[h!]
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{@{}lllll@{}}
+\toprule
+\textbf{Hypotheses}                                                                                                                                      & \textbf{Type} & \textbf{Dyad}  & \textbf{\begin{tabular}[c]{@{}l@{}}ERGM \\ Term\end{tabular}} & \textbf{Motivation}                                                                                                                                                                                                                                                                                                                  \\ \midrule
+\begin{tabular}[c]{@{}l@{}}$\mathrm{\mathbf{H}}^a_2:$ Younger borrowers tend\\ to form more relationships \\ with each other\end{tabular}                & Exogenous     & Independent    & nodecov()                                                     & \begin{tabular}[c]{@{}l@{}}The term captures how the age covariate affects the likelihood \\ of edge formation. Since we want a numeric range, this term is \\ most appropriate.\end{tabular}                                                                                                                                        \\
+\begin{tabular}[c]{@{}l@{}}$\mathrm{\mathbf{H}}^a_3:$ Women tend to form more\\ relationships with other borrowers, \\ regardless of gender\end{tabular} & Exogenous     & Independent    & nodefactor()                                                  & \begin{tabular}[c]{@{}l@{}}The term captures the tendency of women to form more edges, \\ regardless of the other gender.\end{tabular}                                                                                                                                                                                               \\
+\begin{tabular}[c]{@{}l@{}}$\mathrm{\mathbf{H}}^a_4:$ Borrowers tend to exhibit\\ herding around each other\end{tabular}                                 & Endogenous    & Interdependent & gwesp()                                                       & \begin{tabular}[c]{@{}l@{}}The term captures the tendency for triadic relationships to form. \\ In other words, for ties to form due to the presence of other ties\\ in the dyad's neighbourhood.\end{tabular}                                                                                                                       \\
+\begin{tabular}[c]{@{}l@{}}$\mathrm{\mathbf{H}}^a_5:$ Borrowers tend to form ties\\ around other high-status borrowers\end{tabular}                      & Endogenous    & Interdependent & \begin{tabular}[c]{@{}l@{}}gwd() \\ \& nodecov()\end{tabular} & \begin{tabular}[c]{@{}l@{}}The term describes degree distribution, indicating whether a borrower \\ is popular to the degree specified. It does not necessarily \\ relate to community.  It is necessary to also use an indicator of \\ prestige to understand whether pipe or prism dynamics \\ may be more prevalent.\end{tabular} \\ \bottomrule
+\end{tabular}%
+}
+\end{table}
 
 Our research makes notable contributions to existing research on social
 network analyses on P2P networks. The study primarily expands upon the
@@ -277,32 +282,25 @@ there is also significant overlap between them.
 [![Plot of the Bondera Network with and without Community
 Detection](resources/images/draft_1/duo_network_plot.png){fig-align="left"}](fig:network_plot)
 
-+--------------------+---------------------------------------------------+
-| Network Measure    | Value                                             |
-+====================+===================================================+
-| Number of Vertices | 495                                               |
-+--------------------+---------------------------------------------------+
-| Number of Edges    | 14,017                                            |
-+--------------------+---------------------------------------------------+
-| Density            | 0.109                                             |
-+--------------------+---------------------------------------------------+
-| Reciprocity        | 1 \footnote{We recognise that this may not be     |
-|                    | i                                                 |
-|                    | deal and we are looking for ways to deal with the |
-|                    | 1                                                 |
-|                    | 0                                                 |
-|                    | 0\% reciprocity. Potential point for discussion.} |
-+--------------------+---------------------------------------------------+
-| Transitivity       | 0.692                                             |
-+--------------------+---------------------------------------------------+
-| Mean Distance      | 2.112                                             |
-+--------------------+---------------------------------------------------+
-| Dyad Census        | Mutual: 13269                                     |
-|                    |                                                   |
-|                    | Null: 108,996                                     |
-+--------------------+---------------------------------------------------+
+\footnote{We recognise that this reciprocity may not beideal and we are looking for ways to deal with the 100\% reciprocity. Potential point for discussion.}
 
-: Network Descriptive Statistics
+\begin{table}[h!]
+\centering
+\caption{Network Descriptive Statistics}
+\label{tab:desc}
+\begin{tabular}{@{}lr@{}}
+\toprule
+\textbf{Network Measure} & \textbf{Value} \\ \midrule
+Number of Vertices       & 495            \\
+Number of Edges          & 14,017         \\
+Density                  & 0.109          \\
+Reciprocity              & 1.000          \\
+Transitivity             & 0.692          \\
+Mean Distance            & 2.112          \\ \midrule
+Dyad Census: Mutual      & 13,269         \\
+Dyad Census: Null        & 108,996        \\ \bottomrule
+\end{tabular}
+\end{table}
 
 Observing the figure below, we see low betweenness centrality and degree
 distribution without any logarithmic adjustments. The latter indicates
