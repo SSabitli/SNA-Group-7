@@ -4,7 +4,7 @@
 .gitattributes
 .DS_Store
 _cache/
-_output/resources/
+_output/resources
 docs/
 deprecated/
 SNA_Group7_cache/
