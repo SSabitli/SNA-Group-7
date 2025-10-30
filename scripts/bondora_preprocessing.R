@@ -1,69 +1,104 @@
 # --------------------------------------------------------------------------- #
-install.packages("here") # To locate files within directory easier
+install.packages("here") # To locate files within directory easier\
+install.packages("RColorBrewer") # For Colours
 # --------------------------------------------------------------------------- #
 # Import the Bondora P2P Dataset
-bondora_raw <- read.csv(here::here("dataset","LoanData_Bondora.csv"),
-                        header = TRUE)
+bondora_raw <- read.csv(here::here(
+  "dataset","LoanData_Bondora.csv"))
 raw_cols <- colnames(bondora_raw)
 # --------------------------------------------------------------------------- #
-# Subset only Columns we need
-keep_cols <- c("LoanId", "UserName","NewCreditCustomer","LanguageCode",
-               "Age", "Gender", "Country", "Amount", "Interest",
-               "LoanDuration","UseOfLoan", "Education", "MaritalStatus",
-               "NrOfDependants", "Rating", "Restructured", 
-               "NoOfPreviousLoansBeforeLoan", "MonthlyPayment")
-
-keep_cols_slim <- c("LoanId", "UserName",
-                    "Age", "Gender", "Country", "Amount", "Interest",
-                    "LoanDuration","UseOfLoan", "Education", "MaritalStatus", 
-                    "Rating", "Restructured", "NoOfPreviousLoansBeforeLoan", 
-                    "MonthlyPayment")
+# Select Columns to Keep
+keep_cols <- c("LoanId", "UserName","Age", "Gender", 
+               "Country", "Amount", "Interest","LoanDuration",
+              "UseOfLoan", "Education", "MaritalStatus", 
+              "Rating", "Restructured", "MonthlyPayment")
 
 bondora <- bondora_raw[keep_cols]
 
 # Remove Rows with any NAs -> Complete Dataset Preferred
 print(paste("NA Count |",sum(is.na(bondora)),"rows"))
 bondora <- na.omit(bondora)
-sum(is.na(bondora))
+print(paste("NA Count |",sum(is.na(bondora)),"rows"))
 
-# Observe Class of Each Attribute
-sapply(bondora, class)
+# Remove users with only -1 Stated UseofLoan
+bondora_clean <- bondora[bondora$UseOfLoan != -1, ]
 
-# Make New Customer Indicator Binary
-new_customer_mapping <- c("True" = 1, "False" = 0)
-bondora$NewCreditCustomer <- new_customer_mapping[
-  bondora$NewCreditCustomer]
+# Remove Users with only One Loan
+user_counts <- table(bondora_clean$UserName)
+multi_users <- names(user_counts[user_counts > 5])
+bondora_clean <- bondora_clean[bondora_clean$UserName %in% multi_users, ]
+
+# See distribution of UserName Counts
+hist(table(bondora_clean$UserName))
+barplot(table(bondora_clean$UseOfLoan))
 # --------------------------------------------------------------------------- #
-# Observe "Population" Descriptive Statistics
+# Observe Descriptive Statistics for the Full Sample
+
+cols <- RColorBrewer::brewer.pal(n = 3, name = "RdBu")
+
+# Amounts
+par(mfrow=c(1,2))
 summary(bondora$Amount)
-boxplot(bondora$Amount, main="Loan Amounts")
+hist(bondora$Amount, xlab="Amount", col=cols[1], main="")
+boxplot(bondora$Amount, ylab="Amount",col=cols[1], main="")
 
+# Interest Rates
+par(mfrow=c(1,2))
 summary(bondora$Interest)
-boxplot(bondora$Interest, main="Interest Rate (Maximum)")
+hist(bondora$Interest, xlab="Interest Rate (%)", col=cols[1], main="")
+boxplot(bondora$Interest, ylab="Interest Rate (%)",col=cols[1], main="")
 
+# Loan Duration
+par(mfrow=c(1,2))
 summary(bondora$LoanDuration)
-boxplot(bondora$LoanDuration, main="Loan Duration in Months")
+hist(bondora$LoanDuration, xlab="Loan Duration (Months)", col=cols[1], main="")
+boxplot(bondora$LoanDuration,ylab="Loan Duration (Months)",col=cols[1], main="")
 
-summary(bondora$NoOfPreviousLoansBeforeLoan)
-barplot(table(bondora$NoOfPreviousLoansBeforeLoan),
-        main = "Number of Previous Loans")
-
+# Monthly Payment
+par(mfrow=c(1,2))
 summary(bondora$MonthlyPayment)
-boxplot(bondora$MonthlyPayment, main="Monthly Payments")
+hist(bondora$MonthlyPayment, xlab="Monthly Payment", col=cols[1], main="")
+boxplot(bondora$MonthlyPayment,ylab="Monthly Payment",col=cols[1], main="")
+
+# Monthly Payment
+par(mfrow=c(1,2))
+summary(bondora$MonthlyPayment)
+hist(bondora$MonthlyPayment, xlab="Monthly Payment", col=cols[1], main="")
+boxplot(bondora$MonthlyPayment,ylab="Monthly Payment",col=cols[1], main="")
 # --------------------------------------------------------------------------- #
-# Randomly Remove Observations until Desired Size is Reached
-set.seed(42)
-sample_size <- 500
-sample_indices <- sample(1:nrow(bondora), sample_size)
-bondora_sample <- bondora[sample_indices, ]
-# --------------------------------------------------------------------------- #
-# Test Sample Representativeness using Kolmogorov-Smirnov Test
+# Test Sample Distributions using Kolmogorov-Smirnov Test
 numeric_cols <- c("Amount", "Interest","LoanDuration","MonthlyPayment")
 
 for (col in numeric_cols) {
   print(paste("Test condcuted for",col))
   print(ks.test(bondora[[col]], bondora_sample[[col]]))
 }
+# --------------------------------------------------------------------------- #
+# Convert Dataset into Incidence Matrix to form Network Object
+bondora_slim <- bondora_clean
 
+# Create the Incidence Matrix for Use of Loan
+bondora_matrix <- table(
+  bondora_slim$UserName, bondora_slim$UseOfLoan)
+bondora_matrix[bondora_matrix > 0] <- 1
 
+# See distribution of UseofLoan
+barplot(table(bondora_slim$UseOfLoan))
 
+# Create network object
+bondora_net <- network::network(
+  bondora_matrix, directed=FALSE, bipartite=TRUE)
+
+# Extract Vectors for Vertex Attributes
+age <- bondora_clean$Age[match(
+  rownames(bondora_matrix), bondora_clean$UserName)]
+
+# Set the bipartite Attribute
+len <- dim(bondora_matrix)[1]
+network::set.vertex.attribute(
+  bondora_net, "bipartite", value = rep(len,len), v=1:len
+)
+
+# Save the network object
+saveRDS(bondora_net, file="resources/objects/bondora_net.RDS")
+# --------------------------------------------------------------------------- #
