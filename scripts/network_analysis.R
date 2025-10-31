@@ -1,14 +1,15 @@
 # --------------------------------------------------------------------------- #
 # If not already Installed
-install.packages("here")
+install.packages("here") # To locate files within directory easier
+install.packages("viridis") # For Colours
+install.packages("ergm.count")
 
 # Import the Network and Other Object
 bondora_net <- readRDS(here::here("resources","objects","bondora_net.RDS"))
 
 # Set colour palette
-cols <- RColorBrewer::brewer.pal(n = 3, name = "RdBu")
+cols <- viridis::viridis(30)
 # --------------------------------------------------------------------------- #
-
 # Copy network for plotting
 bondora_plot <- bondora_net
 
@@ -20,11 +21,11 @@ network::set.vertex.attribute(bondora_plot, "shape", shape)
 
 # Get Category Count for Vertex Size
 counts <- summary(bondora_plot ~ b2sociality)
-counts_att <- ifelse(type_indicator, counts^0.75, counts^0.5)
+counts_att <- ifelse(type_indicator, counts^0.75, counts^0.6)
 network::set.vertex.attribute(bondora_plot, "size", counts_att)
 
 # Colours for the Node Types
-plot_cols <- ifelse(type_indicator, cols[3], cols[1])
+plot_cols <- ifelse(type_indicator, cols[5], cols[30])
 network::set.vertex.attribute(bondora_plot, "color", plot_cols)
 
 # Legend Plotting
@@ -41,10 +42,14 @@ plot(snafun::to_igraph(bondora_plot),
      vertex.frame.size = 3,
      edge.curved = FALSE,
      layout=igraph::layout.fruchterman.reingold)
-legend("bottomleft", legend=levels(type_legend), col=c(cols[1], cols[3]), 
-       box.lwd=1, box.lty=1, bg=rgb(0,0,0, alpha=0.025),
-       pt.cex=2, lwd = 1, pch=c(16,15), title = "Node Partitions", 
-       title.font=2)
+legend("bottomleft", legend = levels(type_legend), 
+       inset = c(0.1, 0.02),
+       col = c(cols[5], cols[30]),
+       pch = c(16,15), 
+       title = "Node Partitions", title.font = 2,
+       cex = 0.8,       
+       lwd = 1,
+       bg = rgb(0,0,0, alpha=0.025))
 
 # Summary Statistics
 snafun::g_density(bondora_net)
@@ -73,77 +78,139 @@ hist(bet_dist,
      border = "cornsilk4")
 
 par(mfrow = c(1,1))
+# --------------------------------------------------------------------------- #
+# Make function to calculate probabilities from log odds
+lodds_to_prob <- function(l_odd) {
+  return(exp(l_odd) / (1 + exp(l_odd)))
+}
+# Make function to save ERGM object
+save_ergm <- function(object, id) {
+  saveRDS(object, file=here::here("resources","objects",id))
+}
+# Make function to conduct ERGMs automatically
+auto_ergm <- function(model, mcmc = TRUE, name, compare) {
 
+  # Diagnostics
+  if (mcmc) {
+    mcmc_diags <- ergm::mcmc.diagnostics(model)
+    gof <- ergm::gof(model)
+  } else {
+    mcmc_diags <- NULL
+    gof <- ergm::gof(model)
+  }
+  
+  # Save Model
+  save_ergm(model, name)
+  save_ergm(gof, paste(name,"_gof"))
+  
+  # Compare to other Models
+  updated_comps <- append(compare, list(model))
+  comps <- texreg::screenreg(updated_comps)
+  
+  # Return List to view each item separately
+  result <- list(mcmc_diags, gof, comps)
+  names(result) <- c("mcmc","gof","comps")
+  
+  return(result)
+}
+# --------------------------------------------------------------------------- #
+# Find max degree
+(max_deg <- max(summary(bondora_net ~ b2factor("b2_loantype"))))
 # --------------------------------------------------------------------------- #
 # Base Model + GOF
-base_model <- ergm::ergm(p2p_network ~ edges)
-basemodel_gof <- ergm::gof(base_model)
-snafun::stat_plot_gof(basemodel_gof)
-
-texreg::screenreg(base_model)
-
+formula_base_model <- bondora_net ~ edges
+base_ergm <- ergm::ergm(formula_base_model)
+base_ergm_panel <- auto_ergm(base_ergm, mcmc = FALSE,
+                             name = "ergm_base", compare = list())
+snafun::stat_plot_gof(base_ergm_panel$gof) 
+base_ergm_panel$comps
+models = list(base_ergm)
+# --------------------------------------------------------------------------- #
+# Base Model + Edge Counts + GOF
+#base_model_counts <- ergm::ergm(bondora_net ~ edges, response="frequency",
+#                                reference = ~ Poisson)
+#basemodel_counts_gof <- ergm::gof(base_model_counts)
+#snafun::stat_plot_gof(basemodel_counts_gof)
+#
+#texreg::screenreg(list(base_model, base_model_counts))
+# --------------------------------------------------------------------------- #
 # Iteration 1 + MCMC Diagnostics + GOF
-model_1_params <- bondora_net ~ edges + b1degree(1)
+model_1_params <- bondora_net ~ edges + gwb1dsp(decay=0.1, fixed=TRUE)
 model_1 <- ergm::ergm(model_1_params, 
-                      constraints= ~ bd(minout = 0, maxout = 10),
+                      constraints= ~ bd(minout = 0, maxout = max_deg),
                       control = ergm::control.ergm(
       MCMC.burnin = 10000,
       MCMC.samplesize = 50000,
       seed = 42,
-      MCMLE.maxit = 10,
-      parallel = 10,
+      MCMLE.maxit = 20,
+      parallel = 12,
       parallel.type = "PSOCK"
     )
   )
-ergm::mcmc.diagnostics(model_1)
-model_1_gof <- ergm::gof(model_1)
-snafun::stat_plot_gof(model_1_gof)
-model_1_gof
-
-models <- list(base_model, model_1)
-texreg::screenreg(models)
+model_1_panel <- auto_ergm(model=model_1, mcmc=TRUE,
+                           name="ergm_m1",compare=models)
+model_1_panel$mcmc
+snafun::stat_plot_gof(model_1_panel$gof) 
+model_1_panel$comps
+models <- append(models, model_1)
 # --------------------------------------------------------------------------- #
 # Iteration 2 + MCMC Diagnostics + GOF
-model_2_params <- bondora_net ~ edges + gwb1dsp(decay=0.05, fixed=TRUE) +
-  gwb2dsp(decay=0.05, fixed=TRUE)
+model_2_params <- bondora_net ~ edges + gwb1dsp(decay=0.1, fixed=TRUE) +
+  gwb2dsp(decay=0.1, fixed=TRUE)
 model_2 <- ergm::ergm(model_2_params, 
-                      constraints= ~ bd(minout = 0, maxout = 20),
+                      constraints= ~ bd(minout = 0, maxout = max_deg),
                       control = ergm::control.ergm(
   MCMC.burnin = 10000,
-  MCMC.samplesize = 50000,
+  MCMC.samplesize = 100000,
   seed = 42,
-  MCMLE.maxit = 10,
-  parallel = 10,
+  MCMLE.maxit = 20,
+  parallel = 12,
   parallel.type = "PSOCK"
     )
   )
-ergm::mcmc.diagnostics(model_2)
-model_2_gof <- ergm::gof(model_2)
-snafun::stat_plot_gof(model_2_gof)
-model_2_gof
-
-models <- list(base_model, model_1, model_2)
-texreg::screenreg(models)
+model_2_panel <- auto_ergm(model=model_2, mcmc=TRUE,
+                           name="ergm_m2", compare=models)
+snafun::stat_plot_gof(model_2_panel$gof) 
+model_2_panel$comps
+models <- append(models, model_2)
 # --------------------------------------------------------------------------- #
 # Iteration 3 + MCMC Diagnostics + GOF
-model_3_params <- bondora_net ~ edges + gwb1dsp(decay=0.05, fixed=TRUE) +
-  gwb2dsp(decay=0.05, fixed=TRUE) + gwb1degree(decay=0.05, fixed=TRUE)
+model_3_params <- bondora_net ~ edges + gwb1dsp(decay=0.1, fixed=TRUE) +
+  gwb2dsp(decay=0.1, fixed=TRUE) + b1nodematch("b1_gender")
 model_3 <- ergm::ergm(model_3_params, 
-                      constraints= ~ bd(minout = 0, maxout = 20),
+                      constraints= ~ bd(minout = 0, maxout = max_deg),
                       control = ergm::control.ergm(
                         MCMC.burnin = 10000,
-                        MCMC.samplesize = 50000,
+                        MCMC.samplesize = 100000,
                         seed = 42,
-                        MCMLE.maxit = 10,
-                        parallel = 10,
+                        MCMLE.maxit = 20,
+                        parallel = 12,
                         parallel.type = "PSOCK"
                       )
   )
-ergm::mcmc.diagnostics(model_3)
-model_3_gof <- ergm::gof(model_3)
-snafun::stat_plot_gof(model_3_gof)
-model_3_gof
-
-models <- list(base_model, model_1, model_2, model_3)
-texreg::screenreg(models)
+model_3_panel <- auto_ergm(model=model_3, mcmc=TRUE,
+                           name="ergm_m3", compare=models)
+snafun::stat_plot_gof(model_3_panel$gof) 
+model_3_panel$comps
+models <- append(models, model_3)
+# --------------------------------------------------------------------------- #
+# Iteration 4 + MCMC Diagnostics + GOF
+model_4_params <- bondora_net ~ edges + gwb1dsp(decay=0.1, fixed=TRUE) +
+  gwb2dsp(decay=0.1, fixed=TRUE) + b2factor("b2_loantype")
+model_4 <- ergm::ergm(model_4_params, 
+                      constraints= ~ bd(minout = 0, maxout = max_deg),
+                      control = ergm::control.ergm(
+                        MCMC.burnin = 10000,
+                        MCMC.samplesize = 100000,
+                        seed = 42,
+                        MCMLE.maxit = 20,
+                        parallel = 12,
+                        parallel.type = "PSOCK"
+                      )
+)
+model_4_panel <- auto_ergm(model=model_4, mcmc=TRUE,
+                           name="ergm_m4", compare=models)
+snafun::stat_plot_gof(model_4_panel$gof) 
+model_4_panel$comps
+models <- append(models, model_4)
 # --------------------------------------------------------------------------- #
