@@ -1,10 +1,9 @@
 # --------------------------------------------------------------------------- #
-install.packages("here") # To locate files within directory easier
-install.packages("viridis") # For Colours
+#install.packages("viridis") # For Colours
 # --------------------------------------------------------------------------- #
 # Import the Bondora P2P Dataset
-bondora_raw <- read.csv(here::here(
-  "dataset","LoanData_Bondora.csv"))
+obj_paths = "resources/objects/"
+bondora_raw <- read.csv("dataset/LoanData_Bondora.csv")
 raw_cols <- colnames(bondora_raw)
 # --------------------------------------------------------------------------- #
 # Select Columns to Keep
@@ -27,6 +26,9 @@ bondora_clean <- bondora[bondora$UseOfLoan != -1, ]
 user_counts <- table(bondora_clean$UserName)
 multi_users <- names(user_counts[user_counts > 5])
 bondora_clean <- bondora_clean[bondora_clean$UserName %in% multi_users, ]
+
+# See if Ratings are Properly Encoded
+unique(bondora_clean$Rating)
 
 # See distribution of UserName Counts
 hist(table(bondora_clean$UserName))
@@ -95,8 +97,9 @@ plot_desc_hists(bondora, bondora_clean, "MonthlyPayment", "Monthly Payment")
 plot_desc_hists(bondora, bondora_clean, "Age", "Age")
 
 plot_desc_bar(bondora, bondora_clean,"UseOfLoan_factor","Loan Purpose")
+plot_desc_bar(bondora, bondora_clean,"Rating","Credit Rating")
 # --------------------------------------------------------------------------- #
-# Convert Dataset into Incidence Matrix to form Network Object
+# Convert Dataset into Incidence Matrix to form Network Object (for ERGM)
 bondora_slim <- bondora_clean
 
 # Create the Incidence Matrix for Use of Loan
@@ -145,5 +148,72 @@ network::set.vertex.attribute(
 )
 
 # Save the network object
-saveRDS(bondora_net, file="resources/objects/bondora_net.RDS")
+saveRDS(bondora_net, file=paste0(obj_paths,"preprocessing/","bondora_net.RDS"))
+save_files(bondora_net)
 # --------------------------------------------------------------------------- #
+# Get the Adjacency Matrix for Loan Use Similarity (Dependent QAP Variable)
+adj_mat_loan_use <- bondora_matrix %*% t(bondora_matrix)
+# Remove self weights
+diag(adj_mat_loan_use) <- 0
+
+# Get the Adjacency Matrix for Credit Rating Similarity (Predictor in QAP)
+incidence_rating <- table(bondora_slim$UserName, bondora_slim$Rating)
+adj_mat_rating <- incidence_rating %*% t(incidence_rating)
+diag(adj_mat_rating) <- 0
+
+# Get the Adjacency Matrix for Loan Amount (Control in QAP) - BINARY
+# First, bin the Loan Amounts
+bondora_slim$Amount_bins <- cut(
+  bondora_slim$Amount, breaks=c(0,2000,4000,6000,8000,10000),
+  labels = c(1:5)
+)
+incidence_amount_bins <- table(bondora_slim$UserName, bondora_slim$Amount_bins)
+adj_mat_amount_bins <- incidence_amount_bins %*% t(incidence_amount_bins)
+diag(adj_mat_amount_bins) <- 0
+
+# Continous Absolute Difference Approach
+avg_amount <- tapply(bondora_slim$Amount, bondora_slim$UserName, mean)
+adj_mat_amount_diff <- outer(avg_amount, avg_amount, 
+                             FUN = function(x,y) abs(x - y))
+diag(adj_mat_amount_diff) <- 0
+
+# Get Matrix for Differences in Age
+incidence_age <- table(bondora_slim$UserName, bondora_slim$Age)
+borrower_ages <- as.numeric(colnames(incidence_age)[max.col(incidence_age)])
+names(borrower_ages) <- rownames(incidence_age)
+adj_mat_age <- outer(borrower_ages, borrower_ages, 
+                    FUN = function(x, y) abs(x - y))
+rownames(adj_mat_age) <- colnames(adj_mat_age) <- names(borrower_ages)
+
+# Get Adjacency Matrix for (same) Gender
+incidence_gender <- table(bondora_slim$UserName, bondora_slim$Gender)
+adj_mat_gender <- incidence_gender %*% t(incidence_gender)
+# Make the matrix binary for homophily
+adj_mat_gender <- ifelse(adj_mat_gender > 0, 1, 0)
+diag(adj_mat_gender) <- 0
+
+# Get Adjacency Matrix for Differences in Average Loan Duration
+borrower_loandur <- sapply(tapply(bondora_slim$LoanDuration, 
+                                  bondora_slim$UserName, unique),
+                           mean)
+adj_mat_loandur_diff <- outer(borrower_loandur, borrower_loandur, 
+                              FUN=function(x,y) abs(x-y))
+diag(adj_mat_loandur_diff) <- 0
+
+# Get Adjacency Matrix for Homophily in Restructure of Loans
+incidence_restructure <- table(bondora_slim$UserName, bondora_slim$Restructured)
+adj_mat_rest <- incidence_restructure %*% t(incidence_restructure)
+diag(adj_mat_rest) <- 0
+
+# Save the objects for the QAP Regression in different Script
+qap_paths = paste0(obj_paths,"/qap/")
+saveRDS(adj_mat_loan_use, file=paste0(qap_paths,"adj_mat_loanuse.RDS"))
+saveRDS(adj_mat_rating, file=paste0(qap_paths,"adj_mat_rating.RDS"))
+saveRDS(adj_mat_amount_diff, file=paste0(qap_paths,"adj_mat_amtdiffs.RDS"))
+saveRDS(adj_mat_age, file=paste0(qap_paths,"adj_mat_agediffs.RDS"))
+saveRDS(adj_mat_gender, file=paste0(qap_paths,"adj_mat_gender.RDS"))
+saveRDS(adj_mat_loandur_diff, file=paste0(qap_paths,"adj_mat_loandurdiffs.RDS"))
+saveRDS(adj_mat_rest, file=paste0(qap_paths,"adj_mat_rest.RDS"))
+# --------------------------------------------------------------------------- #
+
+
