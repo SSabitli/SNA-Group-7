@@ -7,9 +7,14 @@ install.packages("Rglpk") # additional solver for ERGMs
 # Import the Network and Other Object
 ergm_path <- "resources/objects/ergm/"
 bondora_net <- readRDS("resources/objects/preprocessing/bondora_net.RDS")
+b_indicator <- readRDS("resources/objects/preprocessing/indicator.RDS")
 
 # Set colour palette
 cols <- viridis::viridis(30)
+
+# Determine acceptable core count
+n_cores <- parallel::detectCores() - 3 # Leave some out for other processes
+print(paste("You have",n_cores,"usable cores"))
 
 seed(42)
 # --------------------------------------------------------------------------- #
@@ -17,8 +22,7 @@ seed(42)
 bondora_plot <- bondora_net
 
 # Get node type for plotting
-type <- network::get.vertex.attribute(bondora_net, "bipartite")
-type_indicator <- is.na(type)
+type_indicator <- ifelse(b_indicator == 2, TRUE,FALSE)
 shape <- ifelse(type_indicator,"square","circle")
 network::set.vertex.attribute(bondora_plot, "shape", shape)
 
@@ -71,14 +75,14 @@ par(mfrow = c(1,2))
 hist(deg_dist,
      main = "Unadjusted Degree Distribution",
      xlab = "Node Degree",
-     col = cols[1],
-     border = "cornsilk4")
+     col = cols[15],
+     border = cols[10])
 
 hist(bet_dist,
      main = "Unadjusted Betweenness",
      xlab = "Betweenness",
-     col = cols[1],
-     border = "cornsilk4")
+     col = cols[15],
+     border = cols[10])
 
 par(mfrow = c(1,1))
 # --------------------------------------------------------------------------- #
@@ -100,10 +104,18 @@ auto_ergm <- function(model, mcmc, name) {
   # Diagnostics
   if (mcmc) {
     ergm::mcmc.diagnostics(model)
-    gof <- ergm::gof(model)
-  } else {
-    gof <- ergm::gof(model)
   }
+  
+  # The GOF must be adjusted otherwise it takes too long
+  # We do not limit the GOF by changing its range of parameters
+  gof <- ergm::gof(model,
+                   control = ergm::control.gof.ergm(
+                     nsim = 200,
+                     MCMC.burnin = 5000,
+                     MCMC.interval = 1000,
+                     parallel = n_cores,
+                     parallel.type = "PSOCK"
+                   ))
   
   # Return List to view each item separately
   result <- list(model, gof)
@@ -134,78 +146,159 @@ texreg::screenreg(models)
 # --------------------------------------------------------------------------- #
 # Iteration 1 + MCMC Diagnostics + GOF
 model_1_params <- bondora_net ~ edges + 
-  gwb1degree(decay=0.1, fixed=TRUE) # b1 decay can be very low since 9 b2
-model_1 <- ergm::ergm(model_1_params, 
-                      #constraints= ~ bd(minout = 0, maxout = max_deg),
-                      control = ergm::control.ergm(
-      MCMC.burnin = 10000,
-      MCMC.samplesize = 50000,
-      seed = 42,
-      MCMLE.maxit = 35,
-      MCMC.interval = 1000,
-      parallel = 12,
-      parallel.type = "PSOCK"
-    )
+  # b1 decay can be very low since 9 b2
+  gwb1degree(decay=0.15, fixed=TRUE) 
+
+model_1 <- ergm::ergm(
+  model_1_params,
+  
+  # Max b2 degree is 72, so this constraint is reasonable
+  # and helps convergence significantly.
+  # Technically in the Bondora population this can be 
+  # far higher but we are studying a subsample.
+  #constraints = ~ bd(minout = 0, maxout = 80),
+  
+  control = ergm::control.ergm(
+    # Greater burn-in for cleaner result
+    MCMC.burnin = 20000,
+    # Greater sample size for greater stability
+    MCMC.samplesize = 100000,
+    seed = 42,
+    MCMC.interval = 1000,
+    # Only needed for convergence pvals to improve
+    MCMLE.maxit = 45,
+    # Smaller steps for stability
+    MCMLE.steplength = 0.25,
+    parallel = n_cores,
+    parallel.type = "PSOCK"
   )
+)
+
 model_1_panel <- auto_ergm(model=model_1, mcmc=TRUE, name="ergm_m1")
-model_1_panel$mcmc
+model_1_panel$gof
 snafun::stat_plot_gof(model_1_panel$gof) 
-models <- append(models, list(model_1))
-texreg::screenreg(models)
+texreg::screenreg(list(base_ergm, model_1))
 # --------------------------------------------------------------------------- #
 # Iteration 2 + MCMC Diagnostics + GOF
 model_2_params <- bondora_net ~ edges + 
-  gwb1degree(decay=0.1, fixed=TRUE) + # Decay should be increased slightly
-  gwb1dsp(decay=0.65, fixed=TRUE) # No convergence unless decay > 0.55
-model_2 <- ergm::ergm(model_2_params, 
-                      #constraints= ~ bd(minout = 0, maxout = max_deg),
-                      control = ergm::control.ergm(
-  MCMC.burnin = 15000,      # Greater burn-in for cleaner result
-  MCMC.samplesize = 70000,  # Greater sample size for greater stability
-  seed = 42,
-  MCMC.interval = 1000,   
-  MCMLE.maxit = 35,         # More iterations 
-  parallel = 12,
-  parallel.type = "PSOCK"
+  # low decay important because there is high clustering around low degrees
+  gwb1degree(decay=0.15, fixed=TRUE) + 
+  # decay should be higher due to wider variation in degree but 
+  # too high of degree makes the traces concentrated around the tails.
+  gwb1dsp(decay=0.5, fixed=TRUE)      
+  
+model_2 <- ergm::ergm(
+  model_2_params,
+  
+  # Max b2 degree is 72, so this constraint is reasonable
+  # and helps convergence significantly.
+  # Technically in the Bondora population this can be 
+  # far higher but we are studying a subsample.
+  constraints = ~ bd(minout = 0, maxout = 80),
+  
+  control = ergm::control.ergm(
+    # Greater burn-in for cleaner result
+    MCMC.burnin = 20000,
+    # Greater sample size for greater stability
+    MCMC.samplesize = 100000,
+    seed = 42,
+    MCMC.interval = 1000,
+    # Only needed for convergence pvals to improve
+    MCMLE.maxit = 45,
+    # Smaller steps for stability
+    MCMLE.steplength = 0.25,
+    parallel = n_cores,
+    parallel.type = "PSOCK"
     )
   )
+
 model_2_panel <- auto_ergm(model=model_2, mcmc=TRUE, name="ergm_m2")
 snafun::stat_plot_gof(model_2_panel$gof) 
-models <- append(models, list(model_2))
+model_2_panel$gof
+models <- list(base_ergm, model_1, model_2)
+texreg::screenreg(models)
 # --------------------------------------------------------------------------- #
 # Iteration 3 + MCMC Diagnostics + GOF
-model_3_params <- bondora_net ~ edges + gwb1dsp(decay=0.25, fixed=TRUE) +
-  gwb1degree(decay=0.2, fixed=TRUE) + b1nodematch("b1_gender")
-model_3 <- ergm::ergm(model_3_params, 
-                      constraints= ~ bd(minout = 0, maxout = max_deg),
-                      control = ergm::control.ergm(
-                        MCMC.burnin = 10000,
-                        MCMC.samplesize = 100000,
-                        seed = 42,
-                        MCMLE.maxit = 20,
-                        parallel = 12,
-                        parallel.type = "PSOCK"
-                      )
+model_3_params <- bondora_net ~ edges + 
+  # low decay important because there is high clustering around low degrees
+  gwb1degree(decay=0.15, fixed=TRUE) + 
+  # decay should be higher due to wider variation in degree but 
+  # too high of degree makes the traces concentrated around the tails.
+  gwb1dsp(decay=0.5, fixed=TRUE) +
+  # See differences across genders (implicitly, since b1nodemix unavailable)
+  b1nodematch("b1_gender", diff=FALSE)
+
+model_3 <- ergm::ergm(
+  model_3_params,
+  
+  # Max b2 degree is 72, so this constraint is reasonable
+  # and helps convergence significantly.
+  # Technically in the Bondora population this can be 
+  # far higher but we are studying a subsample.
+  constraints = ~ bd(minout = 0, maxout = 80),
+  
+  control = ergm::control.ergm(
+    # Greater burn-in for cleaner result
+    MCMC.burnin = 20000,
+    # Greater sample size for greater stability
+    MCMC.samplesize = 100000,
+    seed = 42,
+    MCMC.interval = 1000,
+    # Only needed for convergence pvals to improve
+    MCMLE.maxit = 45,
+    # Smaller steps for stability
+    MCMLE.steplength = 0.25,
+    parallel = n_cores,
+    parallel.type = "PSOCK"
   )
+)
+
 model_3_panel <- auto_ergm(model=model_3, mcmc=TRUE, name="ergm_m3")
 snafun::stat_plot_gof(model_3_panel$gof) 
-models <- append(models, list(model_3))
+model_3_panel$gof
+models <- list(base_ergm, model_1, model_2, model_3)
+texreg::screenreg(models)
 # --------------------------------------------------------------------------- #
 # Iteration 4 + MCMC Diagnostics + GOF
-model_4_params <- bondora_net ~ edges + gwb1dsp(decay=0.1, fixed=TRUE) +
-  gwb2dsp(decay=0.1, fixed=TRUE) + b2factor("b2_loantype")
-model_4 <- ergm::ergm(model_4_params, 
-                      constraints= ~ bd(minout = 0, maxout = max_deg),
-                      control = ergm::control.ergm(
-                        MCMC.burnin = 10000,
-                        MCMC.samplesize = 100000,
-                        seed = 42,
-                        MCMLE.maxit = 20,
-                        parallel = 12,
-                        parallel.type = "PSOCK"
-                      )
+model_4_params <- bondora_net ~ edges + 
+  # low decay important because there is high clustering around low degrees
+  gwb1degree(decay=0.15, fixed=TRUE) + 
+  # decay should be higher due to wider variation in degree but 
+  # too high of degree makes the traces concentrated around the tails.
+  gwb1dsp(decay=0.5, fixed=TRUE) +
+  # See differences across genders (implicitly, since b1nodemix unavailable)
+  b1nodematch("b1_gender", diff=TRUE) +
+  # See if higher ages make a difference
+  b1cov("b1_age")
+
+model_4 <- ergm::ergm(
+  model_4_params,
+  
+  # Max b2 degree is 72, so this constraint is reasonable
+  # and helps convergence significantly.
+  # Technically in the Bondora population this can be 
+  # far higher but we are studying a subsample.
+  constraints = ~ bd(minout = 0, maxout = 80),
+  
+  control = ergm::control.ergm(
+    # Greater burn-in for cleaner result
+    MCMC.burnin = 20000,
+    # Greater sample size for greater stability
+    MCMC.samplesize = 100000,
+    seed = 42,
+    MCMC.interval = 1000,
+    # Only needed for convergence pvals to improve
+    MCMLE.maxit = 45,
+    # Smaller steps for stability
+    MCMLE.steplength = 0.25,
+    parallel = n_cores,
+    parallel.type = "PSOCK"
+  )
 )
+
 model_4_panel <- auto_ergm(model=model_4, mcmc=TRUE, name="ergm_m4")
+model_4_panel$gof
 snafun::stat_plot_gof(model_4_panel$gof) 
-models <- append(models, list(model_4))
+models <- list(base_ergm, model_1, model_2, model_3, model_4)
+texreg::screenreg(models)
 # --------------------------------------------------------------------------- #

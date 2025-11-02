@@ -105,19 +105,20 @@ bondora_slim <- bondora_clean
 # Create the Incidence Matrix for Use of Loan
 bondora_matrix <- table(
   bondora_slim$UserName, bondora_slim$UseOfLoan)
-#bondora_matrix[bondora_matrix > 0] <- 1
+bondora_matrix[bondora_matrix > 0] <- 1 # Given that ergm.counts fails with GOF
 
 # Create network object with counts as Edge attribute
 bondora_net <- network::network(
-  bondora_matrix, directed=FALSE, bipartite=TRUE, 
-  ignore.eval = FALSE, names.eval="frequency")
+  bondora_matrix, directed=FALSE, bipartite=nrow(bondora_matrix), 
+  ignore.eval = FALSE, names.eval="frequency", loops=FALSE)
 
-# Set the bipartite Attribute
+# Set the bipartite Attribute - UNNCESSARY GIVEN bipartite=length(n)
 len <- dim(bondora_matrix)[1]
 len_b2 <- dim(bondora_matrix)[2]
-network::set.vertex.attribute(
-  bondora_net, "bipartite", value = rep(len,len), v=1:len
-)
+b_indicator <- c(rep(1,len),rep(2,len_b2))
+#network::set.vertex.attribute(
+#  bondora_net, "bipartite", value = rep(len,len), v=1:len
+#)
 
 # Extract Partition 2 Labels
 loan_use <- levels(bondora_clean$UseOfLoan_factor)
@@ -125,9 +126,11 @@ loan_use <- levels(bondora_clean$UseOfLoan_factor)
 # Create Loan Type Attribute for Partition 2
 b2_loantype <- rep(NA, len)
 b2_loantype <- c(b2_loantype, loan_use)
-network::set.vertex.attribute(
-  bondora_net, "b2_loantype", value = b2_loantype
-)
+
+if (length(b2_loantype) == network::network.size(bondora_net)) {
+  network::set.vertex.attribute(
+    bondora_net, "b2_loantype", value = b2_loantype)
+  }
 
 # Add Age Vertex Attribute to B1
 age <- bondora_clean$Age[match(
@@ -149,7 +152,6 @@ network::set.vertex.attribute(
 
 # Save the network object
 saveRDS(bondora_net, file=paste0(obj_paths,"preprocessing/","bondora_net.RDS"))
-save_files(bondora_net)
 # --------------------------------------------------------------------------- #
 # Get the Adjacency Matrix for Loan Use Similarity (Dependent QAP Variable)
 adj_mat_loan_use <- bondora_matrix %*% t(bondora_matrix)
@@ -207,6 +209,9 @@ diag(adj_mat_rest) <- 0
 
 # Save the objects for the QAP Regression in different Script
 qap_paths = paste0(obj_paths,"/qap/")
+saveRDS(b_indicator, file=paste0(
+  "resources/objects/preprocessing/indicator.RDS"))
+
 saveRDS(adj_mat_loan_use, file=paste0(qap_paths,"adj_mat_loanuse.RDS"))
 saveRDS(adj_mat_rating, file=paste0(qap_paths,"adj_mat_rating.RDS"))
 saveRDS(adj_mat_amount_diff, file=paste0(qap_paths,"adj_mat_amtdiffs.RDS"))

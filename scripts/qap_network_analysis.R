@@ -56,7 +56,7 @@ text(x = qap_plot_m1,
 hist(qap_m1$residuals, main="QAP Residuals", col = cols[15])
 
 # Save Model
-saveRDS(qap_m1, file = paste0(qap_path,"qap_m1"))
+saveRDS(qap_m1, file = paste0(qap_path,"qap_m1.RDS"))
 # --------------------------------------------------------------------------- #
 # Standardised QAP Linear Regression
 scaled_dep <- scale(loan_use_mat)
@@ -85,6 +85,6 @@ text(x = qap_plot_m2,
 hist(qap_m2$residuals, main="QAP Residuals", col = cols[15])
 
 # Save Model
-saveRDS(qap_m2, file = paste0(qap_path,"qap_m2"))
+saveRDS(qap_m2, file = paste0(qap_path,"qap_m2.RDS"))
 # --------------------------------------------------------------------------- #
 par(mfrow=c(1,1))

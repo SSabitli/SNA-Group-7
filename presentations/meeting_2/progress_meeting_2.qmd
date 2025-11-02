@@ -1,0 +1,502 @@
+---
+title: "Bondora Credit Allocation<br>Group 7<br>Second Progress Meeeting"
+format:
+  revealjs: 
+    embed-resources: true
+    self-contained-math: true 
+    center-title-slide: true
+    self-contained: true
+    theme: dark
+    scrollable: true
+---
+
+```{r include=FALSE}
+#install.packages("here")
+#setwd("C:/Users/user/OneDrive/University & Studies/University/JADS DSBE/Semester 1/Social Network Analysis for DS/Group Project/SNA4DS_Group7_Project")
+
+#net <- readRDS("resources/objects/preprocessing/bondora_net.RDS")
+#b_indicator <- readRDS("resources/objects/preprocessing/indicator.RDS")
+
+#base_ergm <- readRDS("resources/objects/ergm/ergm_base_panel.RDS")
+#ergm_m1 <- readRDS("resources/objects/ergm/ergm_m1_panel.RDS")
+#ergm_m2 <- readRDS("resources/objects/ergm/ergm_m2_panel.RDS")
+#ergm_m3 <- readRDS("resources/objects/ergm/ergm_m3_panel.RDS")
+#ergm_m4 <- readRDS("resources/objects/ergm/ergm_m4_panel.RDS")
+
+#qap_m1 <- readRDS("resources/objects/qap/qap_m1.RDS")
+#qap_m2 <- readRDS("resources/objects/qap/qap_m2.RDS")
+
+net <- readRDS(here::here("resources","objects","preprocessing","bondora_net.RDS"))
+b_indicator <- readRDS(here::here("resources","objects","preprocessing","indicator.RDS"))
+
+base_ergm <- readRDS(here::here("resources","objects","ergm","ergm_base_panel.RDS"))
+ergm_m1 <- readRDS(here::here("resources","objects","ergm","ergm_m1_panel.RDS"))
+ergm_m2 <- readRDS(here::here("resources","objects","ergm","ergm_m2_panel.RDS"))
+ergm_m3 <- readRDS(here::here("resources","objects","ergm","ergm_m3_panel.RDS"))
+ergm_m4 <- readRDS(here::here("resources","objects","ergm","ergm_m4_panel.RDS"))
+
+qap_m1 <- readRDS(here::here("resources","objects","qap","qap_m1.RDS"))
+qap_m2 <- readRDS(here::here("resources","objects","qap","qap_m2.RDS"))
+```
+
+## Background & Premise
+
+::: r-fit-text
+-   Bondora P2P Lending Service
+-   European dataset spanning between 2009-2021 with 70k+ loans
+
++-------------------+------------------------------------------------------------------+
+| **Network Type**  | Bipartite                                                        |
+|                   |                                                                  |
+| Partition 1       | Borrowers (based on usernames)                                   |
+|                   |                                                                  |
+| Partition 2       | Reported Loan Use                                                |
++-------------------+------------------------------------------------------------------+
+| **Edges**         | B1 $\rightarrow$ B2 if user took out loan for a specific purpose |
++-------------------+------------------------------------------------------------------+
+| **Overall Study** | How is credit distributed among active users of Bondora?         |
++-------------------+------------------------------------------------------------------+
+:::
+
+## Research Questions & Hypotheses
+
+::: {.r-fit-text style="font-size;0.5em"}
++-------------+------------------------------------------------------------------------------------------------+
+| **Study 1** | How do loan characteristics affect the frequency credit allocation among borrowers?            |
++-------------+------------------------------------------------------------------------------------------------+
+| **Study 2** | How is the structure credit allocation affected by borrower behaviour and its characteristics? |
++-------------+------------------------------------------------------------------------------------------------+
+
+**Hypotheses**
+
++-----------+------------+----------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------+
+| **Study** | **Method** | **Hypothesis**                                                                   | **Specific Method**                                                                                                         |
++-----------+------------+----------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------+
+| **1**     | LR-QAP     | H~1~^a^ : Users with the same loan use are likely to have the same credit rating | $Y$ : Adjacency matrix of shared loan use                                                                                   |
+|           |            |                                                                                  |                                                                                                                             |
+|           |            |                                                                                  | $X_1$ : Adjacency matrix of shared credit rating                                                                            |
+|           |            |                                                                                  |                                                                                                                             |
+|           |            |                                                                                  | $+$ $X_{2,3,..,n}$ : Controls                                                                                               |
+|           |            |                                                                                  |                                                                                                                             |
+|           |            |                                                                                  | We expect $\hat{\beta}^{\mathbf{X}_1}_1>0$                                                                                  |
+|           |            |                                                                                  |                                                                                                                             |
+|           |            |                                                                                  | **Note:** adjacency matrices are obtained by computing $X\cdot X^T$, so both $Y$ and $X$ are standardised for comparability |
++-----------+------------+----------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------+
+| **2**     | ERGM       | H~2~^a^ : Pairs of borrowers share same loan type                                | Endogenous + Dyad-dependent                                                                                                 |
+|           |            |                                                                                  |                                                                                                                             |
+|           |            |                                                                                  | `gwb1dsp(decay = x, fixed=TRUE):` $\hat{\theta}>0$                                                                          |
++-----------+------------+----------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------+
+| 2         | ERGM       | H~3~^a^ : Borrowers have a diverse loan use portfolio                            | Endogenous + Dyad-dependent                                                                                                 |
+|           |            |                                                                                  |                                                                                                                             |
+|           |            |                                                                                  | `gwb1degree(decay = x, fixed =TRUE:` $\hat{\theta}>0$                                                                       |
++-----------+------------+----------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------+
+| **2**     | ERGM       | H~4~^a^ : Younger borrowers have a more diverse range of loan uses               | Exogenous + Dyad-independent                                                                                                |
+|           |            |                                                                                  |                                                                                                                             |
+|           |            |                                                                                  | `b1cov("b1_age")` : $\hat{\theta}>0$                                                                                        |
++-----------+------------+----------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------+
+| **2**     | ERGM       | H~5~^a^ : Borrowers of differing genders have different portfolios of loan use   | Heterophily + Exogenous + Dyad-independent                                                                                  |
+|           |            |                                                                                  |                                                                                                                             |
+|           |            |                                                                                  | `b1nodematch("b1_gender"):` $\hat{\theta}<0$                                                                                |
+|           |            |                                                                                  |                                                                                                                             |
+|           |            |                                                                                  | **Note:** measured indirectly through heterophily because `nodemix()` does not have an equivalent for bipartite ERGMs       |
++-----------+------------+----------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------+
+:::
+
+## Basic Network Statistics {.r-fit-text}
+
+**Network Visualisation**
+
+```{r}
+# Set colour palette
+cols <- viridis::viridis(30)
+
+# Copy network for plotting
+bondora_plot <- net
+
+# Get node type for plotting
+type_indicator <- ifelse(b_indicator == 2, TRUE,FALSE)
+shape <- ifelse(type_indicator,"square","circle")
+network::set.vertex.attribute(bondora_plot, "shape", shape)
+
+# Get Category Count for Vertex Size
+counts <- summary(bondora_plot ~ b2sociality)
+counts_att <- ifelse(type_indicator, counts^0.75, counts^0.6)
+network::set.vertex.attribute(bondora_plot, "size", counts_att)
+
+# Colours for the Node Types
+plot_cols <- ifelse(type_indicator, cols[5], cols[30])
+network::set.vertex.attribute(bondora_plot, "color", plot_cols)
+
+# Legend Plotting
+type_legend <- ifelse(type_indicator, "Borrowers", "Loan Type")
+type_legend <- as.factor(type_legend)
+
+# Plot the Network
+plot(snafun::to_igraph(bondora_plot),
+     main = "Bipartite User-LoanUse",
+     edge.arrow.size = 0.3,
+     edge.color = rgb(0,0,0, alpha = 0.35),
+     vertex.frame.color = "black",
+     vertex.label = NA,
+     vertex.frame.size = 3,
+     edge.curved = FALSE,
+     layout=igraph::layout.fruchterman.reingold)
+legend("bottomleft", legend = levels(type_legend), 
+       inset = c(0.1, 0.02),
+       col = c(cols[5], cols[30]),
+       pch = c(16,15), 
+       title = "Node Partitions", title.font = 2,
+       cex = 0.8,       
+       lwd = 1,
+       bg = rgb(0,0,0, alpha=0.025))
+```
+
+**Descriptive Statistics**
+
+```{r}
+snafun::plot_centralities(net)
+```
+
+## Study 1 \| Preliminary QAP Results {.r-fit-text style="font-size:0.75em;"}
+
+```{r include=FALSE}
+var_names <- c("Intercept", "Rating","Loan Amount","Age","Gender",
+               "Loan Duration","Restructured")
+qap1_results <- qap_m1$coefficients
+qap2_results <- qap_m2$coefficients
+names(qap1_results) <- var_names
+names(qap2_results) <- var_names
+```
+
+**Notes**
+
+-   Linear QAP Regression used to study how borrowers with the same loan type choice are affected by having the same credit rating
+
+-   The adjacency matrices used are **weighted** to give this study a level of detail we do not have with ERGM
+
+    -   Because the weights vary significantly, **standardised** results are more meaningful to compare
+
+-   Intercept has very significant impact: *not all effects can be accounted for and are missing*
+
+**Linear QAP Results**
+
+```{r}
+coef_table <- cbind(Unstd_Parameters = round(qap1_results, 4),
+                    Ustd_t_vals = round(qap_m1$tstat, 2),
+                    Std_Parameters = round(qap2_results, 4),
+                    Std_t_vals = round(qap_m2$tstat, 2))
+print(coef_table)
+```
+
+**Model Specifications (Snippets)**
+
+``` r
+qap_m1 <- sna::netlm(y = loan_use_mat,
+                     x = list(rating_mat, amt_diffs_mat, age_diffs_mat,
+                              gender_mat, loandur_diffs_mat, rest_mat),
+                     nullhyp = "qapspp", reps = 2500)
+
+# Standardised QAP Linear Regression
+scaled_dep <- scale(loan_use_mat)
+scaled_pred <- lapply(pred_vars, scale)
+
+qap_m2 <- sna::netlm(y = scaled_dep,
+                     x = scaled_pred,
+                     nullhyp = "qapspp", reps = 2500)
+```
+
+## Study 2 \| ERGM \| `edges` {.r-fit-text style="font-size:0.75em;"}
+
+**Notes**
+
+-   Sparse edges but bipartite, so take `edges` with grain of salt
+
+-   Unconstrained
+
+**Model Specification**
+
+``` r
+formula_base_model <- bondora_net ~ edges
+base_ergm <- ergm::ergm(formula_base_model)
+```
+
+::::: columns
+::: {.column width="50%"}
+**Goodness of Fit Plots**
+
+```{r}
+snafun::stat_plot_gof(base_ergm$gof)
+```
+:::
+
+::: {.column width="50%"}
+**Model Summary**
+
+```{r}
+texreg::screenreg(list(base_ergm$model))
+```
+:::
+:::::
+
+## Study 2 \| ERGM \| `gwb1degree` {#sec-study-2--ergm--gwb1degree .r-fit-text style="font-size:0.75em;"}
+
+**Notes**
+
+-   `gwb1degree` refers to number of different types of loans users request
+
+**Model Specification**
+
+``` r
+model_1_params <- bondora_net ~ edges + 
+  # b1 decay can be very low since 9 b2
+  gwb1degree(decay=0.15, fixed=TRUE) 
+
+model_1 <- ergm::ergm(
+  model_1_params,
+  
+  # Max b2 degree is 72, so this constraint is reasonable
+  # and helps convergence significantly.
+  # Technically in the Bondora population this can be 
+  # far higher but we are studying a subsample.
+  #constraints = ~ bd(minout = 0, maxout = 80),
+  
+  control = ergm::control.ergm(
+    # Greater burn-in for cleaner result
+    MCMC.burnin = 20000,
+    # Greater sample size for greater stability
+    MCMC.samplesize = 100000,
+    seed = 42,
+    MCMC.interval = 1000,
+    # Only needed for convergence pvals to improve
+    MCMLE.maxit = 45,
+    # Smaller steps for stability
+    MCMLE.steplength = 0.25,
+    parallel = n_cores,
+    parallel.type = "PSOCK"
+  )
+)
+```
+
+**Model(s) Summary**
+
+```{r}
+texreg::screenreg(list(
+  base_ergm$model, ergm_m1$model))
+```
+
+::::: columns
+::: {.column width="40%"}
+**Goodness of Fit Plots**
+
+```{r}
+snafun::stat_plot_gof(ergm_m1$gof)
+```
+:::
+
+::: {.column width="60%"}
+**MCMC Diagnostics**
+
+```{r}
+ergm::mcmc.diagnostics(ergm_m1$model)
+```
+:::
+:::::
+
+## Study 2 \| ERGM \| `gwb1degree + gwb1dsp` {.r-fit-text style="font-size:0.75em;"}
+
+**Notes**
+
+**Model Specification**
+
+``` r
+model_2_params <- bondora_net ~ edges + 
+  # low decay important because there is high clustering around low degrees
+  gwb1degree(decay=0.15, fixed=TRUE) + 
+  # decay should be higher due to wider variation in degree but 
+  # too high of degree makes the traces concentrated around the tails.
+  gwb1dsp(decay=0.5, fixed=TRUE)      
+  
+model_2 <- ergm::ergm(
+  model_2_params,
+  
+  # Max b2 degree is 72, so this constraint is reasonable
+  # and helps convergence significantly.
+  # Technically in the Bondora population this can be 
+  # far higher but we are studying a subsample.
+  constraints = ~ bd(minout = 0, maxout = 80),
+  
+  control = ergm::control.ergm(
+    # Greater burn-in for cleaner result
+    MCMC.burnin = 20000,
+    # Greater sample size for greater stability
+    MCMC.samplesize = 100000,
+    seed = 42,
+    MCMC.interval = 1000,
+    # Only needed for convergence pvals to improve
+    MCMLE.maxit = 45,
+    # Smaller steps for stability
+    MCMLE.steplength = 0.25,
+    parallel = n_cores,
+    parallel.type = "PSOCK"
+    )
+  )
+```
+
+**Model(s) Summary**
+
+```{r}
+texreg::screenreg(list(base_ergm$model, ergm_m1$model, ergm_m2$model))
+```
+
+::::: columns
+::: {.column width="40%"}
+**Goodness of Fit Plots**
+
+```{r}
+snafun::stat_plot_gof(ergm_m2$gof)
+```
+:::
+
+::: {.column width="60%"}
+**MCMC Diagnostics**
+
+```{r}
+ergm::mcmc.diagnostics(ergm_m2$model)
+```
+:::
+:::::
+
+## Study 2 \| ERGM \| `gwb1degree + gwb1dsp + b1nodematch("gender")` {.r-fit-text style="font-size:0.75em;"}
+
+**Notes**
+
+**Model Specification**
+
+``` r
+model_3_params <- bondora_net ~ edges + 
+  # low decay important because there is high clustering around low degrees
+  gwb1degree(decay=0.15, fixed=TRUE) + 
+  # decay should be higher due to wider variation in degree but 
+  # too high of degree makes the traces concentrated around the tails.
+  gwb1dsp(decay=0.5, fixed=TRUE) +
+  # See differences across genders (implicitly, since b1nodemix unavailable)
+  b1nodematch("b1_gender", diff=FALSE)
+
+model_3 <- ergm::ergm(
+  model_3_params,
+  
+  # Max b2 degree is 72, so this constraint is reasonable
+  # and helps convergence significantly.
+  # Technically in the Bondora population this can be 
+  # far higher but we are studying a subsample.
+  constraints = ~ bd(minout = 0, maxout = 80),
+  
+  control = ergm::control.ergm(
+    # Greater burn-in for cleaner result
+    MCMC.burnin = 20000,
+    # Greater sample size for greater stability
+    MCMC.samplesize = 100000,
+    seed = 42,
+    MCMC.interval = 1000,
+    # Only needed for convergence pvals to improve
+    MCMLE.maxit = 45,
+    # Smaller steps for stability
+    MCMLE.steplength = 0.25,
+    parallel = n_cores,
+    parallel.type = "PSOCK"
+  )
+)
+```
+
+**Model(s) Summary**
+
+```{r}
+texreg::screenreg(list(base_ergm$model, ergm_m1$model, ergm_m2$model,
+                       ergm_m3$model))
+```
+
+::::: columns
+::: {.column width="40%"}
+**Goodness of Fit Plots**
+
+```{r}
+snafun::stat_plot_gof(ergm_m3$gof)
+```
+:::
+
+::: {.column width="60%"}
+**MCMC Diagnostics**
+
+```{r}
+ergm::mcmc.diagnostics(ergm_m3$model)
+```
+:::
+:::::
+
+## Study 2 \| ERGM \| `gwb1degree + gwb1dsp + b1nodematch("gender") + b1cov("age")` {.r-fit-text style="font-size:0.75em;"}
+
+**Notes**
+
+**Model Specification**
+
+``` r
+model_4_params <- bondora_net ~ edges + 
+  # low decay important because there is high clustering around low degrees
+  gwb1degree(decay=0.15, fixed=TRUE) + 
+  # decay should be higher due to wider variation in degree but 
+  # too high of degree makes the traces concentrated around the tails.
+  gwb1dsp(decay=0.5, fixed=TRUE) +
+  # See differences across genders (implicitly, since b1nodemix unavailable)
+  b1nodematch("b1_gender", diff=TRUE) +
+  # See if higher ages make a difference
+  b1cov("b1_age")
+
+model_4 <- ergm::ergm(
+  model_4_params,
+  
+  # Max b2 degree is 72, so this constraint is reasonable
+  # and helps convergence significantly.
+  # Technically in the Bondora population this can be 
+  # far higher but we are studying a subsample.
+  constraints = ~ bd(minout = 0, maxout = 80),
+  
+  control = ergm::control.ergm(
+    # Greater burn-in for cleaner result
+    MCMC.burnin = 20000,
+    # Greater sample size for greater stability
+    MCMC.samplesize = 100000,
+    seed = 42,
+    MCMC.interval = 1000,
+    # Only needed for convergence pvals to improve
+    MCMLE.maxit = 45,
+    # Smaller steps for stability
+    MCMLE.steplength = 0.25,
+    parallel = n_cores,
+    parallel.type = "PSOCK"
+  )
+)
+```
+
+**Model(s) Summary**
+
+```{r}
+texreg::screenreg(list(base_ergm$model, ergm_m1$model, ergm_m2$model,                        ergm_m3$model, ergm_m4$model))
+```
+
+::::: columns
+::: {.column width="40%"}
+**Goodness of Fit Plots**
+
+```{r}
+snafun::stat_plot_gof(ergm_m4$gof)
+```
+:::
+
+::: {.column width="60%"}
+**MCMC Diagnostics**
+
+```{r}
+ergm::mcmc.diagnostics(ergm_m4$model)
+```
+:::
+:::::
