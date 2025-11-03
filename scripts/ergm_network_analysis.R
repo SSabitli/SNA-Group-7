@@ -19,7 +19,15 @@ cols <- viridis::viridis(30)
 n_cores <- parallel::detectCores() - 3 # Leave some out for other processes
 print(paste("You have",n_cores,"usable cores"))
 
+# Replicability
 seed(42)
+
+# Save plots
+save_ergm_plot <- function(plt_nam) {
+  plt <- recordPlot()
+  saveRDS(plt, here::here("resources","objects","ergm",
+                          paste0(plt_nam,".Rds")))
+}
 # --------------------------------------------------------------------------- #
 # Copy network for plotting
 bondora_plot <- bondora_net
@@ -54,12 +62,13 @@ plot(snafun::to_igraph(bondora_plot),
      layout=igraph::layout.fruchterman.reingold)
 legend("bottomleft", legend = levels(type_legend), 
        inset = c(0.1, 0.02),
-       col = c(cols[5], cols[30]),
+       col = c(cols[30], cols[5]),
        pch = c(16,15), 
        title = "Node Partitions", title.font = 2,
        cex = 0.8,       
        lwd = 1,
        bg = rgb(0,0,0, alpha=0.025))
+save_ergm_plot("network_plot")
 
 # Summary Statistics
 snafun::g_density(bondora_net)

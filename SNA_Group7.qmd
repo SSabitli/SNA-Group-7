@@ -1,7 +1,7 @@
 ---
-title: Social Network Analysis - Assignment 1
+title: Social Network Analysis - Assignment 2
 subtitle: Group 7
-date: 2025-09-12
+date: 2025-11-16
 author:
   - name: Floris 	Vermeulen
     affiliations:

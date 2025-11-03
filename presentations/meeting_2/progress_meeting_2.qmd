@@ -2,9 +2,9 @@
 title: "Bondora Credit Allocation Study"
 subtitle: "Progress Meeting 2"
 author: "Group 7"
-date: 11-04-2025
 bibliography: references.bib
 csl: apa-6th-edition.csl
+institute: "Jheronimus Academy of Data Science"
 execute:
   cache: true
 format:
@@ -22,7 +22,6 @@ format:
 #install.packages("here") # if you do not have this installed already
 
 net <- readRDS(here::here("resources","objects","preprocessing","bondora_net.Rds"))
-b_indicator <- readRDS(here::here("resources","objects","preprocessing","indicator.Rds"))
 
 base_ergm <- readRDS(here::here("resources","objects","ergm","ergm_base_panel.Rds"))
 ergm_m1 <- readRDS(here::here("resources","objects","ergm","ergm_m1_panel.Rds"))
@@ -43,6 +42,16 @@ br1 <- readRDS(here::here("resources","objects","preprocessing","bar_loanuse.Rds
 br2 <- readRDS(here::here("resources","objects","preprocessing","bar_rating.Rds"))
 
 qap_plt <- readRDS(here::here("resources","objects","qap","unstd_std_plot.Rds"))
+ergm_plt <- readRDS(here::here("resources","objects","ergm","network_plot.Rds"))
+```
+
+```{r include=FALSE}
+prob <- function(input) {
+  return(unname(round(exp(input)/(1+exp(input))),2))
+}
+odds <- function(input) {
+  return(unname(round(exp(input)/(1+exp(input)),2)))
+}
 ```
 
 # How are Different Kinds of Credit Distributed among Bondora Borrowers?
@@ -240,48 +249,7 @@ for (plt in list(h1, h2, h3, h4, h5, br1, br2)) {
 ### Network Visualisation
 
 ```{r}
-# Set colour palette
-cols <- viridis::viridis(30)
-
-# Copy network for plotting
-bondora_plot <- net
-
-# Get node type for plotting
-type_indicator <- ifelse(b_indicator == 2, TRUE,FALSE)
-shape <- ifelse(type_indicator,"square","circle")
-network::set.vertex.attribute(bondora_plot, "shape", shape)
-
-# Get Category Count for Vertex Size
-counts <- summary(bondora_plot ~ b2sociality)
-counts_att <- ifelse(type_indicator, counts^0.75, counts^0.6)
-network::set.vertex.attribute(bondora_plot, "size", counts_att)
-
-# Colours for the Node Types
-plot_cols <- ifelse(type_indicator, cols[5], cols[30])
-network::set.vertex.attribute(bondora_plot, "color", plot_cols)
-
-# Legend Plotting
-type_legend <- ifelse(type_indicator, "Borrowers", "Loan Type")
-type_legend <- as.factor(type_legend)
-
-# Plot the Network
-plot(snafun::to_igraph(bondora_plot),
-     main = "Bipartite User-LoanUse",
-     edge.arrow.size = 0.3,
-     edge.color = rgb(0,0,0, alpha = 0.35),
-     vertex.frame.color = "black",
-     vertex.label = NA,
-     vertex.frame.size = 3,
-     edge.curved = FALSE,
-     layout=igraph::layout.fruchterman.reingold)
-legend("bottomleft", legend = levels(type_legend), 
-       inset = c(0.1, 0.02),
-       col = c(cols[5], cols[30]),
-       pch = c(16,15), 
-       title = "Node Partitions", title.font = 2,
-       cex = 0.8,       
-       lwd = 1,
-       bg = rgb(0,0,0, alpha=0.025))
+replayPlot(ergm_plt)
 ```
 
 ### Descriptive Statistics Plot
@@ -368,15 +336,15 @@ replayPlot(qap_plt)
 ## Study 2 \| ERGM \| `edges` {.smaller}
 
 ::: panel-tabset
-### Notes
+### Summary
 
 -   Sparse edges but bipartite, so take `edges` with grain of salt
 
--   Unconstrained
+-   Unconstrained, minimal model
 
 -   GOF acceptable for an initial non-tuned ERGM
 
-### Specification & Summary
+### Specification
 
 ``` r
 formula_base_model <- bondora_net ~ edges
@@ -397,9 +365,27 @@ snafun::stat_plot_gof(base_ergm$gof)
 ## Study 2 \| ERGM \| `gwb1degree` {.smaller}
 
 ::: panel-tabset
-### Notes
+### Summary
 
--   `gwb1degree` refers to number of different types of loans users request
+**Modelling Notes**
+
+-   GOF indicates that `b2degree` not modelled well
+
+    -   Partition 2 degrees distributed very differently than Partition 1
+
+-   Model 2 converges optimally with `MCMC.samplesize = 100000` and `MCMC.interval = 1000`
+
+-   Greater model stability with `MCMC.steplength = 0.25`
+
+-   No model constraints
+
+**Results**
+
+-   Highly positive and significant estimate for `gwb1degree` which is approximately `r odds(ergm_m1$model$coefficients[2])` in the odds scale
+
+    -   This indicates that borrowers generally have a balanced loan use mix since it is almost equally likely the mix is either highly varied or very specific, relative to a network of random borrowers
+
+-   Excellent MCMC diagnostics
 
 ### Specification
 
@@ -443,7 +429,7 @@ texreg::screenreg(list(
 
 ### MCMC
 
-```{r}
+```{r fig.height=10, fig.width=10}
 ergm::mcmc.diagnostics(ergm_m1$model)
 ```
 
@@ -454,12 +440,36 @@ snafun::stat_plot_gof(ergm_m1$gof)
 ```
 :::
 
-## Study 2 \| ERGM \| `gwb1dsp` {.smaller}
+## Study 2 \| ERGM \| `gwb1dsp`  {.smaller}
 
 ::: panel-tabset
-### Notes
+### Summary
 
--   Constrained model
+**Modelling Notes**
+
+-   Model constrained by minimum of zero `outdegrees` and maximum of 80
+
+    -   Smaller simulation space reduces the noisiness of the MCMC mixing process significantly
+
+    -   Maximum `b2degree=72` so 80 may be reasonable, but we understand the conceptual implications of this
+
+-   `gwb1dsp` decay was set to 0.5 because there are far too many dyad-wise partners otherwise
+
+    -   Cannot be set too high otherwise too many relevant dyad-wise partners are lost
+
+**Results**
+
+-   `gwb1dsp` estimate is highly significant and approximately `r odds(ergm_m2$model$coefficients[3])` in the odds scale
+
+    -   This indicates that sets of two borrowers are less likely to share the same loan type compared to a random case where borrowers select their loan type randomly
+
+-   MCMC diagnostics indicate good mixing, though `gwb1dsp` traces are right-skewed slightly
+
+-   GOF acceptable, however, modelling `b2degree` is difficult
+
+-   AIC/BIC highly negative as a result $\rightarrow$ Model 3 theoretically better than Model 2 given MCMC + GOF
+
+    -   Extremely low Standard Error for `gwb1dsp`
 
 ### Specification
 
@@ -506,7 +516,7 @@ texreg::screenreg(list(base_ergm$model, ergm_m1$model,
 
 ### MCMC
 
-```{r}
+```{r fig.height=10, fig.width=10}
 ergm::mcmc.diagnostics(ergm_m2$model)
 ```
 
@@ -520,9 +530,29 @@ snafun::stat_plot_gof(ergm_m2$gof)
 ## Study 2 \| ERGM \| `b1nodematch("gender")` {.smaller}
 
 ::: panel-tabset
-### Notes
+### Summary
 
--   Constrained model
+**Modelling Notes**
+
+-   Since `b1nodematch` is an exogenous dyad-independent term, the parameters related to convergence were mostly unaffected
+
+**Results**
+
+-   `b1nodematch` is used as a proxy for `nodemix` because it is unavailable for bipartite networks
+
+-   `b1nodematch` significant at 5% and converted to the odds scale, estimate is `r odds(ergm_m3$model$coefficients[4])`
+
+    -   This indicates that being of the same gender decreases the diversity of the borrower's requested loan types, compared to being of the other gender, all else equal
+
+-   The inclusion of the `b1nodematch` term increased the strength of the `gwb1degree` term, but decreased `gwb1dsp`
+
+-   The term decreased the significance of the `gwb1dsp` term, suggesting it may be less statistically relevant under this modelling context
+
+-   MCMC diagnostics show that `b1nodematch` worsens convergence and skews the traces of the other terms, however, it is acceptable
+
+-   GOF is similar to previous cases, however, the fit for `b1degree` is slightly less optimal
+
+-   AIC suggests that this model offers less explanatory potential than the previous, however, BIC indicates the converse. Since the difference is small, this model is not seen as significantly better formulated
 
 ### Specification
 
@@ -571,7 +601,7 @@ texreg::screenreg(list(base_ergm$model, ergm_m1$model,
 
 ### MCMC
 
-```{r}
+```{r fig.height=10, fig.width=10}
 ergm::mcmc.diagnostics(ergm_m3$model)
 ```
 
@@ -585,9 +615,21 @@ snafun::stat_plot_gof(ergm_m3$gof)
 ## Study 2 \| ERGM \| `b1cov("age")` {.smaller}
 
 ::: panel-tabset
-### Notes
+### Summary
 
--   Constrained model
+**Modelling Notes**
+
+-   Parameters related to convergence were unchanged since we have added an exogenous, dyad-independent term
+
+**Results**
+
+-   The `b1cov` term is statistically insignificant and the magnitude is zero, indicating that it is irrelevant to the explanatory power of this model
+
+-   The inclusion of the `b1cov` term appears to stabilise the MCMC mixing process, improving the trace distributions
+
+-   The GOF is not significantly different than previous iterations
+
+-   BIC, which penalises model complexity more than AIC, is notably better than the previous models $\Rightarrow$ this model offers better statistical relevance than the previous models, given our subsample
 
 ### Specification
 
@@ -639,7 +681,7 @@ texreg::screenreg(list(base_ergm$model, ergm_m1$model,
 
 ### MCMC
 
-```{r}
+```{r fig.height=10, fig.width=10}
 ergm::mcmc.diagnostics(ergm_m4$model)
 ```
 
