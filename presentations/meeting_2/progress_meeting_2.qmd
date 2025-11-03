@@ -1,5 +1,7 @@
 ---
-title: "Bondora Credit Allocation<br>Group 7<br>Second Progress Meeeting"
+title: "Bondora Credit Allocation Study"
+subtitle: "Progress Meeting 2"
+author: "Group 7"
 format:
   revealjs: 
     embed-resources: true
@@ -11,20 +13,7 @@ format:
 ---
 
 ```{r include=FALSE}
-#install.packages("here")
-#setwd("C:/Users/user/OneDrive/University & Studies/University/JADS DSBE/Semester 1/Social Network Analysis for DS/Group Project/SNA4DS_Group7_Project")
-
-#net <- readRDS("resources/objects/preprocessing/bondora_net.RDS")
-#b_indicator <- readRDS("resources/objects/preprocessing/indicator.RDS")
-
-#base_ergm <- readRDS("resources/objects/ergm/ergm_base_panel.RDS")
-#ergm_m1 <- readRDS("resources/objects/ergm/ergm_m1_panel.RDS")
-#ergm_m2 <- readRDS("resources/objects/ergm/ergm_m2_panel.RDS")
-#ergm_m3 <- readRDS("resources/objects/ergm/ergm_m3_panel.RDS")
-#ergm_m4 <- readRDS("resources/objects/ergm/ergm_m4_panel.RDS")
-
-#qap_m1 <- readRDS("resources/objects/qap/qap_m1.RDS")
-#qap_m2 <- readRDS("resources/objects/qap/qap_m2.RDS")
+#install.packages("here") # if you do not have this installed already
 
 net <- readRDS(here::here("resources","objects","preprocessing","bondora_net.RDS"))
 b_indicator <- readRDS(here::here("resources","objects","preprocessing","indicator.RDS"))
@@ -39,72 +28,82 @@ qap_m1 <- readRDS(here::here("resources","objects","qap","qap_m1.RDS"))
 qap_m2 <- readRDS(here::here("resources","objects","qap","qap_m2.RDS"))
 ```
 
-## Background & Premise
+# How are Different Kinds of Credit Distributed among Bondora Borrowers?
 
-::: r-fit-text
+## Background & Premise {.smaller}
+
 -   Bondora P2P Lending Service
--   European dataset spanning between 2009-2021 with 70k+ loans
+-   European dataset spanning between 2009-2021 with 179,000+ individual loans
+-   Each user can have 1+ loan
 
-+-------------------+------------------------------------------------------------------+
-| **Network Type**  | Bipartite                                                        |
-|                   |                                                                  |
-| Partition 1       | Borrowers (based on usernames)                                   |
-|                   |                                                                  |
-| Partition 2       | Reported Loan Use                                                |
-+-------------------+------------------------------------------------------------------+
-| **Edges**         | B1 $\rightarrow$ B2 if user took out loan for a specific purpose |
-+-------------------+------------------------------------------------------------------+
-| **Overall Study** | How is credit distributed among active users of Bondora?         |
-+-------------------+------------------------------------------------------------------+
+### Network Information
+
++------------------+------------------------------------------------------------------+
+| **Network Type** | **Undirected Bipartite**                                         |
+|                  |                                                                  |
+| Partition 1 (B1) | Borrowers (based on usernames)                                   |
+|                  |                                                                  |
+| Partition 2 (B2) | Reported Loan Use                                                |
++------------------+------------------------------------------------------------------+
+| **Edges**        | B1 $\rightarrow$ B2 if user took out loan for a specific purpose |
++------------------+------------------------------------------------------------------+
+
+## Research Questions & Hypotheses {.smaller}
+
+::: panel-tabset
+### Study 1
+
++------------+-------------------------------------------------------------------------------------+
+| **Method** | QAP Linear Regression                                                               |
++------------+-------------------------------------------------------------------------------------+
+| **RQ**     | How do loan characteristics affect the frequency credit allocation among borrowers? |
++------------+-------------------------------------------------------------------------------------+
+
++----------------------------------------------------------------------------------+--------------------------------------------------+-------------------------------------------------------------+
+| Hypothesis                                                                       | Specific Method                                  | Literature / Theory                                         |
++==================================================================================+==================================================+=============================================================+
+| H~1~^a^ : Users with the same loan use are likely to have the same credit rating | $Y$ : Adjacency matrix of shared loan use        | Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum |
+|                                                                                  |                                                  |                                                             |
+| We expect $\hat{\beta}_{1,1}>0$                                                  | $X_1$ : Adjacency matrix of shared credit rating |                                                             |
+|                                                                                  |                                                  |                                                             |
+|                                                                                  | $+$ $X_{2,3,..,n}$ : Controls                    |                                                             |
++----------------------------------------------------------------------------------+--------------------------------------------------+-------------------------------------------------------------+
+
+### Study 2
+
++------------+-----------------------------------------------------------------------------------------------------+
+| **Method** | Bipartite ERGMs                                                                                     |
++------------+-----------------------------------------------------------------------------------------------------+
+| **RQ**     | How is the structure credit type allocation affected by borrower behaviour and its characteristics? |
++------------+-----------------------------------------------------------------------------------------------------+
+
++--------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------+
+| Hypothesis                                                                     | ERGM Term                                                                                                             | Literature / Theory                                         |
++================================================================================+=======================================================================================================================+=============================================================+
+| H~2~^a^ : Pairs of borrowers share same loan type                              | Endogenous + Dyad-dependent                                                                                           | Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum |
+|                                                                                |                                                                                                                       |                                                             |
+| We expect $\hat{\theta}>0$                                                     | `gwb1dsp()`                                                                                                           |                                                             |
++--------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------+
+| H~3~^a^ : Borrowers have a diverse loan use portfolio                          | Endogenous + Dyad-dependent                                                                                           | Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum |
+|                                                                                |                                                                                                                       |                                                             |
+| We expect $\hat{\theta}>0$                                                     | `gwb1degree()`                                                                                                        |                                                             |
++--------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------+
+| H~4~^a^ : Younger borrowers have a more diverse range of loan uses             | Exogenous + Dyad-independent                                                                                          | Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum |
+|                                                                                |                                                                                                                       |                                                             |
+| We expect $\hat{\theta}>0$                                                     | `b1cov("b1_age")`                                                                                                     |                                                             |
++--------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------+
+| H~5~^a^ : Borrowers of differing genders have different portfolios of loan use | Heterophily + Exogenous + Dyad-independent                                                                            | Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum Lorem Ipsum |
+|                                                                                |                                                                                                                       |                                                             |
+| We expect $\hat{\theta}<0$                                                     | `b1nodematch("b1_gender")`                                                                                            |                                                             |
+|                                                                                |                                                                                                                       |                                                             |
+|                                                                                | **Note:** measured indirectly through heterophily because `nodemix()` does not have an equivalent for bipartite ERGMs |                                                             |
++--------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------+-------------------------------------------------------------+
 :::
 
-## Research Questions & Hypotheses
+## Basic Network Statistics {.smaller}
 
-::: {.r-fit-text style="font-size;0.5em"}
-+-------------+------------------------------------------------------------------------------------------------+
-| **Study 1** | How do loan characteristics affect the frequency credit allocation among borrowers?            |
-+-------------+------------------------------------------------------------------------------------------------+
-| **Study 2** | How is the structure credit allocation affected by borrower behaviour and its characteristics? |
-+-------------+------------------------------------------------------------------------------------------------+
-
-**Hypotheses**
-
-+-----------+------------+----------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------+
-| **Study** | **Method** | **Hypothesis**                                                                   | **Specific Method**                                                                                                         |
-+-----------+------------+----------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------+
-| **1**     | LR-QAP     | H~1~^a^ : Users with the same loan use are likely to have the same credit rating | $Y$ : Adjacency matrix of shared loan use                                                                                   |
-|           |            |                                                                                  |                                                                                                                             |
-|           |            |                                                                                  | $X_1$ : Adjacency matrix of shared credit rating                                                                            |
-|           |            |                                                                                  |                                                                                                                             |
-|           |            |                                                                                  | $+$ $X_{2,3,..,n}$ : Controls                                                                                               |
-|           |            |                                                                                  |                                                                                                                             |
-|           |            |                                                                                  | We expect $\hat{\beta}^{\mathbf{X}_1}_1>0$                                                                                  |
-|           |            |                                                                                  |                                                                                                                             |
-|           |            |                                                                                  | **Note:** adjacency matrices are obtained by computing $X\cdot X^T$, so both $Y$ and $X$ are standardised for comparability |
-+-----------+------------+----------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------+
-| **2**     | ERGM       | H~2~^a^ : Pairs of borrowers share same loan type                                | Endogenous + Dyad-dependent                                                                                                 |
-|           |            |                                                                                  |                                                                                                                             |
-|           |            |                                                                                  | `gwb1dsp(decay = x, fixed=TRUE):` $\hat{\theta}>0$                                                                          |
-+-----------+------------+----------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------+
-| 2         | ERGM       | H~3~^a^ : Borrowers have a diverse loan use portfolio                            | Endogenous + Dyad-dependent                                                                                                 |
-|           |            |                                                                                  |                                                                                                                             |
-|           |            |                                                                                  | `gwb1degree(decay = x, fixed =TRUE:` $\hat{\theta}>0$                                                                       |
-+-----------+------------+----------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------+
-| **2**     | ERGM       | H~4~^a^ : Younger borrowers have a more diverse range of loan uses               | Exogenous + Dyad-independent                                                                                                |
-|           |            |                                                                                  |                                                                                                                             |
-|           |            |                                                                                  | `b1cov("b1_age")` : $\hat{\theta}>0$                                                                                        |
-+-----------+------------+----------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------+
-| **2**     | ERGM       | H~5~^a^ : Borrowers of differing genders have different portfolios of loan use   | Heterophily + Exogenous + Dyad-independent                                                                                  |
-|           |            |                                                                                  |                                                                                                                             |
-|           |            |                                                                                  | `b1nodematch("b1_gender"):` $\hat{\theta}<0$                                                                                |
-|           |            |                                                                                  |                                                                                                                             |
-|           |            |                                                                                  | **Note:** measured indirectly through heterophily because `nodemix()` does not have an equivalent for bipartite ERGMs       |
-+-----------+------------+----------------------------------------------------------------------------------+-----------------------------------------------------------------------------------------------------------------------------+
-:::
-
-## Basic Network Statistics {.r-fit-text}
-
-**Network Visualisation**
+::: panel-tabset
+### Network Visualisation
 
 ```{r}
 # Set colour palette
@@ -151,13 +150,14 @@ legend("bottomleft", legend = levels(type_legend),
        bg = rgb(0,0,0, alpha=0.025))
 ```
 
-**Descriptive Statistics**
+### Descriptive Statistics Plot
 
 ```{r}
 snafun::plot_centralities(net)
 ```
+:::
 
-## Study 1 \| Preliminary QAP Results {.r-fit-text style="font-size:0.75em;"}
+## Study 1 \| Preliminary QAP Results {.smaller}
 
 ```{r include=FALSE}
 var_names <- c("Intercept", "Rating","Loan Amount","Age","Gender",
@@ -168,7 +168,8 @@ names(qap1_results) <- var_names
 names(qap2_results) <- var_names
 ```
 
-**Notes**
+::: panel-tabset
+### Notes
 
 -   Linear QAP Regression used to study how borrowers with the same loan type choice are affected by having the same credit rating
 
@@ -178,17 +179,27 @@ names(qap2_results) <- var_names
 
 -   Intercept has very significant impact: *not all effects can be accounted for and are missing*
 
-**Linear QAP Results**
+### Parameters
 
-```{r}
-coef_table <- cbind(Unstd_Parameters = round(qap1_results, 4),
-                    Ustd_t_vals = round(qap_m1$tstat, 2),
-                    Std_Parameters = round(qap2_results, 4),
-                    Std_t_vals = round(qap_m2$tstat, 2))
-print(coef_table)
-```
++--------------------------+------------------------------------------------------------------+
+| Variable Type            | Variable Name                                                    |
++==========================+==================================================================+
+| **Dependent Variable**   | Weighted Adjacency Matrix of Borrowers with same Loan Type       |
++--------------------------+------------------------------------------------------------------+
+| **Explanatory Variable** | Weighted Adjacency Matrix of Borrowers of the same Credit Rating |
++--------------------------+------------------------------------------------------------------+
+| Control Variable         | Weighted Adjacency Matrix of Mean Loan Amount Differences        |
++--------------------------+------------------------------------------------------------------+
+| Control Variable         | Weighted Adjacency Matrix of Age Differences                     |
++--------------------------+------------------------------------------------------------------+
+| Control Variable         | Binary Adjacency Matrix of Homophily in Gender                   |
++--------------------------+------------------------------------------------------------------+
+| Control Variable         | Weighted Adjacency Matrix of Mean Loan Duration Differences      |
++--------------------------+------------------------------------------------------------------+
+| Control Variable         | Weighted Adjacency Matrix of Homophily in Loan Restructuring     |
++--------------------------+------------------------------------------------------------------+
 
-**Model Specifications (Snippets)**
+### Specification & Results
 
 ``` r
 qap_m1 <- sna::netlm(y = loan_use_mat,
@@ -205,46 +216,52 @@ qap_m2 <- sna::netlm(y = scaled_dep,
                      nullhyp = "qapspp", reps = 2500)
 ```
 
-## Study 2 \| ERGM \| `edges` {.r-fit-text style="font-size:0.75em;"}
+```{r}
+coef_table <- cbind(Unstd_Parameters = round(qap1_results, 4),
+                    Ustd_t_vals = round(qap_m1$tstat, 2),
+                    Std_Parameters = round(qap2_results, 4),
+                    Std_t_vals = round(qap_m2$tstat, 2))
+print(coef_table)
+```
+:::
 
-**Notes**
+## Study 2 \| ERGM \| `edges` {.smaller}
+
+::: panel-tabset
+### Notes
 
 -   Sparse edges but bipartite, so take `edges` with grain of salt
 
 -   Unconstrained
 
-**Model Specification**
+-   GOF acceptable for an initial non-tuned ERGM
+
+### Specification & Summary
 
 ``` r
 formula_base_model <- bondora_net ~ edges
 base_ergm <- ergm::ergm(formula_base_model)
 ```
 
-::::: columns
-::: {.column width="50%"}
-**Goodness of Fit Plots**
+```{r}
+texreg::screenreg(list(base_ergm$model))
+```
+
+### GOF
 
 ```{r}
 snafun::stat_plot_gof(base_ergm$gof)
 ```
 :::
 
-::: {.column width="50%"}
-**Model Summary**
+## Study 2 \| ERGM \| `gwb1degree` {.smaller}
 
-```{r}
-texreg::screenreg(list(base_ergm$model))
-```
-:::
-:::::
-
-## Study 2 \| ERGM \| `gwb1degree` {#sec-study-2--ergm--gwb1degree .r-fit-text style="font-size:0.75em;"}
-
-**Notes**
+::: panel-tabset
+### Notes
 
 -   `gwb1degree` refers to number of different types of loans users request
 
-**Model Specification**
+### Specification
 
 ``` r
 model_1_params <- bondora_net ~ edges + 
@@ -277,36 +294,34 @@ model_1 <- ergm::ergm(
 )
 ```
 
-**Model(s) Summary**
+### Results
 
 ```{r}
 texreg::screenreg(list(
   base_ergm$model, ergm_m1$model))
 ```
 
-::::: columns
-::: {.column width="40%"}
-**Goodness of Fit Plots**
+### MCMC
+
+```{r}
+ergm::mcmc.diagnostics(ergm_m1$model)
+```
+
+### GOF
 
 ```{r}
 snafun::stat_plot_gof(ergm_m1$gof)
 ```
 :::
 
-::: {.column width="60%"}
-**MCMC Diagnostics**
+## Study 2 \| ERGM \| `gwb1degree + gwb1dsp` {.smaller}
 
-```{r}
-ergm::mcmc.diagnostics(ergm_m1$model)
-```
-:::
-:::::
+::: panel-tabset
+### Notes
 
-## Study 2 \| ERGM \| `gwb1degree + gwb1dsp` {.r-fit-text style="font-size:0.75em;"}
+-   Constrained model
 
-**Notes**
-
-**Model Specification**
+### Specification
 
 ``` r
 model_2_params <- bondora_net ~ edges + 
@@ -342,35 +357,34 @@ model_2 <- ergm::ergm(
   )
 ```
 
-**Model(s) Summary**
+### Results
 
 ```{r}
-texreg::screenreg(list(base_ergm$model, ergm_m1$model, ergm_m2$model))
+texreg::screenreg(list(base_ergm$model, ergm_m1$model, 
+                       ergm_m2$model))
 ```
 
-::::: columns
-::: {.column width="40%"}
-**Goodness of Fit Plots**
+### MCMC
+
+```{r}
+ergm::mcmc.diagnostics(ergm_m2$model)
+```
+
+### GOF
 
 ```{r}
 snafun::stat_plot_gof(ergm_m2$gof)
 ```
 :::
 
-::: {.column width="60%"}
-**MCMC Diagnostics**
+## Study 2 \| ERGM \| `gwb1degree + gwb1dsp + b1nodematch("gender")` {.smaller}
 
-```{r}
-ergm::mcmc.diagnostics(ergm_m2$model)
-```
-:::
-:::::
+::: panel-tabset
+### Notes
 
-## Study 2 \| ERGM \| `gwb1degree + gwb1dsp + b1nodematch("gender")` {.r-fit-text style="font-size:0.75em;"}
+-   Constrained model
 
-**Notes**
-
-**Model Specification**
+### Specification
 
 ``` r
 model_3_params <- bondora_net ~ edges + 
@@ -408,36 +422,34 @@ model_3 <- ergm::ergm(
 )
 ```
 
-**Model(s) Summary**
+### Results
 
 ```{r}
-texreg::screenreg(list(base_ergm$model, ergm_m1$model, ergm_m2$model,
-                       ergm_m3$model))
+texreg::screenreg(list(base_ergm$model, ergm_m1$model, 
+                       ergm_m2$model,ergm_m3$model))
 ```
 
-::::: columns
-::: {.column width="40%"}
-**Goodness of Fit Plots**
+### MCMC
+
+```{r}
+ergm::mcmc.diagnostics(ergm_m3$model)
+```
+
+### GOF
 
 ```{r}
 snafun::stat_plot_gof(ergm_m3$gof)
 ```
 :::
 
-::: {.column width="60%"}
-**MCMC Diagnostics**
+## Study 2 \| ERGM \| `gwb1degree + gwb1dsp + b1nodematch("gender") + b1cov("age")` {.smaller}
 
-```{r}
-ergm::mcmc.diagnostics(ergm_m3$model)
-```
-:::
-:::::
+::: panel-tabset
+### Notes
 
-## Study 2 \| ERGM \| `gwb1degree + gwb1dsp + b1nodematch("gender") + b1cov("age")` {.r-fit-text style="font-size:0.75em;"}
+-   Constrained model
 
-**Notes**
-
-**Model Specification**
+### Specification
 
 ``` r
 model_4_params <- bondora_net ~ edges + 
@@ -477,26 +489,23 @@ model_4 <- ergm::ergm(
 )
 ```
 
-**Model(s) Summary**
+### Results
 
 ```{r}
-texreg::screenreg(list(base_ergm$model, ergm_m1$model, ergm_m2$model,                        ergm_m3$model, ergm_m4$model))
+texreg::screenreg(list(base_ergm$model, ergm_m1$model, 
+                       ergm_m2$model, ergm_m3$model, 
+                       ergm_m4$model))
 ```
 
-::::: columns
-::: {.column width="40%"}
-**Goodness of Fit Plots**
+### MCMC
+
+```{r}
+ergm::mcmc.diagnostics(ergm_m4$model)
+```
+
+### GOF
 
 ```{r}
 snafun::stat_plot_gof(ergm_m4$gof)
 ```
 :::
-
-::: {.column width="60%"}
-**MCMC Diagnostics**
-
-```{r}
-ergm::mcmc.diagnostics(ergm_m4$model)
-```
-:::
-:::::
