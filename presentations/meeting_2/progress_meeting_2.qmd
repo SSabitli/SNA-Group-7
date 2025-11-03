@@ -16,6 +16,7 @@ format:
     self-contained: true
     theme: simple 
     scrollable: true
+    standalone: true
 ---
 
 ```{r include=FALSE}
