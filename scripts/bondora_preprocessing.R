@@ -53,22 +53,31 @@ levels(bondora$UseOfLoan_factor) <- c(
 
 cols <- viridis::viridis(30)
 
+# Make function to save plots
+save_plot <- function(plt_nam) {
+  plt <- recordPlot()
+  saveRDS(plt, here::here("resources","objects","preprocessing",
+                     paste0(plt_nam,".Rds")))
+}
+
 # Make function to consistently plot comparisons
 plot_desc_hists <- function(df1, df2, col_name, type) {
   
   par(mfrow=c(1,3))
   
   hist(df1[[col_name]], xlab=type, col=cols[15], main="", breaks=10)
-  mtext("Full Sample", side=3, adj=0, line=1, cex=1, font=2)
+  mtext("Full Sample", side=3, adj=0, line=0.25, cex=1, font=2)
 
   hist(df2[[col_name]], xlab=type, col=cols[15], main="", breaks=10)
-  mtext("Processed Sample", side=3, adj=0, line=1, cex=1, font=2) 
+  mtext("Processed Sample", side=3, adj=0, line=0.25, cex=1, font=2) 
 
   qqplot(df1[[col_name]], df2[[col_name]], main="", cex=1,
-         xlab="Full Sample", ylab="Subsample")
+         xlab="Full Sample", ylab="Subsample", line=0.25)
   abline(0, 1, lty=2)
   
-  mtext("QQ Plot", side=3, adj=0, line=1, cex=1, font=2)                          
+  mtext("QQ Plot", side=3, adj=0, line=0.25, cex=1, font=2)  
+  
+  mtext(type, outer = TRUE, line = -2, side=3, cex = 1.3, font = 2)
   
   # Reset plot window
   par(mfrow=c(1,1), mar=c(5,4,4,2)+0.1)
@@ -80,24 +89,38 @@ plot_desc_bar <- function(df1, df2, col_name, type) {
   
   barplot(sort(table(df1[[col_name]]), decreasing = F),
           xlab=type, col=cols[15], horiz=TRUE, las=1)
-  mtext("Full Sample", side=3, adj=0, line=1, cex=1, font=2)
+  mtext("Full Sample", side=3, adj=0, line=0.25, cex=1, font=2)
   
   barplot(sort(table(df2[[col_name]]), decreasing = F),
           xlab=type, col=cols[15], horiz=TRUE, las=1)
-  mtext("Processed Sample", side=3, adj=0, line=1, cex=1, font=2)
+  mtext("Processed Sample", side=3, adj=0, line=0.25, cex=1, font=2)
+  
+  mtext(type, outer = TRUE, line = -2, side=3, cex = 1.3, font = 2)
   
   # Reset plot window
   par(mfrow=c(1,1), mar=c(5,4,4,2)+0.1)
 }
 
 plot_desc_hists(bondora, bondora_clean, "Amount", "Amount")
+save_plot("hist_amt")
+
 plot_desc_hists(bondora, bondora_clean, "Interest", "Interest")
+save_plot("hist_int")
+
 plot_desc_hists(bondora, bondora_clean, "LoanDuration", "Loan Duration")
+save_plot("hist_loandur")
+
 plot_desc_hists(bondora, bondora_clean, "MonthlyPayment", "Monthly Payment")
+save_plot("hist_monpmt")
+
 plot_desc_hists(bondora, bondora_clean, "Age", "Age")
+save_plot("hist_age")
 
 plot_desc_bar(bondora, bondora_clean,"UseOfLoan_factor","Loan Purpose")
+save_plot("bar_loanuse")
+
 plot_desc_bar(bondora, bondora_clean,"Rating","Credit Rating")
+save_plot("bar_rating")
 # --------------------------------------------------------------------------- #
 # Convert Dataset into Incidence Matrix to form Network Object (for ERGM)
 bondora_slim <- bondora_clean
@@ -151,7 +174,7 @@ network::set.vertex.attribute(
 )
 
 # Save the network object
-saveRDS(bondora_net, file=paste0(obj_paths,"preprocessing/","bondora_net.RDS"))
+saveRDS(bondora_net, file=paste0(obj_paths,"preprocessing/","bondora_net.Rds"))
 # --------------------------------------------------------------------------- #
 # Get the Adjacency Matrix for Loan Use Similarity (Dependent QAP Variable)
 adj_mat_loan_use <- bondora_matrix %*% t(bondora_matrix)
@@ -210,15 +233,15 @@ diag(adj_mat_rest) <- 0
 # Save the objects for the QAP Regression in different Script
 qap_paths = paste0(obj_paths,"/qap/")
 saveRDS(b_indicator, file=paste0(
-  "resources/objects/preprocessing/indicator.RDS"))
+  "resources/objects/preprocessing/indicator.Rds"))
 
-saveRDS(adj_mat_loan_use, file=paste0(qap_paths,"adj_mat_loanuse.RDS"))
-saveRDS(adj_mat_rating, file=paste0(qap_paths,"adj_mat_rating.RDS"))
-saveRDS(adj_mat_amount_diff, file=paste0(qap_paths,"adj_mat_amtdiffs.RDS"))
-saveRDS(adj_mat_age, file=paste0(qap_paths,"adj_mat_agediffs.RDS"))
-saveRDS(adj_mat_gender, file=paste0(qap_paths,"adj_mat_gender.RDS"))
-saveRDS(adj_mat_loandur_diff, file=paste0(qap_paths,"adj_mat_loandurdiffs.RDS"))
-saveRDS(adj_mat_rest, file=paste0(qap_paths,"adj_mat_rest.RDS"))
+saveRDS(adj_mat_loan_use, file=paste0(qap_paths,"adj_mat_loanuse.Rds"))
+saveRDS(adj_mat_rating, file=paste0(qap_paths,"adj_mat_rating.Rds"))
+saveRDS(adj_mat_amount_diff, file=paste0(qap_paths,"adj_mat_amtdiffs.Rds"))
+saveRDS(adj_mat_age, file=paste0(qap_paths,"adj_mat_agediffs.Rds"))
+saveRDS(adj_mat_gender, file=paste0(qap_paths,"adj_mat_gender.Rds"))
+saveRDS(adj_mat_loandur_diff, file=paste0(qap_paths,"adj_mat_loandurdiffs.Rds"))
+saveRDS(adj_mat_rest, file=paste0(qap_paths,"adj_mat_rest.Rds"))
 # --------------------------------------------------------------------------- #
 
 

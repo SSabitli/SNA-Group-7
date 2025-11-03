@@ -3,11 +3,14 @@
 install.packages("viridis") # For Colours
 install.packages("ergm.count")
 install.packages("Rglpk") # additional solver for ERGMs
+install.packages("here")
 
 # Import the Network and Other Object
 ergm_path <- "resources/objects/ergm/"
-bondora_net <- readRDS("resources/objects/preprocessing/bondora_net.RDS")
-b_indicator <- readRDS("resources/objects/preprocessing/indicator.RDS")
+bondora_net <- readRDS(here::here(
+  "resources","objects","preprocessing","bondora_net.Rds"))
+b_indicator <- readRDS(here::here(
+  "resources","objects","preprocessing","indicator.Rds"))
 
 # Set colour palette
 cols <- viridis::viridis(30)
@@ -92,7 +95,8 @@ lodds_to_prob <- function(l_odd) {
 }
 # Make function to save ERGM object
 save_ergm <- function(object, id) {
-  saveRDS(object, file=paste0(ergm_path,id,".RDS"))
+  saveRDS(object, file=here::here(
+    "resources","objects","ergm",id,".Rds"))
 }
 # Make function to conduct ERGMs automatically
 auto_ergm <- function(model, mcmc, name) {
