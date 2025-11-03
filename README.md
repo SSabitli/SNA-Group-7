@@ -4,13 +4,13 @@ The following project was undertaken as part of the course Social Network Analys
 
 The project contributors are
 
-| Name    | Surname                   |
-|:--------|:--------------------------|
-| Floris  | [Vermeulen]{.smallcaps}   |
-| Martijn | [van Iterson]{.smallcaps} |
-| Niek    | [Fleerakkers]{.smallcaps} |
-| Patryk  | [Grodek]{.smallcaps}      |
-| Samir   | [Sabitli]{.smallcaps}     |
+| Name    | Surname     |
+|:--------|:------------|
+| Floris  | Vermeulen   |
+| Martijn | van Iterson |
+| Niek    | Fleerakkers |
+| Patryk  | Grodek      |
+| Samir   | Sabitli     |
 
 ## Project Abstract
 
@@ -25,7 +25,7 @@ The first study aims to understand the effect of borrowers' credit ratings on th
 Under `Variable Name`, we list the original attribute used from the raw dataset, however, its transformation into the appropriate data structure is described under the `Construction` column
 
 | Variable Name | Variable Type | Construction | Purpose |
-|----------|------------|-------------------|-------------------------|
+|----------------|-------------------|-------------------------------|-----------------------------------------|
 | `UseOfLoan` | Dependent | $n\times n$ adjacency matrix of $n$ borrowers given a common reported `UseofLoan`. Obtained by transforming the $n\times m$  incidence matrix of $m$ loan types by $\mathbf{X} \cdot \mathbf{X}^T$ weighted by unique loan count. |  |
 | `Rating` | Main Predictor |  |  |
 | `Gender` | Control Variable |  |  |
@@ -37,7 +37,7 @@ Under `Variable Name`, we list the original attribute used from the raw dataset,
 
 ### Data Pre-processing
 
--   
+-   s
 
 ### Exponential Random Graph Model
 
