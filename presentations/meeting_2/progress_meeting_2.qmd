@@ -84,7 +84,7 @@ odds <- function(input) {
 ::: panel-tabset
 ### Study 1
 
--   **How do loan characteristics affect the frequency credit allocation among borrowers?**
+-   **How do loan characteristics affect the frequency of credit allocation among borrowers?**
 
 -   Studied using **QAP Linear Regressions** since adjacency matrices are **valued**
 
@@ -100,7 +100,7 @@ odds <- function(input) {
 
 ### Study 2
 
--   **How is the structure credit type allocation affected by borrower behaviour and its characteristics?**
+-   **How is the structure of the type of credit allocation affected by borrower behaviour and its characteristics?**
 
 -   Studied using **Bipartite ERGMs** with **binary edges**
 
