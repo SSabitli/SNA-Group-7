@@ -1,9 +1,9 @@
 # --------------------------------------------------------------------------- #
 # If not already Installed
-install.packages("viridis") # For Colours
-install.packages("ergm.count")
-install.packages("Rglpk") # additional solver for ERGMs
-install.packages("here")
+install.packages("viridis")     # For Colours
+#install.packages("ergm.count") # No longer needed
+install.packages("Rglpk")       # Additional solver for ERGMs
+#install.packages("here")       # To locate files from RProj
 
 # Import the Network and Other Object
 ergm_path <- "resources/objects/ergm/"

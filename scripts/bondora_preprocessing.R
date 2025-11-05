@@ -1,5 +1,6 @@
 # --------------------------------------------------------------------------- #
 #install.packages("viridis") # For Colours
+#install.packages("here") # To locate files from RProj
 # --------------------------------------------------------------------------- #
 # Import the Bondora P2P Dataset
 obj_paths = "resources/objects/"

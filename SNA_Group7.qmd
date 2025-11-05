@@ -43,6 +43,7 @@ include-in-header:
 bibliography: resources/r-references.bib
 csl: resources/apa-6th-edition.csl
 toc: true
+toc-title: "Table of Contents"
 toc-depth: 2
 format:
   pdf: 
@@ -72,6 +73,13 @@ editor:
 # Seed for random number generation
 set.seed(42)
 knitr::opts_chunk$set(cache.extra = knitr::rand_seed)
+#install.packages("here")
+```
+
+```{r}
+# Include any relevant objects
+net <- readRDS(here::here("resources","objects","preprocessing",
+                          "bondora_net.Rds"))
 ```
 
 {{< pagebreak >}}
@@ -335,11 +343,9 @@ circumstances.
 Dataset](resources/images/draft_1/distributions.png){fig-align="left"}](fig:dists)
 
 \clearpage
+\appendix
 
-## References {.unnumbered}
-
-::: {#refs}
-:::
+## Supplements
 
 \definecolor{dkgreen}{rgb}{0,0.6,0}
 \definecolor{gray}{rgb}{0.5,0.5,0.5}
@@ -369,20 +375,36 @@ Dataset](resources/images/draft_1/distributions.png){fig-align="left"}](fig:dist
   stringstyle=\color{mauve},      % string literal style
 }
 \clearpage
-\appendix
-\section{Source Code - Data Processing}
-\linespread{1}
-\lstinputlisting[language=R]{scripts/data_processing_bondora.R}
+
+### Data Preprocessing
 
 \clearpage
 
-\section{Source Code - Network Analysis}
-\linespread{1}
-\lstinputlisting[language=R]{scripts/network_analysis.R}
+### Source Code - Data Preprocessing
 
-{{< pagebreak >}}
+\linespread{1} 
+\lstinputlisting[language=R]{scripts/bondora_preprocessing.R}
+\clearpage
 
+### Source Code - QAP Linear Regression
+
+\linespread{1} 
+\lstinputlisting[language=R]{scripts/qap_network_analysis.R} 
+\clearpage
+
+### Source Code - ERGM Network Analysis
+
+\linespread{1} 
+\lstinputlisting[language=R]{scripts/ergm_network_analysis.R} 
+\clearpage
 \linespread{1.15}
+
+## References {.unnumbered}
+
+::: {#refs}
+:::
+
+\clearpage
 
 ## Technology Statement
 
