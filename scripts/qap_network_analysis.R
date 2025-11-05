@@ -8,6 +8,7 @@ cols <- viridis::viridis(30)
 # --------------------------------------------------------------------------- #
 # Load Relevant Files
 qap_path="resources/objects/qap/"
+
 loan_use_mat <- readRDS(paste0(qap_path,"adj_mat_loanuse.RDS"))
 rating_mat <- readRDS(paste0(qap_path,"adj_mat_rating.RDS"))
 amt_diffs_mat <- readRDS(paste0(qap_path,"adj_mat_amtdiffs.RDS"))
