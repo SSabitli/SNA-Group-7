@@ -1,6 +1,6 @@
 ---
-title: Social Network Analysis - Assignment 2
-subtitle: Group 7
+title: "Credit Allocation Mix in Peer-to-Peer Lending: A Network Study on Bondora"
+subtitle: "Social Network Analysis - Group 7"
 date: 2025-11-16
 author:
   - name: Floris 	Vermeulen
@@ -40,9 +40,14 @@ include-in-header:
       \usepackage{listings}
       \usepackage{color}
       \linespread{1.15}
+      \usepackage{sectsty}
+      \allsectionsfont{\sffamily}
+      \usepackage{tgschola}
+      \usepackage[T1]{fontenc}
 bibliography: resources/r-references.bib
 csl: resources/apa-6th-edition.csl
 toc: true
+link-citations: true
 toc-title: "Table of Contents"
 toc-depth: 2
 format:
@@ -52,6 +57,7 @@ format:
     number-sections: true
     df-print: kable
     fig-cap-location: top
+    sansfont: "Arial"
     geometry:
       - left=1.15in
       - right=1.15in
