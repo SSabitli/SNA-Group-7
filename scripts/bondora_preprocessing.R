@@ -27,6 +27,7 @@ bondora_clean <- bondora[bondora$UseOfLoan != -1, ]
 user_counts <- table(bondora_clean$UserName)
 multi_users <- names(user_counts[user_counts > 5])
 bondora_clean <- bondora_clean[bondora_clean$UserName %in% multi_users, ]
+#bondora_test <- bondora_raw[bondora_raw$UserName %in% multi_users, ]
 
 # See if Ratings are Properly Encoded
 unique(bondora_clean$Rating)

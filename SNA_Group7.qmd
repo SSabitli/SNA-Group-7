@@ -86,6 +86,8 @@ knitr::opts_chunk$set(cache.extra = knitr::rand_seed)
 # Include any relevant objects
 net <- readRDS(here::here("resources","objects","preprocessing",
                           "bondora_net.Rds"))
+net_plot <- readRDS(here::here("resources","objects","ergm",
+                          "network_plot.Rds"))
 ```
 
 {{< pagebreak >}}
@@ -293,10 +295,14 @@ network is not equivalent to the underlying population. Observing the
 figure, we see that there are indeed prevalent communities, however,
 there is also significant overlap between them.
 
-[![Plot of the Bondera Network with and without Community
-Detection](resources/images/draft_1/duo_network_plot.png){fig-align="left"}](fig:network_plot)
-
 \footnote{We recognise that this reciprocity may not beideal and we are looking for ways to deal with the 100\% reciprocity. Potential point for discussion.}
+
+```{r fig.width=10, fig.height=6}
+#| label: fig-network
+#| fig-cap: "Network Visualisation"
+
+replayPlot(net_plot)
+```
 
 \begin{table}[h!]
 \centering

@@ -25,8 +25,8 @@ The first study aims to understand the effect of borrowers' credit ratings on th
 Under `Variable Name`, we list the original attribute used from the raw dataset, however, its transformation into the appropriate data structure is described under the `Construction` column
 
 | Variable Name | Variable Type | Construction | Purpose |
-|----------------|-------------------|-------------------------------|-----------------------------------------|
-| `UseOfLoan` | Dependent | $n\times n$ adjacency matrix of $n$ borrowers given a common reported `UseofLoan`. Obtained by transforming the $n\times m$  incidence matrix of $m$ loan types by $\mathbf{X} \cdot \mathbf{X}^T$ weighted by unique loan count. |  |
+|---------------|-------------|------------------|------------------------|
+| `UseOfLoan` | Dependent | $n\times n$ adjacency matrix of $n$ borrowers given a common reported `UseofLoan`. Obtained by transforming the $n\times m$ incidence matrix of $m$ loan types by $\mathbf{X} \cdot \mathbf{X}^T$ weighted by unique loan count. |  |
 | `Rating` | Main Predictor |  |  |
 | `Gender` | Control Variable |  |  |
 | `Age` | Control Variable |  |  |
@@ -81,11 +81,16 @@ The dataset contains over 100,000 loan grants between February 2009 and July 202
 Due to GitHub's size constraints, the dataset `LoanData_Bondora.csv` is unavailable in this repository. The project has been constructed as such:
 
 -   The main report was written and compiled by Quarto.
--   The .pdf of the report can be found under `_output/`
+-   The .pdf of the main report can be found under `_output/`
 -   The R scripts utilised to process the dataset and conduct network analyses can be found under `scripts/`
+    -   `bondora_preprocessing.R` outlines the steps needed to transform the raw dataset into a usable network
+    -   `qap_network_analysis.R` outlines the analysis using the QAP Linear Regression
+    -   `ergm_network_analysis.R` outlines the analysis using ERGM models
 
 ## R Package Requirements
 
 -   The `snafun` package that can be remotely downloaded from the [SNAfun GitHub Repo](https://github.com/SNAnalyst/SNAfun)
--   `here` package to locate relevant directories within the scripts
--   `igraph`, `sna`, and `network`
+-   `here` package to locate relevant directories using the local `.Rpoj` file
+-   `igraph`, `sna`, and `network` to undertake network modelling
+-   `viridis` for the colour palette
+-   `Rglpk` as an alternative ERGM convergence algorithm
