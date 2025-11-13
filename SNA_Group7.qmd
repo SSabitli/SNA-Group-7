@@ -321,14 +321,13 @@ which becomes lower after processing. The average borrower is assigned a
 relatively high interest rate of 25%, but this figure is 35% in the
 original sample. On average, users are around age 40 but this varies
 highly. The average loan is also relatively long, at 46 months out of a
-maximum 60. Figure @fig-bar-rating shows that most borrowers are
-relatively creditworthy, with few being very highly or badly rated[^1].
-However, borrowers are rated proportionally worse in the initial sample.
-The processed sample resembles the original sample in most metrics,
-however, the study could be biased by the fact that the sub-sample of
-active users are more creditworthy and perceived as less risky, which
-skew loan purpose connections relative to the wider population of P2P
-users.
+maximum 60. @fig-bar-rating shows that most borrowers are relatively
+creditworthy, with few being very highly or badly rated[^1]. However,
+borrowers are rated proportionally worse in the initial sample. The
+processed sample resembles the original sample in most metrics, however,
+the study could be biased by the fact that the sub-sample of active
+users are more creditworthy and perceived as less risky, which skew loan
+purpose connections relative to the wider population of P2P users.
 
 [^1]: Bondora uses their own proprietary credit rating system where the
     best rating is AA and worst is HR [@bondora_how_2024]. The company
