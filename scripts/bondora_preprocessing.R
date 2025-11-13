@@ -1,6 +1,6 @@
 # --------------------------------------------------------------------------- #
-#install.packages("viridis") # For Colours
-#install.packages("here") # To locate files from RProj
+install.packages("viridis") # For Colours
+install.packages("here") # To locate files from RProj
 # --------------------------------------------------------------------------- #
 # Import the Bondora P2P Dataset
 obj_paths = "resources/objects/"
@@ -10,8 +10,8 @@ raw_cols <- colnames(bondora_raw)
 # Select Columns to Keep
 keep_cols <- c("LoanId", "UserName","Age", "Gender", 
                "Country", "Amount", "Interest","LoanDuration",
-              "UseOfLoan", "Education", "MaritalStatus", 
-              "Rating", "Restructured", "MonthlyPayment")
+              "UseOfLoan", "Rating", "Restructured", "MonthlyPayment",
+              "OccupationArea")
 
 bondora <- bondora_raw[keep_cols]
 
@@ -21,7 +21,8 @@ bondora <- na.omit(bondora)
 print(paste("NA Count |",sum(is.na(bondora)),"rows"))
 
 # Remove users with only -1 Stated UseofLoan
-bondora_clean <- bondora[bondora$UseOfLoan != -1, ]
+# NOTE: STEP REMOVED TO PRESERVE SOME GENUINE SPARSITY
+#bondora_clean <- bondora[bondora$UseOfLoan != -1, ]
 
 # Remove Users with only One Loan
 user_counts <- table(bondora_clean$UserName)
@@ -39,17 +40,65 @@ barplot(table(bondora_clean$UseOfLoan))
 # Extract UseofLoan Types and Turn into Factor
 bondora_clean$UseOfLoan_factor <- as.factor(bondora_clean$UseOfLoan)
 unique(bondora_clean$UseOfLoan_factor)
-levels(bondora_clean$UseOfLoan_factor) <- c(
-  "Loan Consolidation", "Real Estate","Home Improvement",
-  "Business","Education","Travel","Vehicle","Other","Health")
 
-bondora$UseOfLoan_factor <- as.factor(bondora$UseOfLoan)
-unique(bondora$UseOfLoan_factor)
-levels(bondora$UseOfLoan_factor) <- c(
-  "Unknown", "Loan Consolidation", "Real Estate","Home Improvement",
-  "Business","Education","Travel","Vehicle","Other","Health", 
-  "Machinery Purchase", "Acquisition Real Estate","Other Business"
+loan_use_labels <- c(
+  "-1" = "NA",
+  "0" ="Loan Consolidation", 
+  "1" = "Real Estate",
+  "2" = "Home Improvement",
+  "3" = "Business",
+  "4" = "Education",
+  "5" = "Travel",
+  "6" = "Vehicle",
+  "7" = "Other",
+  "8" = "Health",
+  "110" = "Other Business",
+  "102" = "Undefined Business",
+  "108" = "Undefined Business"
 )
+# Change Labels for Cleaned Dataset
+bondora_clean$UseOfLoan_factor <- loan_use_labels[
+  as.character(bondora_clean$UseOfLoan)]
+
+# Change Labels for Uncleaned Dataset
+bondora$UseOfLoan_factor <- loan_use_labels[
+  as.character(bondora$UseOfLoan)]
+
+# Add labels to the OccupationArea Variable
+levels(as.factor(bondora_clean$OccupationArea)) # view codes
+
+occupation_labels <- c(
+  "-1" = "NA",
+  "1" = "Other",
+  "2" = "Mining",
+  "3" = "Processing",
+  "4" = "Energy",
+  "5" = "Utilities",
+  "6" = "Construction",
+  "7" = "Retail",
+  "8" = "Transport",
+  "9" = "Hospitality",
+  "10" = "Info/Telcom",
+  "11" = "Finance",
+  "12" = "Realestate",
+  "13" = "Research",
+  "14" = "Admin",
+  "15" = "Civil/Mil",
+  "16" = "Education",
+  "17" = "Healthcare",
+  "18" = "Social",
+  "19" = "Art/Ent",
+  "20" = "Agriculture",
+  "21" = "Forestry/Fish"
+)
+# store original
+bondora_clean$occupation_code <- bondora_clean$OccupationArea
+bondora_clean$occupation_label <- occupation_labels[
+  as.character(bondora_clean$OccupationArea)]
+
+bondora$occupation_code <- bondora$OccupationArea
+bondora$occupation_label <- occupation_labels[
+  as.character(bondora$OccupationArea)]
 # --------------------------------------------------------------------------- #
 # Observe Descriptive Statistics 
 
@@ -123,6 +172,41 @@ save_plot("bar_loanuse")
 
 plot_desc_bar(bondora, bondora_clean,"Rating","Credit Rating")
 save_plot("bar_rating")
+
+plot_desc_bar(bondora, bondora_clean,"occupation_label","Occupation")
+save_plot("bar_occupation")
+
+# Get Tabular Summary Statistics
+tab_comps <- function(df1, df2, cols) {
+  stats <- c("Mean"=mean, "Median"=median, "Std. Dev."=sd, "Min"=min, "Max"=max)
+  
+  get_stats <- function(d) {
+    t(sapply(d[cols], function(x)
+      sapply(stats, function(f) round(f(x, na.rm=TRUE), 2))
+    ))
+  }
+  
+  df1_stats <- get_stats(df1)
+  df2_stats <- get_stats(df2)
+  
+  out <- rbind(
+    cbind(DataFrame = "Original Dataset", 
+          Variable = rownames(df1_stats), df1_stats),
+    cbind(DataFrame = "Cleaned Dataset", 
+          Variable = rownames(df2_stats), df2_stats)
+  )
+  rownames(out) <- NULL
+  as.data.frame(out)
+}
+
+tab_results <- tab_comps(bondora, bondora_slim,
+                         c("Amount","Interest","Age","LoanDuration"))
+
+knitr::kable(tab_results)
+
+# Save table for use in the Report
+saveRDS(tab_results, 
+        file=paste0(obj_paths,"preprocessing/","summary_table.Rds"))
 # --------------------------------------------------------------------------- #
 # Convert Dataset into Incidence Matrix to form Network Object (for ERGM)
 bondora_slim <- bondora_clean
@@ -175,18 +259,30 @@ network::set.vertex.attribute(
   bondora_net, "b1_gender", value = b1_gender
 )
 
-# Save the network object
+# Save the network and data frame object
+saveRDS(bondora_slim, file=paste0(obj_paths,"preprocessing/","bondora_df.Rds"))
 saveRDS(bondora_net, file=paste0(obj_paths,"preprocessing/","bondora_net.Rds"))
 # --------------------------------------------------------------------------- #
+# First, create Incidence Matrix again but with Frequency Counts
+loan_use_matrix <- table(
+  bondora_slim$UserName, bondora_slim$UseOfLoan)
+
 # Get the Adjacency Matrix for Loan Use Similarity (Dependent QAP Variable)
-adj_mat_loan_use <- bondora_matrix %*% t(bondora_matrix)
-# Remove self weights
+adj_mat_loan_use <- loan_use_matrix %*% t(loan_use_matrix)
+# Remove self weights to remove any loops
 diag(adj_mat_loan_use) <- 0
 
 # Get the Adjacency Matrix for Credit Rating Similarity (Predictor in QAP)
 incidence_rating <- table(bondora_slim$UserName, bondora_slim$Rating)
 adj_mat_rating <- incidence_rating %*% t(incidence_rating)
 diag(adj_mat_rating) <- 0
+
+# Get Adjacency Matrix for Occupation Similarity (Predictor in QAP, Binary)
+incidence_occupation <- table(bondora_slim$UserName, 
+                              bondora_slim$occupation_label)
+adj_mat_occupation <- incidence_occupation %*% t(incidence_occupation)
+adj_mat_occupation[adj_mat_occupation > 0] <- 1
+diag(adj_mat_occupation) <- 0
 
 # Get the Adjacency Matrix for Loan Amount (Control in QAP) - BINARY
 # First, bin the Loan Amounts
@@ -238,6 +334,7 @@ saveRDS(b_indicator, file=paste0(
   "resources/objects/preprocessing/indicator.Rds"))
 
 saveRDS(adj_mat_loan_use, file=paste0(qap_paths,"adj_mat_loanuse.Rds"))
+saveRDS(adj_mat_occupation, file=paste0(qap_paths,"adj_mat_occup.Rds"))
 saveRDS(adj_mat_rating, file=paste0(qap_paths,"adj_mat_rating.Rds"))
 saveRDS(adj_mat_amount_diff, file=paste0(qap_paths,"adj_mat_amtdiffs.Rds"))
 saveRDS(adj_mat_age, file=paste0(qap_paths,"adj_mat_agediffs.Rds"))

@@ -52,6 +52,9 @@ toc-title: "Table of Contents"
 toc-depth: 2
 format:
   pdf: 
+    fig-pos: H
+    lof: true
+    lot: true
     documentclass: article
     pagesize: a4
     number-sections: true
@@ -66,7 +69,7 @@ format:
       - heightrounded
 execute:
     echo: false
-    cache: true
+    cache: false
 editor: 
   markdown: 
     wrap: 72
@@ -88,6 +91,10 @@ net <- readRDS(here::here("resources","objects","preprocessing",
                           "bondora_net.Rds"))
 net_plot <- readRDS(here::here("resources","objects","ergm",
                           "network_plot.Rds"))
+sum_tab <- readRDS(here::here("resources","objects","preprocessing",
+                          "summary_table.Rds"))
+cent_plots <- readRDS(here::here("resources","objects","ergm",
+                          "network_plots.Rds"))
 ```
 
 {{< pagebreak >}}
@@ -96,268 +103,363 @@ net_plot <- readRDS(here::here("resources","objects","ergm",
 
 With the advent of online peer-to-peer (P2P) lending platforms, the
 traditional methods of financial intermediation have been usurped by
-individual choice. The surging popularity and accessibility of services
-such as Prosper.com has grown to become one of the most important
-avenues through which individuals can secure micro-loans
-[@cai_judging_2016]. Arguably, while the democratisation of credit
-alleviates numerous pre-existing issues, it serves to exaggerate
-well-known informational asymmetries associated with determining
-creditworthiness [@mingfeng_lin_social_2009]. Per, @chen_group_2016,
-from a traditional financial lens, these asymmetries can contribute to
-moral hazard and adverse selection, ultimately causing systemic
-financial losses. This arises from the fact the users are anonymous,
-challenging the veracity of their information. Further, the unsecured
-nature of credit makes its collection relatively ineffective. Jointly,
-these factors characterise the lemons market theory by
-@akerlof_market_1978.
+individual choice; with no stringent third parties involved in
+transactions, individuals have greater power in sourcing credit. This
+presents new realities for individuals disenfranchised by the
+traditional financial system [@alistair_milne_business_2017].
+Traditional financial literature shows that individually, investors
+exhibit behavioural biases [@agrawal_managing_2012; @ayal_two_2011] in
+how they choose their investments, however, numerous studies demonstrate
+that these behavioural biases are present among non-professional P2P
+borrowers. For example, @herzenstein_strategic_2011 and
+@lee_herding_2012 suggest that users cluster around popular loans,
+exhibiting 'herding' behaviour. Literature focuses predominantly on
+funding success [@yao_relationship_2019], however, @ayal_behavioral_2018
+suggests that there is insufficient attention on how borrowers form
+their loan portfolios. As the authors indicate, this area of research is
+important in understanding why less professional investors deviate from
+known models of rational investor behaviour. Our study aims to model and
+understand how P2P borrowers' behaviours influence what kinds of loans
+they acquire.
 
-However, social networks can act a crucial avenue through which
-information transfer could be facilitated, alleviate some of the
-existing asymmetries [@mingfeng_lin_social_2009]. There are several
-prominent theories and research that attempt to bridge this gap. First,
-the theory of social capital is particularly salient because it relates
-directly to the reputation and trustworthiness of the users
-[@adler_social_2002]. While its definition is not strictly defined,
-according to @putnam_bowling_2015, it can be seen as a means through
-which social organisation facilitate coordination and trust.
-@nahapiet_social_1998 define three dimensions, including structural,
-relational, and cognitive. We primarily study the structural component,
-whereby the network properties relating to tie formation between
-borrowers is considered. Following this perspective, @chen_group_2016
-argue that social capital is earned through connections to others.
-However, per the authors, the internet facilitates weak forms of these
-ties, diminishing the benefits of social capital on P2P platforms,
-especially for non-friendship networks. Notably, they cite a low
-interdependence and closed structures to this effect.
+Investigating behavioural biases, @ayal_behavioral_2018 find that
+investors' familiarity with specific assets can make them seem less
+risky, making recognisable assets more attractive. However, such assets
+lead to undiversified portfolios. Evidence with P2P platforms supports
+the familiarity bias in lenders, as @galak_micro-finance_2010
+demonstrate that lenders choose borrowers who are similar across
+demographic attributes such as gender, occupation, and ethnicity. Based
+on these notions, we formulate our first study, asking:
 
-With this, we arrive at our first research problem, aiming to understand
-\textbf{to what extent are borrower networks weak in P2P networks?} More
-specifically, we formulate the hypothesis
+***Research Question 1:** Do borrowers tend to choose similar loan uses
+based on similarities across their attributes?*
 
-\begin{tabular}{ll}
-$\mathrm{\mathbf{H}}_1^a:$ & Borrower networks based on similarity have a low degree of centralisation
-\end{tabular}
+This question is answered using linear Quadratic Assignment Procedure
+(QAP) regressions, as we can represent similarities across loan uses and
+attributes as matrices that can be used as inputs in the model. Further,
+we integrate loan use frequencies to understand how the prevalence of
+specific loan types affects borrowers' portfolio compositions.
 
-To understand social capital, we employ techniques related to the
-occurance of dyadic connections rather than studying their structural
-components. As such, this problem can be studied with the use of the
-Quadratic Assignment Procedure (QAP) and Conditional Uniform Graph (CUG)
-tests, whereby the theoretical distributions of network characteristics
-can be tested.
+Using data from LendingClub, @serrano-cinca_determinants_2015 study
+funding success, finding that the reported loan use is a significant
+factor explaining differences in default rates. Specifically, the
+authors argue that there is heterogeneity in the credit riskiness of
+individuals seeking specific loan purposes, indicating that credit
+rating can explain some variation in borrowers' choice of loan use.
+Therefore, we formulate the following hypothesis:
 
-Our second study attempts to model social capital as a statistical
-model, specifically considering the structural dimension to social
-capital. According to the comprehensive review of @bachmann_online_2011,
-past studies have considered financial, demographic, and soft
-informational factors in the financial outcomes of P2P lending, however,
-these perspectives have not been considered with relation to each other.
-With respect to this premise, we posit
-\textbf{what is the role of structural and non-structural factors in the formation of social capital?}
-This problem is arguably best studied with the use of Exponential Random
-Graph Models (ERGM) as they are considered to work well in identifying a
-combination of structural and exogenous patterns in the context of a
-variety of network specifications [@jackson_overview_2011].
+*Hypothesis 1: Borrowers with the same credit ratings choose similar
+loan uses*
 
-In studying demographic factors, @pope_whats_2008 suggest that age plays
-a significant role in funding success. In particular, compared to
-individuals aged 35-60, those aged 35 or younger have a 40-90 basis
-point higher success rate. Additionally, those aged 60 and above are
-1.1-2.3 percentage points less successful. While this is not a direct
-relationship with social capital, it may suggest that these individuals
-may be placed lower in the P2P market, per @putnam_bowling_2015.
+Supporting the familiarity bias, @ravina_love_2019 studies personal
+characteristics in P2P markets, finding that loans tend to be awarded to
+those sharing personal characteristics such as occupation. As
+@ayal_behavioral_2018 implies, this can be generalised to suggest that
+lenders' loan grants reflect a wider network of similar borrower
+preferences, which can reflect the homogeneity in loan use observed by
+@serrano-cinca_determinants_2015. Thus,
 
-In studying gender, @barasinska_does_2010 find that female lenders are
-less risk averse than male lenders, funding credit with lower interest
-rates at a higher frequency. In conjunction, @pope_whats_2008 find that
-single women pay 0.4% less interest than men. These factors may indicate
-that edges are more likely to form between borrowers if they are women.
+*Hypothesis 2: Borrowers sharing the same occupation area tend to share
+loan uses*
 
-The structural dynamics of the network could be explained by the theory
-of Relational Herding, as formulated by @de_liu_friendships_2015. The
-authors explain that in the face of uncertainty, actors tend to exhibit
-a clustering behaviour, even putting aside their own private
-information. Though, other social dynamics may also explain the
-phenomenon. @devenow_rational_1996 posit that herding may also occur if
-individuals blindly follow others without rational analysis. In the P2P
-context, @herzenstein_strategic_2011 show evidence of strategic herding
-when borrowers observe that a loan has gotten funding in the past.
+Further, behavioural finance suggests that individuals' financial
+decisions are not independent, but rather, shaped by bounded rationality
+and psychological preferences [@kahneman_prospect_1979]. In the P2P
+context, @ayal_behavioral_2018 shows that these preferences can
+influence how borrowers choose loan types and how this can overlap with
+other borrowers' decisions. Using the Exponential Random Graph Model
+(ERGM) framework, we can identify how these behaviours manifest as
+structural regularities in a borrower-to-loan-use network. Therefore, we
+ask:
 
-Further, @podolny_status-based_1993 explains that the ways in which
-information flows in social networks can explain its outcomes. In
-particular, if the reputation or status of an individual can be
-observed, they are said to be "pipes" for other actors to transact with
-them. However, if this reputation is merely \textit{perceived}, then it
-said to be a "prism". In our context, prism seems more appropriate as
-users usually cannot directly observe prestige-related characteristics,
-however, this can be tested by constructing a variable related to latent
-status.
+***Research Question 2:** What behavioural mechanisms affect the
+structure of borrower-to-loan-use connections?*
 
-\begin{table}[h!]
+The aforedescribed section outlined that the familiarity bias can lead
+to similarities across borrower portfolios in terms of their
+characteristics. However, in P2P settings, this can manifest itself as
+familiarity *clustering*, wherein borrowers who have previously been
+granted certain loan types are more likely to repeat their choices, or
+select other categories that appear familiar to different borrowers.
+@herzenstein_strategic_2011, studying borrower decisions on Prosper.com,
+identifies a 'strategic herding' behaviour, where individuals gravitate
+towards popular or socially-validated loans. Considering that loan
+popularity is directly observable through its number of bids, we assert
+that borrowers linked to one loan purpose are likely to connect with
+others sharing the same loan use. In network terms, this behaviour
+results in cyclical substructures where there are overlapping nodes of
+each of the bipartite partitions. We capture a conservative form of this
+cycle through the ERGM term `cycle(4)`, formulating:
+
+*Hypothesis 3: Borrowers who share one loan purpose are likely to share
+another*
+
+Further, according to @amar_winning_2011, the notion of Debt Account
+Aversion can also explain how investors choose debt. Specifically,
+investors tend to avoid holding multiple debt accounts because per
+Prospect Theory, borrowers mentally segregate wins and losses to
+minimise perceived distress from debt [@kahneman_prospect_1979].
+@ayal_perceived_2009 expands with the Theory of Perceived
+Diversification, explaining that borrowers' distress increases with the
+perceived *distinctiveness* of each debt type, suggesting that in the
+P2P context, debt mentally differentiated by purpose would also be seen
+as distressing [@ayal_perceived_2009]. Therefore, we assert that
+borrowers try to minimise loan distinctiveness by requesting loans of a
+single type. This can be captured by the `b1degree(1)` term, which
+models whether borrowers are only linked to one loan purpose. Therefore,
+we formulate:
+
+*Hypothesis 4: Borrowers exhibit preferences for minimal debt
+distinctiveness, sharing one loan use*
+
+Notwithstanding, credit choices relate to non-structural factors.
+@cooper_consumption_2023 show that younger borrowers face constraints in
+the types of loans they can access in typical credit markets. The
+authors argue that this constraint shapes how these borrowers form loan
+portfolios, often concentrating around different use cases such as
+education, personal consumption, or small business loans. Considering
+the systemic differences in how age affects credit consumption, we
+assert that younger borrowers have different loan use portfolios. The
+ERGM term `b1cov("age")` can capture this by assessing how changes in
+age affect how borrowers form connections with different loan types.
+Therefore:
+
+*Hypothesis 5: Younger borrowers have different loan use mixes than
+older borrowers*
+
+Alongside age, the borrower's gender is known to be a significant factor
+in influencing credit use decisions. @aliano_role_2023 study the role of
+gender and other factors on borrowers' probability of default on the
+Bondora.com, finding a persistent gender effect on different loan uses;
+women tend to default less on health, home, and business loans.
+@croson_gender_2009 shows that these differences can be due to risk
+perception and self-selection effects, where women exhibit greater risk
+aversion, leading to different borrowing patterns. We expect that these
+differences in risk tolerance and perceived creditworthiness by lenders
+affect loan use composition in terms of gender. The term
+`b1nodematch("gender")` captures this effect by assessing homophily in
+loan use selection. Our premise is supported by a negative estimate for
+the term, indicating heterophily. Therefore:
+
+*Hypothesis 6: Gender differences lead to different loan use mixes*
+
+\begin{table}[!h]
+\centering
+\caption{Hypotheses related to Study 2}
+\label{tab:ergm_hyp}
 \resizebox{\textwidth}{!}{%
-\begin{tabular}{@{}lllll@{}}
+\begin{tabular}{@{}lll@{}}
 \toprule
-\textbf{Hypotheses}                                                                                                                                      & \textbf{Type} & \textbf{Dyad}  & \textbf{\begin{tabular}[c]{@{}l@{}}ERGM \\ Term\end{tabular}} & \textbf{Motivation}                                                                                                                                                                                                                                                                                                                  \\ \midrule
-\begin{tabular}[c]{@{}l@{}}$\mathrm{\mathbf{H}}^a_2:$ Younger borrowers tend\\ to form more relationships \\ with each other\end{tabular}                & Exogenous     & Independent    & nodecov()                                                     & \begin{tabular}[c]{@{}l@{}}The term captures how the age covariate affects the likelihood \\ of edge formation. Since we want a numeric range, this term is \\ most appropriate.\end{tabular}                                                                                                                                        \\
-\begin{tabular}[c]{@{}l@{}}$\mathrm{\mathbf{H}}^a_3:$ Women tend to form more\\ relationships with other borrowers, \\ regardless of gender\end{tabular} & Exogenous     & Independent    & nodefactor()                                                  & \begin{tabular}[c]{@{}l@{}}The term captures the tendency of women to form more edges, \\ regardless of the other gender.\end{tabular}                                                                                                                                                                                               \\
-\begin{tabular}[c]{@{}l@{}}$\mathrm{\mathbf{H}}^a_4:$ Borrowers tend to exhibit\\ herding around each other\end{tabular}                                 & Endogenous    & Interdependent & gwesp()                                                       & \begin{tabular}[c]{@{}l@{}}The term captures the tendency for triadic relationships to form. \\ In other words, for ties to form due to the presence of other ties\\ in the dyad's neighbourhood.\end{tabular}                                                                                                                       \\
-\begin{tabular}[c]{@{}l@{}}$\mathrm{\mathbf{H}}^a_5:$ Borrowers tend to form ties\\ around other high-status borrowers\end{tabular}                      & Endogenous    & Interdependent & \begin{tabular}[c]{@{}l@{}}gwd() \\ \& nodecov()\end{tabular} & \begin{tabular}[c]{@{}l@{}}The term describes degree distribution, indicating whether a borrower \\ is popular to the degree specified. It does not necessarily \\ relate to community.  It is necessary to also use an indicator of \\ prestige to understand whether pipe or prism dynamics \\ may be more prevalent.\end{tabular} \\ \bottomrule
+\textbf{Hypothesis} &
+  \textbf{Term} &
+  \textbf{Explanation} \\ \midrule
+\begin{tabular}[c]{@{}l@{}}$\mathbf{\mathrm{H^a_1}}:$ Borrowers who share one\\ loan purpose are likely to share another\end{tabular} &
+  \textit{cycle(4)} &
+  \begin{tabular}[c]{@{}l@{}}This captures the tendency of borrowers and\\ loan uses to be cyclical, where people cluster\\ around shared uses of loans.\end{tabular} \\
+\begin{tabular}[c]{@{}l@{}}$\mathbf{\mathrm{H^a_2}}:$ Borrowers exhibit preferences\\ for minimal debt distinctiveness,\\ sharing one loan use\end{tabular} &
+  \textit{b1degree(1)} &
+  \begin{tabular}[c]{@{}l@{}}This captures the tendency of borrowers to\\ prefer minimal distinctiveness in their loan uses,\\ preferring to hold only one distinct type to\\ minimise their perceived risk.\end{tabular} \\
+\begin{tabular}[c]{@{}l@{}}$\mathbf{\mathrm{H^a_3}}:$ Younger borrowers have\\ different loan use mixes than older borrowers\end{tabular} &
+  \textit{b1cov("age")} &
+  \begin{tabular}[c]{@{}l@{}}This captures the tendency for younger borrowers\\ to choose different kinds of loans based on how\\ differently they consume credit.\end{tabular} \\
+\begin{tabular}[c]{@{}l@{}}$\mathbf{\mathrm{H^a_4}}:$ Gender differences lead to\\ different loan use mixes\end{tabular} &
+  \textit{b1nodematch("gender")} &
+  \begin{tabular}[c]{@{}l@{}}This captures the idea that there are systemic \\ differences in what kinds of loan uses are preferred\\ the genders due to their perceived riskiness and\\ creditworthiness.\end{tabular} \\ \bottomrule
 \end{tabular}%
 }
 \end{table}
 
-Our research makes notable contributions to existing research on social
-network analyses on P2P networks. The study primarily expands upon the
-existing ideas of social capital by analysing it with respect to
-European P2P lending market and evaluating the interactions between
-structural and non-structural factors such as demographics. Typically,
-research tends to consider them independently and utilises predictive,
-rather than purely statistical models.
-
-Following this, the report will outline the methodology employed. In
-this section, we will discuss the dataset utilised, specific data
-processing steps and other considerations relating to the empirical or
-network environment. Further, we justify the empirical structure of the
-analysis, evaluating the specific methodologies utilised with respect to
-the wider quantitative landscape. Subsequently, the results are outlined
-for each model and hypothesis, alongside their interpretations for our
-research problem. Finally, we conclude the report by summarising the
-core research problem, our empirical set-up alongside considerations for
-future research.
+Following this section, we outline the methodology, explaining our
+dataset and network construction. To facilitate this, descriptive
+statistics are analysed for both the dataset and resulting network.
+Subsequently, we elaborate on our choice of models, discussing how
+network models can be used to conduct the study. Then, modelling results
+are shown and explained to evaluate our hypotheses. Simultaneously, the
+robustness of the study is evaluated through the models' diagnostics.
+Finally, we arrive at our conclusions, summarising the study, its
+results, and implications. Supporting items such as the source code and
+specific data processing steps are shown in section \ref{sec:supp}.
 
 ## Methodology {#sec-methodology}
 
-Within this section, we construct the empirical layout of our research
-problem, including the dataset and data processing steps.
-
 ### Dataset {#sec-dataset}
 
-The study utilises a publicly-retrieved dataset from a leading European
-P2P platform called Bondora. The dataset contains detailed information
-on both defaulted and non-defaulted loans given to users between
-February 2009 and July 2021. Prior to any manipulation, the dataset
-contains a range of numeric, binary, categorical, and time-series
-attributes across 85,087 unique users and 179,235 individual loans. The
-data was originally collected by @noauthor_bondora_nodate in 2021 and
-published on kaggle.com. While the user published the data, they simply
-downloaded it from a now-defunct page on Bondora's website. Public data
-is no longer offered by Bondora, access to newer data is not possible.
+The study utilises publicly-available data from Bondora, a European P2P
+lending platform primarily operating in the Baltics and Spain. The
+dataset contains detailed information on defaulted and non-defaulted
+loans granted to users between February 2009 and July 2021.
+Specifically, contained is a range of numeric, binary, categorical, and
+time-series attributes across 85,087 unique users and 179,235 individual
+loans. Since the company's API is no longer accessible, we utilised a
+publicly available repository compiled by @manu_siddhartha_bondora_2021
+on kaggle.com. The user made a series of API calls to collect the data.
+Following this, the dataset was processed according to Appendix
+\ref{sec:preprocessing}.
 
-\subsection{Data Processing and Network Construction}
+### Data Processing & Network Formation
 
-To make the data usable for our research, it was processed. The full
-steps can be seen in the Appendix. First, only attributes relevant to
-the research were kept for resource efficiency and ease of use.
-Following this, any rows with missing values were entirely removed to
-preserve a complete dataset. This step did not remove a significant
-number of data points. Following this, it is mandatory to reduce the
-size of the overall dataset to ensure that any analyses conducted can
-converge and do so in a timely manner. We did this by randomly removing
-data points until the dataset had 500 remaining observations. While a
-sampling bias is technically possible as a result, the pseudo-random
-data reduction should minimize this effect.
+Initially, the dataset was filtered to reduce the user-base into the
+most active individuals. @zhao_portfolio_2016 shows that using a
+sub-sample of the most active lenders on P2P platforms can produce
+results that model theoretical behaviour more accurately, making
+inferences less noisy. We extend this to borrowers, assuming that the
+most active users are also knowledgeable of the platform. As such, we
+only keep users with more than 5 loans throughout their tenure. Since we
+are studying interactions across two distinct set of nodes, a bipartite
+network was formed with unique users as the first partition and the
+purpose of loans as the second. This allows us to evaluate how borrowers
+interact with loan purposes; a one-mode projection onto users is not
+meaningful for P2P networks as it produces no discernible structure.
+Ultimately, we have 138 and 9 nodes in the first and second partitions,
+respectively.
 
-To construct the network, we need to specify edges between users. While
-there are many ways to do this, we prefer an approach that does not
-introduce unnecessary complexity to models' interpretations and
-maintains a meaningful semantic relationship between borrowers.
-Ultimately, we create edges based on how similar borrowers are across
-several dimensions, computed by cosine similarity. The intuition here
-arises from the fact that certain behaviours or social processes
-\textit{groups} borrowers together. This technique has the advantage of
-discounting vector size for its angle, which reduces the influence of
-outliers in defining how similar individuals are. However, to avoid a
-fully connected network that would make ERGM completely redundant, we
-establish a threshold of `cosine_sim=0.5` to determine whether an edge
-can exist. This enables us to control how similar individuals must be
-for our analysis while maintaining a reasonable density.
+### Descriptive Statistics & Preliminary Analysis
 
-Defining the dimensions that make an individual similar to another is a
-difficult task, however, we opted for attributes describing users' loans
-rather than their demographic or financial characteristics. This is
-\textit{crucial} because we must isolate these variables from any
-outcome being studied. Otherwise, our analysis will be severely biased
-by data leakage and possibly even simultaneous equation bias. Further,
-we chose to standardise the attributes chosen for cosine similarity to
-avoid bias introduced by differing variable scales. Ultimately, the
-edges formed are weighted
-\footnote{We understand that weighted edges make ERGMs significantly more difficult. We can definitely make them binary for further analysis. We believe that making them weighted can make the analysis more meaningful because it would allow us to determine the degree to which a predictor makes someone similar which can be important in determining something like the relational herding or prism/pipe effects. To be discussed.}
-by how similar individuals are to each other. The attributes excluded
-from this similarity measure were later added to the `igraph` network
-object as vertex attributes.
+The table below summarises the numeric variables between the original
+and cleaned datasets. First, borrowers take out relatively small loans
+which becomes lower after processing. The average borrower is assigned a
+relatively high interest rate of 25%, but this figure is 35% in the
+original sample. On average, users are around age 40 but this varies
+highly. The average loan is also relatively long, at 46 months out of a
+maximum 60. Figure @fig-bar-rating shows that most borrowers are
+relatively creditworthy, with few being very highly or badly rated[^1].
+However, borrowers are rated proportionally worse in the initial sample.
+The processed sample resembles the original sample in most metrics,
+however, the study could be biased by the fact that the sub-sample of
+active users are more creditworthy and perceived as less risky, which
+skew loan purpose connections relative to the wider population of P2P
+users.
 
-\subsection{Descriptive Statistics and Network Overview}
+[^1]: Bondora uses their own proprietary credit rating system where the
+    best rating is AA and worst is HR [@bondora_how_2024]. The company
+    bases these ratings on their calculated expected probability of loss
+    on the loan. For example, someone rated AA ranges from a expected
+    loss of 0% to 2%, whereas for HR this is 25% - \>25%.
 
-Having processed the dataset and created a weighted network of similar
-borrowers, we provide an overview of the descriptive statistics relating
-to the network and wider dataset. The figure below shows an overview of
-the network, however, since we rely on sampling for the nodes, the
-network is not equivalent to the underlying population. Observing the
-figure, we see that there are indeed prevalent communities, however,
-there is also significant overlap between them.
+```{r}
+#| label: tab-desc-table
+#| tbl-cap: "Descriptive Statistics of Numeric Variables"
 
-\footnote{We recognise that this reciprocity may not beideal and we are looking for ways to deal with the 100\% reciprocity. Potential point for discussion.}
+knitr::kable(sum_tab)
+```
 
-```{r fig.width=10, fig.height=6}
+Table \ref{tab:net_desc} shows a network density of 0.025, indicating
+that only 2.5% of all possible borrower–loan-type connections exist.
+This low density suggests that borrowers typically engage with few loan
+types, reflecting specialization in borrowing behaviour. The
+centralization value of 0.512 further indicates an uneven distribution
+across loan types, where a few popular categories attract many borrowers
+while most remain peripheral. The mean distance of approximately three
+implies that borrowers are closely connected, typically separated by
+only two loan-use steps.
+
+Centrality distributions reinforce this structure [@fig-network-plots].
+Betweenness is highest among loan-type nodes, though several borrowers
+also bridge distinct loan clusters. Closeness centrality remains low but
+scattered, suggesting localized clustering constrained by the bipartite
+structure. Degree distributions show wide variation among loan types,
+consistent with a hub-like structure dominated by a few popular uses.
+Finally, the homogeneous eccentricity distribution indicates that no
+borrowers are highly isolated, reflecting a compact and moderately
+cohesive network overall.
+
+\begin{table}[!h]
+\centering
+\caption{Bipartite Network Descriptive Statistics}
+\label{tab:net_desc}
+\begin{tabular}{@{}lrrr@{}}
+\toprule
+\textbf{Statistic} & \textbf{Partition 1} & \textbf{Partition 2} & \textbf{Overall Network} \\ \midrule
+Vertex Count   & 138 & 9 & 147   \\
+Edge Count     & -   & - & 264   \\
+Density        & -   & - & 0.025 \\
+Mean Distance  & -   & - & 2.952 \\
+Reciprocity    & -   & - & 1.000 \\
+Centralization & -   & - & 0.512 \\ \bottomrule
+\end{tabular}
+\end{table}
+
+```{r fig.width=14, fig.height=7}
 #| label: fig-network
 #| fig-cap: "Network Visualisation"
 
 replayPlot(net_plot)
 ```
 
-\begin{table}[h!]
-\centering
-\caption{Network Descriptive Statistics}
-\label{tab:desc}
-\begin{tabular}{@{}lr@{}}
-\toprule
-\textbf{Network Measure} & \textbf{Value} \\ \midrule
-Number of Vertices       & 495            \\
-Number of Edges          & 14,017         \\
-Density                  & 0.109          \\
-Reciprocity              & 1.000          \\
-Transitivity             & 0.692          \\
-Mean Distance            & 2.112          \\ \midrule
-Dyad Census: Mutual      & 13,269         \\
-Dyad Census: Null        & 108,996        \\ \bottomrule
-\end{tabular}
-\end{table}
+\begin{footnotesize}
+\linespread{1}
+Note: Each colour represents a different partition of the network. The partitions' nodes are scaled to their relative degrees. Users with many different loan types are larger than those with single loan uses. Similarly, the size of second partition nodes represents how many users belong to each.
+\end{footnotesize}
 
-Observing the figure below, we see low betweenness centrality and degree
-distribution without any logarithmic adjustments. The latter indicates
-that most nodes have very low connectivity. This may have been a result
-of the threshold set for the similarity. The former suggests that few
-nodes act as the bridge between different communities of borrowers and
-that the few highly connected nodes are crucial for the connection of
-the wider P2P network.
+```{r fig.width=14, fig.height=7}
+#| label: fig-network-plots
+#| fig-cap: "Network Centrality Distribution Plots"
 
-[![Degree and Betweeness Distribution of the P2P
-Network](resources/images/draft_1/deg_bet.png){fig-align="left"}](deg_bet_dist)
+replayPlot(cent_plots)
+```
 
-The figure below shows various aspects of the wider dataset. Firstly, we
-observe that there are significantly more males within our subsample
-borrowing than females. Notably, some users did note "Other" for their
-gender. It is unclear whether this relates to the user being non-binary
-or whether it was a data error. Generally, borrowers tend to be young,
-with the median hovering around 22. The interquartile range is
-approximately 10 years, suggesting that most users lean younger. The
-duration of users' loans tends to be extremely left skewed, indicating
-the the majority of users request very long loans. There is quite a
-large range in terms of the loan amounts and their interest rates. The
-median loan amount hovers around 2000 euros, with most of the users not
-borrowing more than 4000. This distribution reaffirms that users prefer
-loans on the lower end. For most users, the interest rate is tightly
-dispersed and below 40%. This could suggest that loan providers are
-quite selective in their clientèle. Notably, some users do exceed 100%
-interest rates, suggesting that the data has users with extraordinary
-circumstances.
+## Research Rationale
 
-[![Descriptive Statistics of the wider
-Dataset](resources/images/draft_1/distributions.png){fig-align="left"}](fig:dists)
+Our overall study analyses borrowers' behaviours, however, the studies
+are differentiated in their scope; the first study observes dyad-level
+relations among borrowers to understand how shared attributes affect
+borrowers' behaviours. This is inherently useful because behavioural
+finance aims to understand how individuals behave in *aggregate*
+[@ayal_behavioral_2018]. Typically, the Quadratic Assignment Procedure
+is selected for dyad-level observations because basic linear regressions
+such as Ordinary Least Squares are fundamentally flawed and biased when
+using non-independent observations [@simpson_qap_2001].
+
+Recognising this, studies such as @zuo_clustering_nodate assume that
+groups of borrowers have dependencies, and accordingly, use clustering
+methods such as K-Means or Fuzzy Clustering to understand behaviour.
+However, these methods are unsuitable when we require a distribution of
+estimates to make inferences from our results. Moreover, studying
+individuals as dyads rather than large clusters provides finer
+granularity in results. Therefore, QAP regression is the most
+appropriate choice for this study: it allows us to control for the
+non-independence among dyads, derive a statistical distribution of
+estimates through matrix permutation, and draw valid inferences about
+the relationship between borrower similarities and loan-use behaviour.
+This makes it both theoretically and methodologically well-suited to our
+research objectives and dataset.
+
+The second study extends the analysis from a dyadic similarities to the
+structural formation of borrower-to-loan-use connections, which can
+identify the behavioural mechanisms that influence borrowers' specific
+loan use mixes. While QAP can account for exogenous influences, it
+cannot analyse higher-order network patterns such as clustering while
+accounting for simultaneous interactions between borrowers and loan
+uses. Using the Exponential Random Graph Model allows us to analyse how
+local behavioural tendencies aggregates to a global network structure.
+
+Recent evidence highlights the need to focus on structural approaches in
+P2P lending. @liu_network_2024 studies borrowers' centrality with the
+Bondora P2P dataset, modelling edges through borrower-to-borrower
+similarity metrics. Ultimately, they find that a borrower's position is
+highly significant for their probability of default, using centrality as
+an exogenous variable in a logistic regression. In contrast, ERGM allows
+us to move away from predictive association and instead account for
+endogenous factors, allowing us to understand the likelihood that
+borrowers' selection of loan uses are random. Consequently, we can
+better understand how behavioural phenomena such as familiarity and debt
+account aversion can translate into *systemic* patterns of credit use.
+
+As we aim to understand how two distinct groups of nodes interact, a
+bipartite approach is highly suitable. Specifically,
+@stivala_improving_2025 shows that in bipartite networks, terms such as
+`cycle(4)` can be effective in capturing clustering as in hypothesis 3,
+whereas it would fail in one-mode projected networks. Furthermore, the
+flexibility of ERGM also allows for modelling exogenous impacts such as
+heterophily in gender-based loan use mixes, as in hypothesis 6, and
+covariate age effects as in hypothesis 5.
 
 \clearpage
 \appendix
 
 ## Supplements
+
+\label{sec:supp}
 
 \definecolor{dkgreen}{rgb}{0,0.6,0}
 \definecolor{gray}{rgb}{0.5,0.5,0.5}
@@ -386,9 +488,172 @@ Dataset](resources/images/draft_1/distributions.png){fig-align="left"}](fig:dist
   commentstyle=\color{dkgreen},   % comment style
   stringstyle=\color{mauve},      % string literal style
 }
+
+### Data Preprocessing Steps
+
+\label{sec:preprocessing}
+
+This section outlines the specific steps taken to process the data into
+the network object that was used in later analysis, outlining the
+rationale, where needed.
+
+-   Following the data import, only the following attributes were kept
+    to make our processing steps more focused
+
+``` r
+keep_cols <- c("LoanId", "UserName","Age", "Gender", 
+               "Country", "Amount", "Interest","LoanDuration",
+              "UseOfLoan", "Rating", "Restructured", "MonthlyPayment",
+              "OccupationArea")
+```
+
+-   We removed rows with any `NA` values for the selected attributes to
+    ensure that we have a complete dataset
+
+-   To ensure that our study is focused around active and possibly
+    knowledgeable users of the platform, we kept only the loans from
+    users with 5+ granted loans
+
+-   When adding labels to each loan use and occupation area, we keep any
+    possible missing values because these do not indicate lower quality
+    data. Instead, they can carry information about lenders distribute
+    loans according to the quality of information presented by borrowers
+    [@yao_relationship_2019]. Additionally, keeping missing labels is
+    important to ensure that the edges are not superficially limited and
+    that nodes can be isolates if they are indeed that way in reality.
+
+-   To create the network object for ERGM models:
+
+    -   We first create an incidence matrix of size $n\times m$,
+        borrower usernames by the loan use, where the values are the
+        number of loans the user obtained for each loan use category.
+        These values are then turned into binary because our modelling
+        does not support the use of weighted edges.
+
+    -   A bipartite network is created from this incidence matrix, where
+        the first partition are unique users, and the second partition
+        is the loan use associated among all loans of the user. Users
+        can share more than more loan use type.
+
+    -   We add age and gender attributes to each node of the first
+        partition
+
+-   To create the relevant networks/matrices for QAP Regressions:
+
+    -   We first re-create the loan use incidence matrix, however, we
+        keep the counts as the linear regression supports this.
+
+        -   We then convert the loan use incidence matrix into an
+            adjacency matrix of shape $n \times n$ through the
+            transformation $\mathbf{X} \cdot\mathbf{X^T}$, which results
+            in a matrix of shared loan uses weighted by the frequency of
+            each user's loan count within each loan use category.
+
+        -   We then set the diagonal values of $\mathbf{X}$ to be zero
+            to ensure that there are no loops within the network.
+
+    -   In accordance with this procedure, we create adjacency matrices
+        for Credit Rating and Occupation Area which will be used as the
+        main predictors in the QAP models.
+
+        -   Credit Rating is a weighted adjacency matrix based on the
+            loan count belonging to each user for each credit rating
+            category
+
+        -   Occupation Area is a binary adjacency matrix based on which
+            occupation each user has reported to have held in the past
+            when applying for each of their loans.
+
+    -   Additionally, we create a set of control variables to improve
+        the validity and performance of the linear regression using Loan
+        Amounts, Age, Gender, Loan Duration, and whether the loans have
+        been restructured.
+
+        -   Loan Amounts is a weighted adjacency matrix based on five
+            bins across the range of possible loan amounts
+
+        -   Age is an adjacency matrix based on differences in users'
+            ages
+
+        -   Gender is a binary adjacency matrix based on users' shared
+            gender.
+
+        -   Loan Duration is an adjacency matrix based on the
+            differences in users' loans average durations
+
+        -   Restructured is a binary adjacency matrix based on whether
+            the users share the fact that they have defaulted on any
+            loans in the past. The users can either have shared both
+            defaults and non-defaults, or both.
+
 \clearpage
 
-### Data Preprocessing
+### Distributions of Variables across Samples
+
+\label{sec:dist}
+
+```{r fig.width=14, fig.height=5}
+#| label: fig-hist-amt
+#| fig-cap: "Distribution of Loan Amount across Samples"
+#| warning: false
+
+replayPlot(readRDS(here::here("resources","objects","preprocessing",
+                          "hist_amt.Rds")))
+```
+
+```{r fig.width=14, fig.height=5}
+#| label: fig-hist-int
+#| fig-cap: "Distribution of Interest Rates across Samples"
+#| warning: false
+
+replayPlot(readRDS(here::here("resources","objects","preprocessing",
+                          "hist_int.Rds")))
+```
+
+```{r fig.width=14, fig.height=5}
+#| label: fig-hist-age
+#| fig-cap: "Distribution of Age across Samples"
+#| warning: false
+
+replayPlot(readRDS(here::here("resources","objects","preprocessing",
+                          "hist_age.Rds")))
+```
+
+```{r fig.width=14, fig.height=5}
+#| label: fig-hist-loandur
+#| fig-cap: "Distribution of Loan Duration across Samples"
+#| warning: false
+
+replayPlot(readRDS(here::here("resources","objects","preprocessing",
+                          "hist_loandur.Rds")))
+```
+
+```{r fig.width=14, fig.height=5}
+#| label: fig-bar-loanuse
+#| fig-cap: "Distribution of Loan Purpose across Samples"
+#| warning: false
+
+replayPlot(readRDS(here::here("resources","objects","preprocessing",
+                          "bar_loanuse.Rds")))
+```
+
+```{r fig.width=14, fig.height=5}
+#| label: fig-bar-rating
+#| fig-cap: "Distribution of Credit Ratings across Samples"
+#| warning: false
+
+replayPlot(readRDS(here::here("resources","objects","preprocessing",
+                          "bar_rating.Rds")))
+```
+
+```{r fig.width=14, fig.height=7}
+#| label: fig-bar-occupation
+#| fig-cap: "Distribution of Occupation Types across Samples"
+#| warning: false
+
+replayPlot(readRDS(here::here("resources","objects","preprocessing",
+                          "bar_occupation.Rds")))
+```
 
 \clearpage
 
@@ -423,12 +688,16 @@ Dataset](resources/images/draft_1/distributions.png){fig-align="left"}](fig:dist
 > During the preparation of this work, we used ChatGPT in order to
 > generate select parts of the R script utilised to process the dataset.
 > Specifically, the tool was used to transform the processed dataset
-> into a format that `igraph` would accept as a network object. No AI
-> tool was utilised to write parts of the report. The following parts of
-> the assignment were affected/generated by AI tool usage: **DATASET;**
-> the data described within this section was processed partly by some
-> code drafted by ChatGPT and edited by the group. After using this
-> tool/service, **Samir Sabitli** evaluated the validity of the tool’s
-> outputs, including the sources that generative AI tools have used, and
-> edited the content as needed. As a consequence, **Samir Sabitli**
-> takes full responsibility for the content of their work.
+> into a format that `igraph` would accept as a network object.
+> Additionally, some R functions written by the group were improved with
+> ChatGPT's suggestions. No AI tool was utilised to independently write
+> parts of the report. The following parts of the assignment were
+> affected/generated by AI tool usage: **INTRODUCTION;** The tool was
+> utilised to evaluate the validity of certain theoretical concepts and
+> refine them. **DATASET;** the data described within this section was
+> processed partly by some code drafted by ChatGPT and edited by the
+> group. After using this tool/service, **Group 7** evaluated the
+> validity of the tool’s outputs, including the sources that generative
+> AI tools have used, and edited the content as needed. As a
+> consequence, **Group 7** takes full responsibility for the content of
+> their work.

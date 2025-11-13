@@ -1,7 +1,9 @@
 # --------------------------------------------------------------------------- #
+# NOTE: NOT THE LATEST QAP ANALYSIS!
+
 # If not already Installed
 install.packages("viridis") # For Colours
-#install.packages("here")   # To locate files from RProj
+install.packages("here")    # To locate files from RProj
 
 # Set colour palette
 cols <- viridis::viridis(30)
@@ -16,6 +18,7 @@ age_diffs_mat <- readRDS(paste0(qap_path,"adj_mat_agediffs.RDS"))
 gender_mat <- readRDS(paste0(qap_path,"adj_mat_gender.RDS"))
 loandur_diffs_mat <- readRDS(paste0(qap_path,"adj_mat_loandurdiffs.RDS"))
 rest_mat <- readRDS(paste0(qap_path,"adj_mat_rest.RDS"))
+occup_mat <- readRDS(paste0(qap_path,"adj_mat_occup.Rds"))
 # --------------------------------------------------------------------------- #
 # Create function to determine significance from t-value statistic
 t_to_stars <- function(t) {
@@ -34,9 +37,9 @@ save_qap_plot <- function(plt_nam) {
                           paste0(plt_nam,".Rds")))
 }
 
-var_names <- c("Intercept", "Rating","Loan Amount","Age","Gender",
-               "Loan Duration","Restructured")
-pred_vars <- list(rating_mat, amt_diffs_mat, age_diffs_mat,
+var_names <- c("Intercept", "Rating", "Occupation", 
+               "Loan Amount", "Age","Gender", "Loan Duration", "Restructured")
+pred_vars <- list(rating_mat, occup_mat, amt_diffs_mat, age_diffs_mat,
                   gender_mat, loandur_diffs_mat, rest_mat)
 # --------------------------------------------------------------------------- #
 # Basic QAP Linear Regression

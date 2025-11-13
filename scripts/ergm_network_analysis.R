@@ -1,9 +1,10 @@
 # --------------------------------------------------------------------------- #
+# NOTE: NOT THE LATEST ERGM ANALYSIS! FOR REFERENCE ONLY
+
 # If not already Installed
 install.packages("viridis")     # For Colours
-#install.packages("ergm.count") # No longer needed
 install.packages("Rglpk")       # Additional solver for ERGMs
-#install.packages("here")       # To locate files from RProj
+install.packages("here")        # To locate files from RProj
 
 # Import the Network and Other Object
 ergm_path <- "resources/objects/ergm/"
@@ -19,7 +20,7 @@ cols <- viridis::viridis(30)
 n_cores <- parallel::detectCores() - 3 # Leave some out for other processes
 print(paste("You have",n_cores,"usable cores"))
 
-# Replicability
+# Repeatability
 seed(42)
 
 # Save plots
@@ -38,8 +39,8 @@ shape <- ifelse(type_indicator,"square","circle")
 network::set.vertex.attribute(bondora_plot, "shape", shape)
 
 # Get Category Count for Vertex Size
-counts <- summary(bondora_plot ~ b2sociality)
-counts_att <- ifelse(type_indicator, counts^0.75, counts^0.6)
+counts <- sna::degree(bondora_plot)
+counts_att <- ifelse(type_indicator, log(counts)*4, counts*1.5)
 network::set.vertex.attribute(bondora_plot, "size", counts_att)
 
 # Colours for the Node Types
@@ -52,7 +53,7 @@ type_legend <- as.factor(type_legend)
 
 # Plot the Network
 plot(snafun::to_igraph(bondora_plot),
-     main = "Bipartite User-LoanUse",
+     #main = "Bipartite User-LoanUse",
      edge.arrow.size = 0.3,
      edge.color = rgb(0,0,0, alpha = 0.35),
      vertex.frame.color = "black",
@@ -60,43 +61,28 @@ plot(snafun::to_igraph(bondora_plot),
      vertex.frame.size = 3,
      edge.curved = FALSE,
      layout=igraph::layout.fruchterman.reingold)
-legend("bottomleft", legend = levels(type_legend), 
-       inset = c(0.1, 0.02),
+legend("bottomleft", 
+       legend = levels(type_legend), 
+       inset = c(0.15, 0.01),
        col = c(cols[30], cols[5]),
-       pch = c(16,15), 
-       title = "Node Partitions", title.font = 2,
-       cex = 0.8,       
-       lwd = 1,
-       bg = rgb(0,0,0, alpha=0.025))
+       pch = c(16, 15), 
+       title = "Node Partitions", 
+       title.font = 2,
+       cex = 1,              # Increase the text size
+       pt.cex = 2,             # Increase the point symbol size
+       box.lwd = 1,            # Thin box border
+       box.col = "black",      # Box color
+       bty = "o"               # Use a box around legend
+)
 save_ergm_plot("network_plot")
 
 # Summary Statistics
 snafun::g_density(bondora_net)
 snafun::g_centralize(bondora_net)
 
-# Degree and Betweenness Distribution
-deg_dist <- snafun::g_degree_distribution(bondora_net)
-bet_dist <- snafun::v_betweenness(bondora_net)
-
-# Other Descriptives
-summary(bondora_net ~ b1degree(1:9))
-summary(bondora_net ~ b2degree(1:10))
-
-par(mfrow = c(1,2))
-
-hist(deg_dist,
-     main = "Unadjusted Degree Distribution",
-     xlab = "Node Degree",
-     col = cols[15],
-     border = cols[10])
-
-hist(bet_dist,
-     main = "Unadjusted Betweenness",
-     xlab = "Betweenness",
-     col = cols[15],
-     border = cols[10])
-
-par(mfrow = c(1,1))
+# Plot Network Summary Statistics
+snafun::plot_centralities(bondora_net)
+save_ergm_plot("network_plots")
 # --------------------------------------------------------------------------- #
 # Make function to calculate probabilities from log odds
 lodds_to_prob <- function(l_odd) {
