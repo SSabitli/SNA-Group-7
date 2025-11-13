@@ -32,6 +32,9 @@ affiliations:
     name: Eindhoven University of Technology
 include-in-header:
   - text: |
+      \usepackage{tgschola}
+      \usepackage[T1]{fontenc}
+      
       \usepackage{longtable}
       \usepackage{graphicx}
       \usepackage{booktabs}
@@ -42,8 +45,6 @@ include-in-header:
       \linespread{1.15}
       \usepackage{sectsty}
       \allsectionsfont{\sffamily}
-      \usepackage{tgschola}
-      \usepackage[T1]{fontenc}
 bibliography: resources/r-references.bib
 csl: resources/apa-6th-edition.csl
 toc: true
@@ -52,6 +53,7 @@ toc-title: "Table of Contents"
 toc-depth: 2
 format:
   pdf: 
+    pdf-engine: xelatex
     fig-pos: H
     lof: true
     lot: true
@@ -60,6 +62,8 @@ format:
     number-sections: true
     df-print: kable
     fig-cap-location: top
+    mainfont: "TeX Gyre Schola"
+    mathfont: "Latin Modern Math"
     sansfont: "Arial"
     geometry:
       - left=1.15in
@@ -523,7 +527,7 @@ keep_cols <- c("LoanId", "UserName","Age", "Gender",
 
 -   To create the network object for ERGM models:
 
-    -   We first create an incidence matrix of size $n\times m$,
+    -   We first create an incidence matrix of size $n \times m$,
         borrower usernames by the loan use, where the values are the
         number of loans the user obtained for each loan use category.
         These values are then turned into binary because our modelling
@@ -543,8 +547,8 @@ keep_cols <- c("LoanId", "UserName","Age", "Gender",
         keep the counts as the linear regression supports this.
 
         -   We then convert the loan use incidence matrix into an
-            adjacency matrix of shape $n \times n$ through the
-            transformation $\mathbf{X} \cdot\mathbf{X^T}$, which results
+            adjacency matrix of shape $n\times n$ through the
+            transformation $\mathbf{X}\cdot\mathbf{X^T}$, which results
             in a matrix of shared loan uses weighted by the frequency of
             each user's loan count within each loan use category.
 
