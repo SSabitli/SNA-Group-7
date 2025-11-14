@@ -124,7 +124,9 @@ their loan portfolios. As the authors indicate, this area of research is
 important in understanding why less professional investors deviate from
 known models of rational investor behaviour. Our study aims to model and
 understand how P2P borrowers' behaviours influence what kinds of loans
-they acquire.
+they acquire. In subsequent discussions, we consider investors as
+rational participants in credit markets, as described by theory, whereas
+borrowers refer to the users of P2P platforms.
 
 Investigating behavioural biases, @ayal_behavioral_2018 find that
 investors' familiarity with specific assets can make them seem less
@@ -136,7 +138,7 @@ demographic attributes such as gender, occupation, and ethnicity. Based
 on these notions, we formulate our first study, asking:
 
 ***Research Question 1:** Do borrowers tend to choose similar loan uses
-based on similarities across their attributes?*
+based on their individual and loan characteristics?*
 
 This question is answered using linear Quadratic Assignment Procedure
 (QAP) regressions, as we can represent similarities across loan uses and
@@ -214,7 +216,7 @@ models whether borrowers are only linked to one loan purpose. Therefore,
 we formulate:
 
 *Hypothesis 4: Borrowers exhibit preferences for minimal debt
-distinctiveness, sharing one loan use*
+distinctiveness, selecting one loan use*
 
 Notwithstanding, credit choices relate to non-structural factors.
 @cooper_consumption_2023 show that younger borrowers face constraints in
@@ -260,7 +262,7 @@ the term, indicating heterophily. Therefore:
 \begin{tabular}[c]{@{}l@{}}$\mathbf{\mathrm{H^a_1}}:$ Borrowers who share one\\ loan purpose are likely to share another\end{tabular} &
   \textit{cycle(4)} &
   \begin{tabular}[c]{@{}l@{}}This captures the tendency of borrowers and\\ loan uses to be cyclical, where people cluster\\ around shared uses of loans.\end{tabular} \\
-\begin{tabular}[c]{@{}l@{}}$\mathbf{\mathrm{H^a_2}}:$ Borrowers exhibit preferences\\ for minimal debt distinctiveness,\\ sharing one loan use\end{tabular} &
+\begin{tabular}[c]{@{}l@{}}$\mathbf{\mathrm{H^a_2}}:$ Borrowers exhibit preferences\\ for minimal debt distinctiveness,\\ selecting one loan use\end{tabular} &
   \textit{b1degree(1)} &
   \begin{tabular}[c]{@{}l@{}}This captures the tendency of borrowers to\\ prefer minimal distinctiveness in their loan uses,\\ preferring to hold only one distinct type to\\ minimise their perceived risk.\end{tabular} \\
 \begin{tabular}[c]{@{}l@{}}$\mathbf{\mathrm{H^a_3}}:$ Younger borrowers have\\ different loan use mixes than older borrowers\end{tabular} &
@@ -284,9 +286,7 @@ Finally, we arrive at our conclusions, summarising the study, its
 results, and implications. Supporting items such as the source code and
 specific data processing steps are shown in section \ref{sec:supp}.
 
-## Methodology {#sec-methodology}
-
-### Dataset {#sec-dataset}
+## Dataset {#sec-methodology}
 
 The study utilises publicly-available data from Bondora, a European P2P
 lending platform primarily operating in the Baltics and Spain. The
@@ -300,38 +300,37 @@ on kaggle.com. The user made a series of API calls to collect the data.
 Following this, the dataset was processed according to Appendix
 \ref{sec:preprocessing}.
 
-### Data Processing & Network Formation
+### Pre-Processing & Network Formation
 
-Initially, the dataset was filtered to reduce the user-base into the
-most active individuals. @zhao_portfolio_2016 shows that using a
-sub-sample of the most active lenders on P2P platforms can produce
-results that model theoretical behaviour more accurately, making
-inferences less noisy. We extend this to borrowers, assuming that the
-most active users are also knowledgeable of the platform. As such, we
-only keep users with more than 5 loans throughout their tenure. Since we
-are studying interactions across two distinct set of nodes, a bipartite
-network was formed with unique users as the first partition and the
-purpose of loans as the second. This allows us to evaluate how borrowers
-interact with loan purposes; a one-mode projection onto users is not
-meaningful for P2P networks as it produces no discernible structure.
-Ultimately, we have 138 and 9 nodes in the first and second partitions,
-respectively.
+Initially, the dataset was filtered loans between 2014 and 2016 since
+the data is incomplete during other periods. Since we are studying
+interactions across two distinct set of nodes, a bipartite network was
+formed with unique users as the first partition and the purpose of loans
+as the second. This allows us to evaluate how borrowers interact with
+loan purposes; a one-mode projection onto users is not meaningful for
+P2P networks as it produces no discernible structure. For model
+efficiency and performance, we randomly sample 500 individuals from the
+larger sample. Ultimately, we have 500 and 9 nodes in the first and
+second partitions, respectively.
 
 ### Descriptive Statistics & Preliminary Analysis
 
-The table below summarises the numeric variables between the original
-and cleaned datasets. First, borrowers take out relatively small loans
-which becomes lower after processing. The average borrower is assigned a
-relatively high interest rate of 25%, but this figure is 35% in the
-original sample. On average, users are around age 40 but this varies
-highly. The average loan is also relatively long, at 46 months out of a
-maximum 60. @fig-bar-rating shows that most borrowers are relatively
-creditworthy, with few being very highly or badly rated[^1]. However,
-borrowers are rated proportionally worse in the initial sample. The
-processed sample resembles the original sample in most metrics, however,
-the study could be biased by the fact that the sub-sample of active
-users are more creditworthy and perceived as less risky, which skew loan
-purpose connections relative to the wider population of P2P users.
+@tbl-desc-table summarises the numeric variables between the reduced and
+larger samples. First, borrowers take out relatively small loans with
+fairly high interest rates, possibly reflecting that the average
+borrower is deemed fairly risky. The average loan is quite long, at
+approximately 46 months out of a maximum 60. @fig-bar-rating shows that
+the largest credit category is HR[^1], which is the lowest possible
+rating. So, the typical borrower is relatively uncreditworthy. Moreover,
+the largest categories of loan use are "Other" and "Home Improvement",
+suggesting these are largely personal. We observe minimal differences
+between the random sampling and the larger sample of individuals, per
+@tbl-desc-table and @fig-bar-rating, however, the study may be biased by
+the fact that the dataset contains only granted loans, rather than all
+bids for loans. This means our inferences about how borrowers behave is
+limited to successful bids. Further, the time period is relatively
+distant, meaning that recent structural changes to the P2P sector cannot
+be accounted for.
 
 [^1]: Bondora uses their own proprietary credit rating system where the
     best rating is AA and worst is HR [@bondora_how_2024]. The company
@@ -340,21 +339,21 @@ purpose connections relative to the wider population of P2P users.
     loss of 0% to 2%, whereas for HR this is 25% - \>25%.
 
 ```{r}
-#| label: tab-desc-table
+#| label: tbl-desc-table
 #| tbl-cap: "Descriptive Statistics of Numeric Variables"
 
 knitr::kable(sum_tab)
 ```
 
-Table \ref{tab:net_desc} shows a network density of 0.025, indicating
-that only 2.5% of all possible borrower–loan-type connections exist.
-This low density suggests that borrowers typically engage with few loan
-types, reflecting specialization in borrowing behaviour. The
-centralization value of 0.512 further indicates an uneven distribution
-across loan types, where a few popular categories attract many borrowers
-while most remain peripheral. The mean distance of approximately three
-implies that borrowers are closely connected, typically separated by
-only two loan-use steps.
+@tbl-net-stats shows a network density of 0.12, indicating that only 12%
+of all possible borrower–loan-type connections exist. This density
+suggests that borrowers typically engage with few loan types, reflecting
+specialization in borrowing behaviour. The centralization value of 0.47
+further indicates an uneven distribution across loan types, where a few
+popular categories attract many borrowers while most remain peripheral.
+The mean distance of approximately three implies that borrowers are
+closely connected, typically separated by only three-to-four loan-use
+steps.
 
 Centrality distributions reinforce this structure [@fig-network-plots].
 Betweenness is highest among loan-type nodes, though several borrowers
@@ -362,25 +361,17 @@ also bridge distinct loan clusters. Closeness centrality remains low but
 scattered, suggesting localized clustering constrained by the bipartite
 structure. Degree distributions show wide variation among loan types,
 consistent with a hub-like structure dominated by a few popular uses.
+However, the second partition has relatively small degree dispersion.
 Finally, the homogeneous eccentricity distribution indicates that no
 borrowers are highly isolated, reflecting a compact and moderately
 cohesive network overall.
 
-\begin{table}[!h]
-\centering
-\caption{Bipartite Network Descriptive Statistics}
-\label{tab:net_desc}
-\begin{tabular}{@{}lrrr@{}}
-\toprule
-\textbf{Statistic} & \textbf{Partition 1} & \textbf{Partition 2} & \textbf{Overall Network} \\ \midrule
-Vertex Count   & 138 & 9 & 147   \\
-Edge Count     & -   & - & 264   \\
-Density        & -   & - & 0.025 \\
-Mean Distance  & -   & - & 2.952 \\
-Reciprocity    & -   & - & 1.000 \\
-Centralization & -   & - & 0.512 \\ \bottomrule
-\end{tabular}
-\end{table}
+```{r}
+#| label: tbl-net-stats
+#| tbl-cap: "Basic Network Descriptive Statistics"
+
+knitr::kable(readRDS(here::here("resources","objects","ergm","net_summary.Rds")))
+```
 
 ```{r fig.width=14, fig.height=7}
 #| label: fig-network
@@ -507,15 +498,33 @@ rationale, where needed.
 keep_cols <- c("LoanId", "UserName","Age", "Gender", 
                "Country", "Amount", "Interest","LoanDuration",
               "UseOfLoan", "Rating", "Restructured", "MonthlyPayment",
-              "OccupationArea")
+              "OccupationArea", "BiddingStartedOn")
 ```
 
 -   We removed rows with any `NA` values for the selected attributes to
     ensure that we have a complete dataset
 
--   To ensure that our study is focused around active and possibly
-    knowledgeable users of the platform, we kept only the loans from
-    users with 5+ granted loans
+-   Observing @fig-user-counts, we see that between 2017-2021, there
+    exists many -1 values for `UseofLoan`. This is because Bondora no
+    longer provided this detail in later datasets. However, between 2014
+    and 2016 this data is available. Because of this, we restrict the
+    time period to have the least noisy data. `BiddingStartedOn` was
+    chosen to record the time, because the auction start date can be a
+    good indication of activity around the loan.
+
+```{r fig.width=14, fig.height=5}
+#| label: fig-user-counts
+#| fig-cap: "Number of Unique Users per Loan Type per Year"
+
+replayPlot(readRDS(here::here("resourceS","objects","preprocessing","user_cnt_plt.Rds")))
+```
+
+-   Then, we sampled 500 individuals out of the filtered dataset to
+    ensure that our models run sufficiently well and converge. By
+    choosing 500 individuals, we preserve importance structures within
+    the network while adding sufficient statistical power.
+
+<!-- -->
 
 -   When adding labels to each loan use and occupation area, we keep any
     possible missing values because these do not indicate lower quality

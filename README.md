@@ -20,33 +20,68 @@ The project contributors are
 
 ### Study 1
 
-The first study aims to understand the effect of borrowers' credit ratings on their stated loan use purpose. To understand this, Linear Quadratic Assignment Problem (QAP) regression models were utilised for their ability to explain networks as a linear function of other related networks. In the following table we describe the construction and use of each variable within the Linear QAP framework.
+The first study aims to uncover how similarities across borrowers' loan uses are explained by their personal and loan characteristics. To understand this, Linear Quadratic Assignment Problem (QAP) regression models were utilised for their ability to explain networks as a linear function of other related networks. In the following table we describe the construction and use of each variable within the Linear QAP framework.
 
 Under `Variable Name`, we list the original attribute used from the raw dataset, however, its transformation into the appropriate data structure is described under the `Construction` column
 
-| Variable Name | Variable Type | Construction | Purpose |
-|---------------|-------------|------------------|------------------------|
-| `UseOfLoan` | Dependent | $n\times n$ adjacency matrix of $n$ borrowers given a common reported `UseofLoan`. Obtained by transforming the $n\times m$ incidence matrix of $m$ loan types by $\mathbf{X} \cdot \mathbf{X}^T$ weighted by unique loan count. |  |
-| `Rating` | Main Predictor |  |  |
-| `Gender` | Control Variable |  |  |
-| `Age` | Control Variable |  |  |
-| `LoanDuration` | Control Variable |  |  |
-| `Amount` | Control Variable |  |  |
+| Variable Name | Variable Type | Construction |
+|--------------|--------------|--------------------------------------------|
+| `UseOfLoan` | Dependent | $n\times n$ adjacency matrix of $n$ borrowers given a common reported `UseofLoan`. Obtained by transforming the $n\times m$ incidence matrix of $m$ loan types by $\mathbf{X} \cdot \mathbf{X}^T$ weighted by unique loan count. |
+| `Rating` | Main Predictor | $n \times n$ adjacency matrix of $n$ borrowers given a commonly reported credit rating across their portfolio of loans. Obtained by transforming the $n \times m$ incidence matrix of $m$ credit ratings by $\mathbf{X\cdot X^T}$, weighted by unique loan count. |
+| `OccupationArea` | Main Predictor | Binary $n\times n$ adjacency matrix of $n$ borrowers given a common occupation area reported across their portfolio of loans. Obtained by transforming the $n\times m$ incidence matrix of occupation areas by $\mathbf{X\cdot X^T}$, replacing weighted values by ones. |
+| `Gender` | Control Variable | Binary $n\times n$ adjacency matrix of $n$ borrowers given a common gender reported across all loans. Obtained by transforming the $n\times m$ incidence matrix of genders by $\mathbf{X\cdot X^T}$, replacing weighted values by ones. |
+| `Age` | Control Variable | $n\times n$ adjacency matrix of differences across borrowers' ages constructed by transforming the $n \times m$ incidence matrix of $m$ ages by $\mathbf{D}=\left[ |x_i-x_j| \right]^n_{i,j=1}$. |
+| `LoanDuration` | Control Variable | $n\times m$ adjacency matrix of differences across borrowers' average loan duration by transforming the $n\times m$ matrix of $m$ average loan durations by $\mathbf{D}=\left[ |x_i-x_j| \right]^n_{i,j=1}$. |
+| `Amount` | Control Variable | $n\times m$ adjacency matrix of differences across average loan amounts per borrower by transforming the $n\times m$ matrix of $m$ average loan amounts by $\mathbf{D}=\left[ |x_i-x_j| \right]^n_{i,j=1}$. |
 
 ## Methodology
 
 ### Data Pre-processing
 
--   s
+-   Attributes were condensed to:
 
-### Exponential Random Graph Model
+```         
+c("LoanId", "UserName","Age", "Gender", 
+               "Country", "Amount", "Interest","LoanDuration",
+              "UseOfLoan", "Rating", "Restructured", "MonthlyPayment",
+              "OccupationArea", "BiddingStartedOn")
+```
 
--   Quantify and test hypotheses related to the structures that exist around pairs of similar borrowers
--   Quantify and test hypotheses related to how borrowers' exogenous attributes affect the formation of similarity between them
+-   Any rows with `NA` values across the above attributes were removed to preserve data completeness
+-   Data was filtered to `BiddingStartedOn` date between 2014 and 2016 because other date ranges did not have complete information on `UseofLoan`
+-   To ensure that the resulting network is computationally manageable, we randomly sampled 500 individuals to be used as the training set
 
 ### Quadratic Analytic Procedure
 
--   Used to test whether certain network attributes are random
+> ***Hypothesis 1:** Borrowers with the same credit ratings choose similar loan uses*
+
+> ***Hypothesis 2:** Borrowers sharing the same occupation area tend to share loan uses*
+
+### Exponential Random Graph Model
+
+> ***Hypothesis 3:** Borrowers who share one loan purpose are likely to share another*
+>
+> -   ERGM term: `cycle(4)`
+>
+> -   Endogenous, dyad-dependent Markovian term
+
+> ***Hypothesis 4:** Borrowers exhibit preferences for minimal debt distinctiveness, selecting one loan use*
+>
+> -   ERGM term: `b1degree(1)`
+>
+> -   Endogenous, dyad-dependent Markovian term
+
+> ***Hypothesis 5:** Younger borrowers have different loan use mixes than older borrowers*
+>
+> -   ERGM term: `b1cov("age")`
+>
+> -   Exogenous, dyad-independent vertex-covariate term
+
+> ***Hypothesis 6:** Gender differences lead to different loan use mixes*
+>
+> -   ERGM term: `b1nodematch("gender")`
+>
+> -   Exogenous, dyad-independent homophily term
 
 ## Dataset
 

@@ -21,7 +21,7 @@ n_cores <- parallel::detectCores() - 3 # Leave some out for other processes
 print(paste("You have",n_cores,"usable cores"))
 
 # Repeatability
-seed(42)
+set.seed(42)
 
 # Save plots
 save_ergm_plot <- function(plt_nam) {
@@ -40,7 +40,7 @@ network::set.vertex.attribute(bondora_plot, "shape", shape)
 
 # Get Category Count for Vertex Size
 counts <- sna::degree(bondora_plot)
-counts_att <- ifelse(type_indicator, log(counts)*4, counts*1.5)
+counts_att <- ifelse(type_indicator, log(counts)*4, counts*2.5)
 network::set.vertex.attribute(bondora_plot, "size", counts_att)
 
 # Colours for the Node Types
@@ -76,9 +76,22 @@ legend("bottomleft",
 )
 save_ergm_plot("network_plot")
 
-# Summary Statistics
-snafun::g_density(bondora_net)
-snafun::g_centralize(bondora_net)
+# Summary Statistics and Save Them
+density <- snafun::g_density(bondora_net)[1]
+centralization <- snafun::g_centralize(bondora_net)[1]
+vertices <- snafun::count_vertices(bondora_net)[1]
+edges <- snafun::count_edges(bondora_net)[1]
+dist <- snafun::g_mean_distance(bondora_net)[1]
+
+net_names <- c("Vertex Count","Edge Count","Density","Centralization",
+               "Mean Distance")
+net_stats <- c(vertices, edges, density, centralization, dist)
+net_stats <- sapply(net_stats, function(x) round(as.numeric(x),2))
+
+net_summary <- data.frame(Statistic = net_names,
+                          "Measure" = net_stats)
+knitr::kable(net_summary)
+saveRDS(net_summary, here::here("resources","objects","ergm","net_summary.Rds"))
 
 # Plot Network Summary Statistics
 snafun::plot_centralities(bondora_net)

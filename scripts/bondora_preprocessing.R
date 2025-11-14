@@ -1,6 +1,7 @@
 # --------------------------------------------------------------------------- #
 install.packages("viridis") # For Colours
 install.packages("here") # To locate files from RProj
+set.seed(42)
 # --------------------------------------------------------------------------- #
 # Import the Bondora P2P Dataset
 obj_paths = "resources/objects/"
@@ -11,31 +12,74 @@ raw_cols <- colnames(bondora_raw)
 keep_cols <- c("LoanId", "UserName","Age", "Gender", 
                "Country", "Amount", "Interest","LoanDuration",
               "UseOfLoan", "Rating", "Restructured", "MonthlyPayment",
-              "OccupationArea")
+              "OccupationArea", "BiddingStartedOn")
 
 bondora <- bondora_raw[keep_cols]
+
+# Change date format to the correct one
+bondora$BiddingStartedOn <- as.POSIXct(bondora$BiddingStartedOn, 
+                                       format = "%Y-%m-%d %H:%M:%S")
+bondora$year <- as.numeric(format(bondora$BiddingStartedOn, "%Y"))
 
 # Remove Rows with any NAs -> Complete Dataset Preferred
 print(paste("NA Count |",sum(is.na(bondora)),"rows"))
 bondora <- na.omit(bondora)
 print(paste("NA Count |",sum(is.na(bondora)),"rows"))
 
-# Remove users with only -1 Stated UseofLoan
-# NOTE: STEP REMOVED TO PRESERVE SOME GENUINE SPARSITY
-#bondora_clean <- bondora[bondora$UseOfLoan != -1, ]
+# Observe the distribution of Loan Use over Time
+unique_counts <- tapply(bondora$UserName,
+                        list(bondora$year, bondora$UseOfLoan),
+                        function(x) length(unique(x)))
+unique_counts[is.na(unique_counts)] <- 0
 
-# Remove Users with only One Loan
-user_counts <- table(bondora_clean$UserName)
-multi_users <- names(user_counts[user_counts > 5])
-bondora_clean <- bondora_clean[bondora_clean$UserName %in% multi_users, ]
+barplot(t(unique_counts),           # transpose so bars = loan types
+        beside = TRUE,              # side-by-side bars
+        col = viridis::viridis(ncol(unique_counts)),
+        legend.text = colnames(unique_counts),
+        args.legend = list(x = "topright", cex = 0.8),
+        xlab = "Year",
+        ylab = "Number of Unique Users")
+user_counts_plt <- recordPlot()
+saveRDS(user_counts_plt,
+        here::here("resources","objects","preprocessing","user_cnt_plt.Rds"))
+
+# Restrict to Recent Time Period
+bondora_test <- bondora[bondora$year > 2013 & bondora$year < 2017, ]
+
+# See the distribution of LoanUses
+see_counts <- function(var1, var2) {
+  counts <- table(var1, var2)
+  total_counts <- colSums(counts)
+  prop <- total_counts / sum(total_counts)
+  
+  return(list(total_counts, round(prop,2)))
+}
+before_counts <- see_counts(bondora_test$UserName, bondora_test$UseOfLoan)
+barplot(before_counts[[1]])
+
+# Number of unique users in the subsample
+unique_users <- unique(bondora_test$UserName)
+sample_users <- sample(unique_users, 500)
+bondora_clean <- bondora_test[bondora_test$UserName %in% sample_users, ]
+
+after_counts <- see_counts(bondora_clean$UserName, bondora_clean$UseOfLoan)
+barplot(after_counts[[1]])
+
+# DEPRECATED METHOD
+# Filter People with 2+ Loans
+#user_counts <- table(bondora_test$UserName)
+#multi_users <- names(user_counts[user_counts > 2])
+#bondora_clean <- bondora_test[bondora_test$UserName %in% multi_users, ]
+
+# DEPRECATED METHOD
+# Remove Users with only One Loan 
+#user_counts <- table(bondora_clean$UserName)
+#multi_users <- names(user_counts[user_counts > 5])
+#bondora_clean <- bondora_clean[bondora_clean$UserName %in% multi_users, ]
 #bondora_test <- bondora_raw[bondora_raw$UserName %in% multi_users, ]
 
 # See if Ratings are Properly Encoded
 unique(bondora_clean$Rating)
-
-# See distribution of UserName Counts
-hist(table(bondora_clean$UserName))
-barplot(table(bondora_clean$UseOfLoan))
 
 # Extract UseofLoan Types and Turn into Factor
 bondora_clean$UseOfLoan_factor <- as.factor(bondora_clean$UseOfLoan)
@@ -61,8 +105,8 @@ bondora_clean$UseOfLoan_factor <- loan_use_labels[
   as.character(bondora_clean$UseOfLoan)]
 
 # Change Labels for Uncleaned Dataset
-bondora$UseOfLoan_factor <- loan_use_labels[
-  as.character(bondora$UseOfLoan)]
+bondora_test$UseOfLoan_factor <- loan_use_labels[
+  as.character(bondora_test$UseOfLoan)]
 
 # Add labels to the OccupationArea Variable
 levels(as.factor(bondora_clean$OccupationArea)) # view codes
@@ -96,9 +140,9 @@ bondora_clean$occupation_code <- bondora_clean$OccupationArea
 bondora_clean$occupation_label <- occupation_labels[
   as.character(bondora_clean$OccupationArea)]
 
-bondora$occupation_code <- bondora$OccupationArea
-bondora$occupation_label <- occupation_labels[
-  as.character(bondora$OccupationArea)]
+bondora_test$occupation_code <- bondora_test$OccupationArea
+bondora_test$occupation_label <- occupation_labels[
+  as.character(bondora_test$OccupationArea)]
 # --------------------------------------------------------------------------- #
 # Observe Descriptive Statistics 
 
@@ -117,10 +161,10 @@ plot_desc_hists <- function(df1, df2, col_name, type) {
   par(mfrow=c(1,3))
   
   hist(df1[[col_name]], xlab=type, col=cols[15], main="", breaks=10)
-  mtext("Full Sample", side=3, adj=0, line=0.25, cex=1, font=2)
+  mtext("Initial Sample", side=3, adj=0, line=0.25, cex=1, font=2)
 
   hist(df2[[col_name]], xlab=type, col=cols[15], main="", breaks=10)
-  mtext("Processed Sample", side=3, adj=0, line=0.25, cex=1, font=2) 
+  mtext("Reduced Sample", side=3, adj=0, line=0.25, cex=1, font=2) 
 
   qqplot(df1[[col_name]], df2[[col_name]], main="", cex=1,
          xlab="Full Sample", ylab="Subsample", line=0.25)
@@ -140,11 +184,11 @@ plot_desc_bar <- function(df1, df2, col_name, type) {
   
   barplot(sort(table(df1[[col_name]]), decreasing = F),
           xlab=type, col=cols[15], horiz=TRUE, las=1)
-  mtext("Full Sample", side=3, adj=0, line=0.25, cex=1, font=2)
+  mtext("Initial Sample", side=3, adj=0, line=0.25, cex=1, font=2)
   
   barplot(sort(table(df2[[col_name]]), decreasing = F),
           xlab=type, col=cols[15], horiz=TRUE, las=1)
-  mtext("Processed Sample", side=3, adj=0, line=0.25, cex=1, font=2)
+  mtext("Reduced Sample", side=3, adj=0, line=0.25, cex=1, font=2)
   
   mtext(type, outer = TRUE, line = -2, side=3, cex = 1.3, font = 2)
   
@@ -152,28 +196,28 @@ plot_desc_bar <- function(df1, df2, col_name, type) {
   par(mfrow=c(1,1), mar=c(5,4,4,2)+0.1)
 }
 
-plot_desc_hists(bondora, bondora_clean, "Amount", "Amount")
+plot_desc_hists(bondora_test, bondora_clean, "Amount","Amount")
 save_plot("hist_amt")
 
-plot_desc_hists(bondora, bondora_clean, "Interest", "Interest")
+plot_desc_hists(bondora_test, bondora_clean, "Interest","Interest")
 save_plot("hist_int")
 
-plot_desc_hists(bondora, bondora_clean, "LoanDuration", "Loan Duration")
+plot_desc_hists(bondora_test, bondora_clean, "LoanDuration","Loan Duration")
 save_plot("hist_loandur")
 
-plot_desc_hists(bondora, bondora_clean, "MonthlyPayment", "Monthly Payment")
+plot_desc_hists(bondora_test, bondora_clean, "MonthlyPayment","Monthly Payment")
 save_plot("hist_monpmt")
 
-plot_desc_hists(bondora, bondora_clean, "Age", "Age")
+plot_desc_hists(bondora_test, bondora_clean, "Age","Age")
 save_plot("hist_age")
 
-plot_desc_bar(bondora, bondora_clean,"UseOfLoan_factor","Loan Purpose")
+plot_desc_bar(bondora_test, bondora_clean,"UseOfLoan_factor","Loan Purpose")
 save_plot("bar_loanuse")
 
-plot_desc_bar(bondora, bondora_clean,"Rating","Credit Rating")
+plot_desc_bar(bondora_test, bondora_clean,"Rating","Credit Rating")
 save_plot("bar_rating")
 
-plot_desc_bar(bondora, bondora_clean,"occupation_label","Occupation")
+plot_desc_bar(bondora_test, bondora_clean,"occupation_label","Occupation")
 save_plot("bar_occupation")
 
 # Get Tabular Summary Statistics
@@ -190,16 +234,16 @@ tab_comps <- function(df1, df2, cols) {
   df2_stats <- get_stats(df2)
   
   out <- rbind(
-    cbind(DataFrame = "Original Dataset", 
+    cbind(DataFrame = "Initial Sample", 
           Variable = rownames(df1_stats), df1_stats),
-    cbind(DataFrame = "Cleaned Dataset", 
+    cbind(DataFrame = "Reduced Sample", 
           Variable = rownames(df2_stats), df2_stats)
   )
   rownames(out) <- NULL
   as.data.frame(out)
 }
 
-tab_results <- tab_comps(bondora, bondora_slim,
+tab_results <- tab_comps(bondora_test, bondora_clean,
                          c("Amount","Interest","Age","LoanDuration"))
 
 knitr::kable(tab_results)
@@ -225,9 +269,6 @@ bondora_net <- network::network(
 len <- dim(bondora_matrix)[1]
 len_b2 <- dim(bondora_matrix)[2]
 b_indicator <- c(rep(1,len),rep(2,len_b2))
-#network::set.vertex.attribute(
-#  bondora_net, "bipartite", value = rep(len,len), v=1:len
-#)
 
 # Extract Partition 2 Labels
 loan_use <- levels(bondora_clean$UseOfLoan_factor)
