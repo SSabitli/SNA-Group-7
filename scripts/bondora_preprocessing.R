@@ -80,6 +80,7 @@ barplot(after_counts[[1]])
 
 # See if Ratings are Properly Encoded
 unique(bondora_clean$Rating)
+bondora_clean <- bondora_clean[bondora_clean$Rating != "", ]
 
 # Extract UseofLoan Types and Turn into Factor
 bondora_clean$UseOfLoan_factor <- as.factor(bondora_clean$UseOfLoan)

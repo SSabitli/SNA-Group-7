@@ -134,17 +134,21 @@ risky, making recognisable assets more attractive. However, such assets
 lead to undiversified portfolios. Evidence with P2P platforms supports
 the familiarity bias in lenders, as @galak_micro-finance_2010
 demonstrate that lenders choose borrowers who are similar across
-demographic attributes such as gender, occupation, and ethnicity. Based
-on these notions, we formulate our first study, asking:
+demographic attributes such as gender, occupation, and ethnicity.
+Moreover, @amar_winning_2011 explains that borrowers show an aversion to
+holding a *large number of debts,* preferring to first reduce debt
+count, even if they had other debts with higher interest rates. This
+irrational behaviour demonstrates that individual borrowers face
+behavioural biases on the *type* and *number* of debts they select.
+Based on these notions, we formulate our first study, asking:
 
-***Research Question 1:** Do borrowers tend to choose similar loan uses
-based on their individual and loan characteristics?*
+***Research Question 1:** Do borrowers vary in their loan use type and
+frequency based on their individual and loan characteristics?*
 
 This question is answered using linear Quadratic Assignment Procedure
 (QAP) regressions, as we can represent similarities across loan uses and
-attributes as matrices that can be used as inputs in the model. Further,
-we integrate loan use frequencies to understand how the prevalence of
-specific loan types affects borrowers' portfolio compositions.
+attributes as matrices, weighted by loan use frequency, as inputs in the
+model.
 
 Using data from LendingClub, @serrano-cinca_determinants_2015 study
 funding success, finding that the reported loan use is a significant
@@ -200,20 +204,15 @@ cycle through the ERGM term `cycle(4)`, formulating:
 *Hypothesis 3: Borrowers who share one loan purpose are likely to share
 another*
 
-Further, according to @amar_winning_2011, the notion of Debt Account
-Aversion can also explain how investors choose debt. Specifically,
-investors tend to avoid holding multiple debt accounts because per
-Prospect Theory, borrowers mentally segregate wins and losses to
-minimise perceived distress from debt [@kahneman_prospect_1979].
-@ayal_perceived_2009 expands with the Theory of Perceived
-Diversification, explaining that borrowers' distress increases with the
-perceived *distinctiveness* of each debt type, suggesting that in the
-P2P context, debt mentally differentiated by purpose would also be seen
-as distressing [@ayal_perceived_2009]. Therefore, we assert that
-borrowers try to minimise loan distinctiveness by requesting loans of a
-single type. This can be captured by the `b1degree(1)` term, which
-models whether borrowers are only linked to one loan purpose. Therefore,
-we formulate:
+Further, @ayal_perceived_2009, expands on the theory of Debt Account
+Aversion with the Theory of Perceived Diversification, explaining that
+borrowers' distress increases with not just by the number of debts, but
+also the perceived *distinctiveness* of each debt type, suggesting that
+in the P2P context, debt mentally differentiated by purpose would also
+be seen as distressing. Therefore, we assert that borrowers try to
+minimise loan distinctiveness by requesting loans of a single type. This
+can be captured by the `b1degree(1)` term, which models whether
+borrowers are only linked to one loan purpose. Therefore, we formulate:
 
 *Hypothesis 4: Borrowers exhibit preferences for minimal debt
 distinctiveness, selecting one loan use*
@@ -249,31 +248,14 @@ the term, indicating heterophily. Therefore:
 
 *Hypothesis 6: Gender differences lead to different loan use mixes*
 
-\begin{table}[!h]
-\centering
-\caption{Hypotheses related to Study 2}
-\label{tab:ergm_hyp}
-\resizebox{\textwidth}{!}{%
-\begin{tabular}{@{}lll@{}}
-\toprule
-\textbf{Hypothesis} &
-  \textbf{Term} &
-  \textbf{Explanation} \\ \midrule
-\begin{tabular}[c]{@{}l@{}}$\mathbf{\mathrm{H^a_1}}:$ Borrowers who share one\\ loan purpose are likely to share another\end{tabular} &
-  \textit{cycle(4)} &
-  \begin{tabular}[c]{@{}l@{}}This captures the tendency of borrowers and\\ loan uses to be cyclical, where people cluster\\ around shared uses of loans.\end{tabular} \\
-\begin{tabular}[c]{@{}l@{}}$\mathbf{\mathrm{H^a_2}}:$ Borrowers exhibit preferences\\ for minimal debt distinctiveness,\\ selecting one loan use\end{tabular} &
-  \textit{b1degree(1)} &
-  \begin{tabular}[c]{@{}l@{}}This captures the tendency of borrowers to\\ prefer minimal distinctiveness in their loan uses,\\ preferring to hold only one distinct type to\\ minimise their perceived risk.\end{tabular} \\
-\begin{tabular}[c]{@{}l@{}}$\mathbf{\mathrm{H^a_3}}:$ Younger borrowers have\\ different loan use mixes than older borrowers\end{tabular} &
-  \textit{b1cov("age")} &
-  \begin{tabular}[c]{@{}l@{}}This captures the tendency for younger borrowers\\ to choose different kinds of loans based on how\\ differently they consume credit.\end{tabular} \\
-\begin{tabular}[c]{@{}l@{}}$\mathbf{\mathrm{H^a_4}}:$ Gender differences lead to\\ different loan use mixes\end{tabular} &
-  \textit{b1nodematch("gender")} &
-  \begin{tabular}[c]{@{}l@{}}This captures the idea that there are systemic \\ differences in what kinds of loan uses are preferred\\ the genders due to their perceived riskiness and\\ creditworthiness.\end{tabular} \\ \bottomrule
-\end{tabular}%
-}
-\end{table}
+| Hypothesis | Term | Explanation |
+|---------------------|-----------------|----------------------------------|
+| $H_3^a:$  Borrowers who share one loan purpose are likely to share another | *cycle(4)* | This captures the tendency of borrowers and loan uses to be cyclical, where people cluster around shared uses of loans. |
+| $H_4^a:$ Borrowers exhibit preferences for minimal debt distinctiveness, selecting one loan use | *b1degree(1)* | This captures the tendency of borrowers to prefer minimal distinctiveness in their loan uses, preferring to hold only one distinct type to minimise their perceived risk. |
+| $H_5^a:$ Younger borrowers have different loan use mixes than older borrowers | *b1cov("age")* | This captures the tendency for younger borrowers to choose different kinds of loans based on how differently they consume credit. |
+| $H_6^a:$ Gender differences lead to different loan use mixes | *b1nodematch("gender")* | This captures the idea that there are systemic differences in what kinds of loan uses are preferred the genders due to their perceived riskiness and creditworthiness. |
+
+: Hypotheses related to Study 2
 
 Following this section, we outline the methodology, explaining our
 dataset and network construction. To facilitate this, descriptive

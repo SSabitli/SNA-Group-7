@@ -7,6 +7,9 @@ install.packages("here")    # To locate files from RProj
 
 # Set colour palette
 cols <- viridis::viridis(30)
+
+# Ensure repeatability
+set.seed(42)
 # --------------------------------------------------------------------------- #
 # Load Relevant Files
 qap_path="resources/objects/qap/"
@@ -37,51 +40,56 @@ save_qap_plot <- function(plt_nam) {
                           paste0(plt_nam,".Rds")))
 }
 
-var_names <- c("Intercept", "Rating", "Occupation", 
-               "Loan Amount", "Age","Gender", "Loan Duration", "Restructured")
-pred_vars <- list(rating_mat, occup_mat, amt_diffs_mat, age_diffs_mat,
+# Make function to run QAPs automatically
+run_QAP <- function(y_mat, xlist, varnames, model_name) {
+  
+  # Run QAP Linear Regression
+  model <- sna::netlm(y = y_mat, x = xlist, nullhyp = "qapspp", reps = 1000)
+  model$names <- varnames
+  summary(model)
+  
+  # Obtain results from Model and Name them
+  results <- model$coefficients
+  names(results) <- varnames
+  
+  # Add significance stars to model results
+  results_sig <- paste(round(results,3), t_to_stars(model$tstat))
+  
+  # Save Model
+  saveRDS(model, here::here("resources","objects","qap",
+                            paste0(model_name,".Rds")))
+  
+  # Prepare function output
+  list_names <- c("model","results","results_sig")
+  items <- list(model, results, results_sig)
+  names(items) <- list_names
+  
+  return(items)
+}
+
+var_names <- c("Intercept", "Rating", "Occupation","Loan Amount", "Age",
+               "Gender", "Loan Duration", "Restructured")
+main_pred_names <- c("Intercept", "Rating", "Occupation")
+main_pred_vars <- list(rating_mat, occup_mat)
+all_pred_vars <- list(rating_mat, occup_mat, amt_diffs_mat, age_diffs_mat,
                   gender_mat, loandur_diffs_mat, rest_mat)
 # --------------------------------------------------------------------------- #
-# Basic QAP Linear Regression
-qap_m1 <- sna::netlm(y = loan_use_mat,
-                     x = list(rating_mat, amt_diffs_mat, age_diffs_mat,
-                              gender_mat, loandur_diffs_mat, rest_mat),
-                     nullhyp = "qapspp", reps = 2500)
-qap_m1$names <- var_names
-summary(qap_m1)
+# Basic QAP Linear Regression 1 - Unstandardised + No Controls
 
-results_m1 <- qap_m1$coefficients
-names(results_m1) <- var_names
-results_sig_m1 <- paste(round(results_m1,3), t_to_stars(qap_m1$tstat))
+qap_m1 <- run_QAP(loan_use_mat, main_pred_vars, main_pred_names, "qap_m1")
+summary(qap_m1$model)
 
-# Plot Residuals
-hist(qap_m1$residuals, main="QAP Residuals", col = cols[15])
-
-# Save Model
-saveRDS(qap_m1, file = paste0(qap_path,"qap_m1.RDS"))
 # --------------------------------------------------------------------------- #
-# Standardised QAP Linear Regression
+# Basic QAP Linear Regression 1 - Standardised + No Controls
 scaled_dep <- scale(loan_use_mat)
-scaled_pred <- lapply(pred_vars, scale)
+scaled_pred <- lapply(main_pred_vars, scale)
 
-qap_m2 <- sna::netlm(y = scaled_dep,
-                     x = scaled_pred,
-                     nullhyp = "qapspp", reps = 2500)
-qap_m2$names <- var_names
-summary(qap_m2)
+qap_m2 <- run_QAP(scaled_dep, scaled_pred, main_pred_names, "qap_m2")
+summary(qap_m2$model)
 
-# Plot the result
-results_m2 <- qap_m2$coefficients
-names(results_m2) <- var_names
-results_sig_m2 <- paste(round(results_m2,3), t_to_stars(qap_m2$tstat))
-
-# Plot Residuals
-hist(qap_m2$residuals, main="QAP Residuals", col = cols[15])
-
-# Save Model
-saveRDS(qap_m2, file = paste0(qap_path,"qap_m2.RDS"))
 # --------------------------------------------------------------------------- #
-# Plot the result
+# Plot the result for Model 1 Unstandardised vs Standardised
+
 par(mfrow=c(1,2))
 
 qap_plot_m1 <- barplot(results_m1, col = cols[15],  border = cols[10], 
@@ -104,3 +112,17 @@ text(x = qap_plot_m2,
 save_qap_plot("unstd_std_plot")
 
 par(mfrow=c(1,1))
+# --------------------------------------------------------------------------- #
+# Basic QAP Linear Regression 2 - Unstandardised + Controls
+
+qap_m3 <- run_QAP(loan_use_mat, all_pred_vars, var_names, "qap_m3")
+summary(qap_m3$model)
+
+# --------------------------------------------------------------------------- #
+# Basic QAP Linear Regression 2 - Standardised + Controls
+scaled_pred_2 <- lapply(all_pred_vars, scale)
+
+qap_m4 <- run_QAP(scaled_dep, scaled_pred_2, var_names, "qap_m4")
+summary(qap_m4$model)
+
+# --------------------------------------------------------------------------- #
