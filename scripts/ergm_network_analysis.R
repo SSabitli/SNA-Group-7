@@ -136,6 +136,7 @@ auto_ergm <- function(model, mcmc, name) {
   
   return(result)
 }
+
 # --------------------------------------------------------------------------- #
 # Find max degree
 (max_deg <- max(summary(bondora_net ~ b2factor("b2_loantype"))))
@@ -179,9 +180,7 @@ snafun::stat_plot_gof(model_1_panel$gof)
 texreg::screenreg(list(base_ergm, model_1))
 # --------------------------------------------------------------------------- #
 # Iteration 2 + MCMC Diagnostics + GOF
-model_2_params <- bondora_net ~ edges + 
-  # See if individuals tend to pick one loan type
-  b1degree(1) + 
+model_2_params <- bondora_net ~ edges + b1degree(1) + 
   # See if there is clustering around pairs of loan types
   cycle(4)
   
@@ -212,13 +211,10 @@ models <- list(base_ergm, model_1, model_2)
 texreg::screenreg(models)
 # --------------------------------------------------------------------------- #
 # Iteration 3 + MCMC Diagnostics + GOF
-model_3_params <- bondora_net ~ edges + 
-  # See if individuals tend to pick one loan type
-  b1degree(1) + 
-  # See if there is clustering around pairs of loan types
-  cycle(4) +
+model_3_params <- bondora_net ~ edges + b1degree(1) + cycle(4) +
+  
   # See if there is heterophily in gender (given negative effect)
-  b1nodematch("b1_gender", diff=FALSE)
+  b1factor("b1_gender")
 
 model_3 <- ergm::ergm(
   model_3_params,
@@ -226,13 +222,15 @@ model_3 <- ergm::ergm(
   
   control = ergm::control.ergm(
     # Greater burn-in for cleaner result
+    # Cycles mixed with the rest of the terms requires more burnin samples
     MCMC.burnin = 20000,
     # Greater sample size for greater stability
     MCMC.samplesize = 100000,
     seed = 42,
+    # Reducing interval to reduce complexity between intervals
     MCMC.interval = 1000,
     # Only needed for convergence pvals to improve
-    MCMLE.maxit = 45,
+    MCMLE.maxit = 25,
     # Smaller steps for stability
     MCMLE.steplength = 0.25,
     parallel = n_cores,
@@ -248,21 +246,14 @@ texreg::screenreg(models)
 # --------------------------------------------------------------------------- #
 # Iteration 4 + MCMC Diagnostics + GOF
 model_4_params <- bondora_net ~ edges + b1degree(1) + cycle(4) +
-  
-  # See if there is heterophily in gender (given negative effect)
-  b1nodematch("b1_gender", diff=TRUE) +
+  b1factor("b1_gender") +
   
   # See if higher ages make a difference
   b1cov("b1_age")
 
 model_4 <- ergm::ergm(
   model_4_params,
-  
-  # Max b2 degree is 72, so this constraint is reasonable
-  # and helps convergence significantly.
-  # Technically in the Bondora population this can be 
-  # far higher but we are studying a subsample.
-  constraints = ~ bd(minout = 0, maxout = 80),
+  #constraints = ~ bd(minout = 0, maxout = 80),
   
   control = ergm::control.ergm(
     # Greater burn-in for cleaner result
@@ -285,4 +276,11 @@ model_4_panel$gof
 snafun::stat_plot_gof(model_4_panel$gof) 
 models <- list(base_ergm, model_1, model_2, model_3, model_4)
 texreg::screenreg(models)
+# --------------------------------------------------------------------------- #
+# Collect Models in Table
+
+headers <- c("Base ERGM","b1degree(1)","cycle(4)","Age","Gender")
+ergm_table <- texreg::screenreg(models, custom.model.names = headers,
+                                digits = 3)
+ergm_table
 # --------------------------------------------------------------------------- #

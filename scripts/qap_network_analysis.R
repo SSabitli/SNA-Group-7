@@ -67,6 +67,36 @@ run_QAP <- function(y_mat, xlist, varnames, model_name) {
   return(items)
 }
 
+# Make function to Plot QAP Coefficients
+plot_QAP_coefs <- function(m1_results, m1_sig, m1_title, m2_results, m2_sig,
+                           m2_title, file_name) {
+  # Set viewing window to two plots
+  par(mfrow=c(1,2))
+  
+  m1_plot <- barplot(m1_results, col = cols[15],  border = cols[10], 
+                     ylim = c(min(m1_results) - 0.1*diff(range(m1_results)), 
+                              max(m1_results) + 0.1*diff(range(m1_results))),
+                     main=m1_title)
+  text(x = m1_plot, 
+       y = m1_results + sign(m1_results)*(0.025*diff(range(m1_results))), 
+       labels = m1_sig, font = 2)
+  
+  
+  m2_plot <- barplot(m2_results, col = cols[15],  border = cols[10], 
+                     ylim = c(min(m2_results) - 0.1*diff(range(m2_results)), 
+                              max(m2_results) + 0.1*diff(range(m2_results))),
+                     main=m2_title)
+  text(x = m2_plot, 
+       y = m2_results + sign(m2_results)*(0.025*diff(range(m2_results))), 
+       labels = m2_sig, font = 2)
+  
+  save_qap_plot(file_name)
+  
+  # Reset plot view
+  par(mfrow=c(1,1))
+
+}
+
 var_names <- c("Intercept", "Rating", "Occupation","Loan Amount", "Age",
                "Gender", "Loan Duration", "Restructured")
 main_pred_names <- c("Intercept", "Rating", "Occupation")
@@ -114,28 +144,12 @@ plot(qap_m2_fitted, qap_m2_resid, xlab="Fitted Values", ylab="Residuals",
 # --------------------------------------------------------------------------- #
 # Plot the result for Model 1 Unstandardised vs Standardised
 
-par(mfrow=c(1,2))
+plot_QAP_coefs(qap_m1$results, qap_m1$results_sig, 
+               "QAP LR - Unstd. + No Controls", 
+               qap_m2$results, qap_m2$results_sig,
+               "QAP LR - Std. + No Controls", 
+               "qap_nocontrols_plots")
 
-qap_plot_m1 <- barplot(results_m1, col = cols[15],  border = cols[10], 
-                       ylim = c(min(results_m1) + min(results_m1)*0.15, 
-                                max(results_m1) + max(results_m1)*0.15),
-                       main="QAP Model Results (Unstandardised)")
-text(x = qap_plot_m1, 
-     y = results_m1 + sign(results_m1)*(0.075*diff(range(results_m1))), 
-     labels = results_sig_m1, font = 2)
-
-
-qap_plot_m2 <- barplot(results_m2, col = cols[15],  border = cols[10], 
-                       ylim = c(min(results_m2) + min(results_m2)*0.15, 
-                                max(results_m2) + max(results_m2)*0.15),
-                       main="QAP Model Results (Standardised)")
-text(x = qap_plot_m2, 
-     y = results_m2 + sign(results_m2)*(0.075*diff(range(results_m2))), 
-     labels = results_sig_m2, font = 2)
-
-save_qap_plot("unstd_std_plot")
-
-par(mfrow=c(1,1))
 # --------------------------------------------------------------------------- #
 # Basic QAP Linear Regression 2 - Unstandardised + Controls
 
@@ -174,4 +188,46 @@ hist(qap_m4_resid, xlab="Residuals",
 plot(qap_m4_fitted, qap_m4_resid, xlab="Fitted Values", ylab="Residuals",
      main="QAP LR - Unstandardised + Controls")
 
+# --------------------------------------------------------------------------- #
+# Plot results for models with Controls
+
+plot_QAP_coefs(qap_m3$results, qap_m3$results_sig, 
+               "QAP LR - Unstd. + Controls", 
+               qap_m4$results, qap_m4$results_sig,
+               "QAP LR - Std. + Controls", 
+               "qap_nocontrols_plots")
+
+# --------------------------------------------------------------------------- #
+# Collect Results in Table
+
+# Extract R2 from the netlm object
+calc_r2 <- function(model) {
+  
+  out <- capture.output(model)
+  r2_line <- grep("Multiple R-squared", out, value = TRUE)
+  r2 <- as.numeric(
+    sub(".*Multiple R-squared:\\s*([0-9\\.]+).*", "\\1", r2_line))
+  
+  return(r2)
+}
+
+# Make function to get details of netlm manually
+extract.netlm <- function(model) {
+  tr <- texreg::createTexreg(
+    coef.names = model$names,
+    coef = model$coefficients,
+    se = model$coefficients / model$tstat,
+    pvalues = model$pgreqabs,
+    gof.names = c("R-squared"),
+    gof = (calc_r2(model)),
+    gof.decimal = c(TRUE)
+  )
+  return(tr)
+}
+
+titles <- c("M1 | Unstd.","M2 | Std.","M3 | Unstd.")
+texreg::screenreg(lapply(list(qap_m1$model, qap_m2$model, qap_m3$model), 
+                         extract.netlm), 
+                  custom.model.names = titles,
+                  digits = 3)
 # --------------------------------------------------------------------------- #

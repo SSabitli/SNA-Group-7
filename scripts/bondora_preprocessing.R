@@ -270,6 +270,8 @@ bondora_net <- network::network(
 len <- dim(bondora_matrix)[1]
 len_b2 <- dim(bondora_matrix)[2]
 b_indicator <- c(rep(1,len),rep(2,len_b2))
+network::set.vertex.attribute(bondora_net,
+                              "bipartite",value=b_indicator)
 
 # Extract Partition 2 Labels
 loan_use <- levels(bondora_clean$UseOfLoan_factor)
