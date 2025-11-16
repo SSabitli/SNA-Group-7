@@ -249,7 +249,7 @@ the term, indicating heterophily. Therefore:
 *Hypothesis 6: Gender differences lead to different loan use mixes*
 
 | Hypothesis | Term | Explanation |
-|---------------------|-----------------|----------------------------------|
+|------------------------|------------------|------------------------------|
 | $H_3^a:$  Borrowers who share one loan purpose are likely to share another | *cycle(4)* | This captures the tendency of borrowers and loan uses to be cyclical, where people cluster around shared uses of loans. |
 | $H_4^a:$ Borrowers exhibit preferences for minimal debt distinctiveness, selecting one loan use | *b1degree(1)* | This captures the tendency of borrowers to prefer minimal distinctiveness in their loan uses, preferring to hold only one distinct type to minimise their perceived risk. |
 | $H_5^a:$ Younger borrowers have different loan use mixes than older borrowers | *b1cov("age")* | This captures the tendency for younger borrowers to choose different kinds of loans based on how differently they consume credit. |

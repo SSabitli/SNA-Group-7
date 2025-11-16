@@ -79,6 +79,18 @@ all_pred_vars <- list(rating_mat, occup_mat, amt_diffs_mat, age_diffs_mat,
 qap_m1 <- run_QAP(loan_use_mat, main_pred_vars, main_pred_names, "qap_m1")
 summary(qap_m1$model)
 
+# Run Diagnostics
+qap_m1_resid <- qap_m1$model$residuals
+qap_m1_fitted <- qap_m1$model$fitted.values
+
+# Residuals Plot
+hist(qap_m1_resid, xlab="Residuals", 
+     main="QAP LR - Unstandardised + No Controls")
+
+# Fitted vs Residuals
+plot(qap_m1_fitted, qap_m1_resid, xlab="Fitted Values", ylab="Residuals",
+     main="QAP LR - Unstandardised + No Controls")
+
 # --------------------------------------------------------------------------- #
 # Basic QAP Linear Regression 1 - Standardised + No Controls
 scaled_dep <- scale(loan_use_mat)
@@ -86,6 +98,18 @@ scaled_pred <- lapply(main_pred_vars, scale)
 
 qap_m2 <- run_QAP(scaled_dep, scaled_pred, main_pred_names, "qap_m2")
 summary(qap_m2$model)
+
+# Run Diagnostics
+qap_m2_resid <- qap_m2$model$residuals
+qap_m2_fitted <- qap_m2$model$fitted.values
+
+# Residuals Plot
+hist(qap_m2_resid, xlab="Residuals", 
+     main="QAP LR - Standardised + No Controls")
+
+# Fitted vs Residuals
+plot(qap_m2_fitted, qap_m2_resid, xlab="Fitted Values", ylab="Residuals",
+     main="QAP LR - Standardised + No Controls")
 
 # --------------------------------------------------------------------------- #
 # Plot the result for Model 1 Unstandardised vs Standardised
@@ -118,11 +142,36 @@ par(mfrow=c(1,1))
 qap_m3 <- run_QAP(loan_use_mat, all_pred_vars, var_names, "qap_m3")
 summary(qap_m3$model)
 
+# Run Diagnostics
+qap_m3_resid <- qap_m3$model$residuals
+qap_m3_fitted <- qap_m3$model$fitted.values
+
+# Residuals Plot
+hist(qap_m3_resid, xlab="Residuals", 
+     main="QAP LR - Unstandardised + Controls")
+
+# Fitted vs Residuals
+plot(qap_m3_fitted, qap_m3_resid, xlab="Fitted Values", ylab="Residuals",
+     main="QAP LR - Unstandardised + Controls")
+
+
 # --------------------------------------------------------------------------- #
 # Basic QAP Linear Regression 2 - Standardised + Controls
 scaled_pred_2 <- lapply(all_pred_vars, scale)
 
 qap_m4 <- run_QAP(scaled_dep, scaled_pred_2, var_names, "qap_m4")
 summary(qap_m4$model)
+
+# Run Diagnostics
+qap_m4_resid <- qap_m4$model$residuals
+qap_m4_fitted <- qap_m4$model$fitted.values
+
+# Residuals Plot
+hist(qap_m4_resid, xlab="Residuals", 
+     main="QAP LR - Unstandardised + Controls")
+
+# Fitted vs Residuals
+plot(qap_m4_fitted, qap_m4_resid, xlab="Fitted Values", ylab="Residuals",
+     main="QAP LR - Unstandardised + Controls")
 
 # --------------------------------------------------------------------------- #

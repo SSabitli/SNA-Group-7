@@ -104,7 +104,7 @@ lodds_to_prob <- function(l_odd) {
 # Make function to save ERGM object
 save_ergm <- function(object, id) {
   saveRDS(object, file=here::here(
-    "resources","objects","ergm",id,".Rds"))
+    "resources","objects","ergm",paste0(id,".Rds")))
 }
 # Make function to conduct ERGMs automatically
 auto_ergm <- function(model, mcmc, name) {
@@ -148,26 +148,13 @@ snafun::stat_plot_gof(base_ergm_panel$gof)
 models = list(base_ergm)
 texreg::screenreg(models)
 # --------------------------------------------------------------------------- #
-# Base Model + Edge Counts + GOF
-#base_model_counts <- ergm::ergm(bondora_net ~ edges, response="frequency",
-#                                reference = ~ Poisson)
-#basemodel_counts_gof <- ergm::gof(base_model_counts)
-#snafun::stat_plot_gof(basemodel_counts_gof)
-#
-#texreg::screenreg(list(base_model, base_model_counts))
-# --------------------------------------------------------------------------- #
 # Iteration 1 + MCMC Diagnostics + GOF
 model_1_params <- bondora_net ~ edges + 
-  # b1 decay can be very low since 9 b2
-  gwb1degree(decay=0.15, fixed=TRUE) 
+  # See if individuals tend to pick one loan type
+  b1degree(1) 
 
 model_1 <- ergm::ergm(
   model_1_params,
-  
-  # Max b2 degree is 72, so this constraint is reasonable
-  # and helps convergence significantly.
-  # Technically in the Bondora population this can be 
-  # far higher but we are studying a subsample.
   #constraints = ~ bd(minout = 0, maxout = 80),
   
   control = ergm::control.ergm(
@@ -193,20 +180,14 @@ texreg::screenreg(list(base_ergm, model_1))
 # --------------------------------------------------------------------------- #
 # Iteration 2 + MCMC Diagnostics + GOF
 model_2_params <- bondora_net ~ edges + 
-  # low decay important because there is high clustering around low degrees
-  gwb1degree(decay=0.15, fixed=TRUE) + 
-  # decay should be higher due to wider variation in degree but 
-  # too high of degree makes the traces concentrated around the tails.
-  gwb1dsp(decay=0.5, fixed=TRUE)      
+  # See if individuals tend to pick one loan type
+  b1degree(1) + 
+  # See if there is clustering around pairs of loan types
+  cycle(4)
   
 model_2 <- ergm::ergm(
   model_2_params,
-  
-  # Max b2 degree is 72, so this constraint is reasonable
-  # and helps convergence significantly.
-  # Technically in the Bondora population this can be 
-  # far higher but we are studying a subsample.
-  constraints = ~ bd(minout = 0, maxout = 80),
+  #constraints = ~ bd(minout = 0, maxout = 80),
   
   control = ergm::control.ergm(
     # Greater burn-in for cleaner result
@@ -232,22 +213,16 @@ texreg::screenreg(models)
 # --------------------------------------------------------------------------- #
 # Iteration 3 + MCMC Diagnostics + GOF
 model_3_params <- bondora_net ~ edges + 
-  # low decay important because there is high clustering around low degrees
-  gwb1degree(decay=0.15, fixed=TRUE) + 
-  # decay should be higher due to wider variation in degree but 
-  # too high of degree makes the traces concentrated around the tails.
-  gwb1dsp(decay=0.5, fixed=TRUE) +
-  # See differences across genders (implicitly, since b1nodemix unavailable)
+  # See if individuals tend to pick one loan type
+  b1degree(1) + 
+  # See if there is clustering around pairs of loan types
+  cycle(4) +
+  # See if there is heterophily in gender (given negative effect)
   b1nodematch("b1_gender", diff=FALSE)
 
 model_3 <- ergm::ergm(
   model_3_params,
-  
-  # Max b2 degree is 72, so this constraint is reasonable
-  # and helps convergence significantly.
-  # Technically in the Bondora population this can be 
-  # far higher but we are studying a subsample.
-  constraints = ~ bd(minout = 0, maxout = 80),
+  #constraints = ~ bd(minout = 0, maxout = 80),
   
   control = ergm::control.ergm(
     # Greater burn-in for cleaner result
@@ -272,14 +247,11 @@ models <- list(base_ergm, model_1, model_2, model_3)
 texreg::screenreg(models)
 # --------------------------------------------------------------------------- #
 # Iteration 4 + MCMC Diagnostics + GOF
-model_4_params <- bondora_net ~ edges + 
-  # low decay important because there is high clustering around low degrees
-  gwb1degree(decay=0.15, fixed=TRUE) + 
-  # decay should be higher due to wider variation in degree but 
-  # too high of degree makes the traces concentrated around the tails.
-  gwb1dsp(decay=0.5, fixed=TRUE) +
-  # See differences across genders (implicitly, since b1nodemix unavailable)
+model_4_params <- bondora_net ~ edges + b1degree(1) + cycle(4) +
+  
+  # See if there is heterophily in gender (given negative effect)
   b1nodematch("b1_gender", diff=TRUE) +
+  
   # See if higher ages make a difference
   b1cov("b1_age")
 
