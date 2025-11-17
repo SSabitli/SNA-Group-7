@@ -200,7 +200,9 @@ plot_QAP_coefs(qap_m3$results, qap_m3$results_sig,
 # --------------------------------------------------------------------------- #
 # Collect Results in Table
 
-# Extract R2 from the netlm object
+# Extract R2 from the netlm object from the Console output
+# It was too difficult to calculate R2 from scratch and netlm does not 
+# provide this as an output directly from the netlm object
 calc_r2 <- function(model) {
   
   out <- capture.output(model)
@@ -225,9 +227,13 @@ extract.netlm <- function(model) {
   return(tr)
 }
 
-titles <- c("M1 | Unstd.","M2 | Std.","M3 | Unstd.")
-texreg::screenreg(lapply(list(qap_m1$model, qap_m2$model, qap_m3$model), 
-                         extract.netlm), 
-                  custom.model.names = titles,
-                  digits = 3)
+# View the Table of Results
+titles <- c("M1 | Unstd.","M2 | Std.","M3 | Unstd.","M4 | Std.")
+extracted_models <- lapply(list(qap_m1$model, qap_m2$model, qap_m3$model,
+                                qap_m4$model), extract.netlm)
+texreg::screenreg(extracted_models, custom.model.names = titles, digits = 3)
+
+# Save the table for use in the Report
+saveRDS(list(extracted_models, titles), 
+        here::here("resources","objects","qap","qap_tables.Rds"))
 # --------------------------------------------------------------------------- #

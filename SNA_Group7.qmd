@@ -430,6 +430,52 @@ flexibility of ERGM also allows for modelling exogenous impacts such as
 heterophily in gender-based loan use mixes, as in hypothesis 6, and
 covariate age effects as in hypothesis 5.
 
+## Results
+
+### Study 1 - QAP Linear Regression
+
+Table \ref{tab-qap-results}
+
+```{r}
+#| output: asis
+#| label: tbl-qap-results
+qap_table_items <- readRDS(here::here("resources","objects","qap",                                 "qap_tables.Rds"))
+
+texreg::texreg(qap_table_items[[1]], 
+               custom.model.names = qap_table_items[[2]],
+               digits = 3,
+               caption.above = TRUE,
+               caption = "QAP Modelling Results",
+               label = "tab-qap-results",
+               booktabs = TRUE,
+               float.pos = "!h",
+               use.packages = FALSE,
+               scalebox = 1,
+               dcolumn = TRUE)
+```
+
+### Study 2 - ERGM
+
+Table \ref{tab-ergm-results}
+
+```{r}
+#| output: asis
+#| label: tbl-ergm-results
+ergm_table_items <- readRDS(here::here("resources","objects","ergm",                                 "ergm_table.Rds"))
+
+texreg::texreg(ergm_table_items[[1]], 
+               custom.model.names = ergm_table_items[[2]],
+               digits = 3,
+               caption.above = TRUE,
+               caption = "ERGM Modelling Results",
+               label = "tab-ergm-results",
+               booktabs = TRUE,
+               float.pos = "!h",
+               use.packages = FALSE,
+               scalebox = 0.8,
+               dcolumn = TRUE)
+```
+
 \clearpage
 \appendix
 
@@ -647,6 +693,17 @@ replayPlot(readRDS(here::here("resources","objects","preprocessing",
 
 replayPlot(readRDS(here::here("resources","objects","preprocessing",
                           "bar_occupation.Rds")))
+```
+
+\clearpage
+
+### ERGM Results - Supplementary Tables
+
+```{r}
+#| label: tbl-ergm-prob-tables
+#| tbl-cap: "ERGM Results in Probability Scale"
+knitr::kable(readRDS(
+  here::here("resources","objects","ergm","ergm_prob_tables.Rds")))
 ```
 
 \clearpage

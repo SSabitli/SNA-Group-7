@@ -277,10 +277,33 @@ snafun::stat_plot_gof(model_4_panel$gof)
 models <- list(base_ergm, model_1, model_2, model_3, model_4)
 texreg::screenreg(models)
 # --------------------------------------------------------------------------- #
-# Collect Models in Table
-
+# Collect Models in Table 1: Raw results
 headers <- c("Base ERGM","b1degree(1)","cycle(4)","Age","Gender")
-ergm_table <- texreg::screenreg(models, custom.model.names = headers,
+texreg::knitreg(models, custom.model.names = headers,
                                 digits = 3)
-ergm_table
+
+# Save the Table to use in Report
+saveRDS(list(models, headers),
+        here::here("resources","objects","ergm","ergm_table.Rds"))
+
+# Padding
+pad <- function(x, max) {
+  return(c(unname(x), rep("-", max-length(x))))
+}
+
+# Collect Models in Table 2: Log Odds Results
+max_ergms <- length(model_4$coefficients)
+df_prob <- data.frame(
+  Terms = names(model_4$coefficients),
+  "Base ERGM" = pad(round(lodds_to_prob(base_ergm$coefficients),3),max_ergms),
+  "b1degree(1)" = pad(round(lodds_to_prob(model_1$coefficients),3),max_ergms),
+  "cycle(4)" = pad(round(lodds_to_prob(model_2$coefficients),3),max_ergms),
+  "Age" = pad(round(lodds_to_prob(model_3$coefficients),3),max_ergms),
+  "Gender" = pad(round(lodds_to_prob(model_4$coefficients),3),max_ergms)
+)
+knitr::kable(df_prob)
+
+# Save Table to use in Report
+saveRDS(df_prob, 
+        here::here("resources","objects","ergm","ergm_prob_tables.Rds"))
 # --------------------------------------------------------------------------- #
