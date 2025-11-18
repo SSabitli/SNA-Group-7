@@ -1,0 +1,463 @@
+---
+title: "Bondora Credit Allocation Study"
+subtitle: "Progress Meeting 3"
+author: "Group 7"
+bibliography: references.bib
+csl: apa-6th-edition.csl
+institute: "Jheronimus Academy of Data Science"
+execute:
+  cache: true
+format:
+  revealjs: 
+    margin: 0.05
+    embed-resources: true
+    self-contained-math: true 
+    center-title-slide: true
+    self-contained: true
+    theme: simple 
+    scrollable: true
+    standalone: true
+---
+
+```{r include=FALSE}
+#install.packages("here") # if you do not have this installed already
+
+net <- readRDS(here::here("resources","objects","preprocessing","bondora_net.Rds"))
+
+base_ergm <- readRDS(here::here("resources","objects","ergm","ergm_base_panel.Rds"))
+ergm_m1 <- readRDS(here::here("resources","objects","ergm","ergm_m1_panel.Rds"))
+ergm_m2 <- readRDS(here::here("resources","objects","ergm","ergm_m2_panel.Rds"))
+ergm_m3 <- readRDS(here::here("resources","objects","ergm","ergm_m3_panel.Rds"))
+ergm_m4 <- readRDS(here::here("resources","objects","ergm","ergm_m4_panel.Rds"))
+
+qap_m1 <- readRDS(here::here("resources","objects","qap","qap_m1.Rds"))
+qap_m2 <- readRDS(here::here("resources","objects","qap","qap_m2.Rds"))
+
+h1 <- readRDS(here::here("resources","objects","preprocessing","hist_amt.Rds"))
+h2 <- readRDS(here::here("resources","objects","preprocessing","hist_int.Rds"))
+h3 <- readRDS(here::here("resources","objects","preprocessing","hist_loandur.Rds"))
+h4 <- readRDS(here::here("resources","objects","preprocessing","hist_monpmt.Rds"))
+h5 <- readRDS(here::here("resources","objects","preprocessing","hist_age.Rds"))
+
+br1 <- readRDS(here::here("resources","objects","preprocessing","bar_loanuse.Rds"))
+br2 <- readRDS(here::here("resources","objects","preprocessing","bar_rating.Rds"))
+
+qap_plt <- readRDS(here::here("resources","objects","qap","unstd_std_plot.Rds"))
+ergm_plt <- readRDS(here::here("resources","objects","ergm","network_plot.Rds"))
+```
+
+```{r include=FALSE}
+prob <- function(input) {
+  return(unname(round(exp(input)/(1+exp(input))),2))
+}
+odds <- function(input) {
+  return(unname(round(exp(input)/(1+exp(input)),2)))
+}
+```
+
+# How are Different Kinds of Credit Distributed among Bondora Borrowers?
+
+## Background & Premise {.smaller}
+
+-   Bondora P2P Lending Service
+-   European dataset spanning between 2009-2021 with 179,000+ individual loans
+-   Data on 112 attributes of users individually and the characteristics of their loans
+
+### Network Information
+
++----------------+-------------------------------------------------------------------------------+
+| **Type**       | **Undirected Bipartite**                                                      |
+|                |                                                                               |
+| $\mathrm{B}_1$ | Borrowers identified by `UserName`                                            |
+|                |                                                                               |
+| $\mathrm{B}_2$ | Reported `LoanUse`                                                            |
++----------------+-------------------------------------------------------------------------------+
+| **Edges**      | $\mathrm{B}_1 \rightarrow \mathrm{B}_2:$ User takes out specific kind of loan |
+|                |                                                                               |
+|                | $\mathrm{B}_2 \rightarrow \mathrm{B}_1:$ Specific loan type belongs to a User |
+|                |                                                                               |
+|                | $\mathrm{B}_1 \nleftrightarrow \mathrm{B}_2:$ Forbidden edges                 |
++----------------+-------------------------------------------------------------------------------+
+
+## Theoretical Premise and RQs {.smaller}
+
+::: panel-tabset
+### Overall Study
+
+-   Traditional financial theory shows that investors exhibit behavioural biases in how they choose their investments [@aggarwal1981]
+
+    -   Behaviour varies based on risk attitudes and information theory
+
+-   Evidence shows that these same biases may also affect non-professional P2P borrowers [@lee_herding_2012; @herzenstein_strategic_2011]
+
+-   Specifically, @ayal_behavioral_2018 show that there is insufficient attention on borrowers' portfolio formation
+
+-   We want to understand how non professional P2P borrowers form their portfolios and how this is affected by behavioural biases
+
+### Study 1
+
+-   Investors' familiarity with certain assets can make investments seem less risky, driving them towards it [@ayal_behavioral_2018]
+
+-   @galak_micro-finance_2010 show clustering among borrowers and lenders across demographic attributes
+
+-   @amar_winning_2011 show that borrowers are averse to holding *large number* of debts
+
+    ***Do borrowers vary in their loan use type and frequency based on their individual and loan characteristics?***
+
+-   Linear QAP can assess similarities across borrowers, taking into account loan frequency
+
+### LRQAP
+
+@serrano-cinca_determinants_2015 show that heterogeneity in credit ratings explains significant differences across loan use purposes. Therefore:
+
+**Hypothesis 1: Borrowers with the same credit ratings choose similar loan uses**
+
+@ravina_love_2019 shows that occupation significant factor in whether loans are awarded. @ayal_behavioral_2018 suggests this can be generalised to reflect borrower preferences. Shared occupations can be indicative of similar preferences in loan use
+
+**Hypothesis 2: Borrowers sharing the same occupation area tend to share loan uses**
+
+### Study 2
+
+-   Individuals' financial decisions are not independent [@kahneman_prospect_1979]
+
+-   @ayal_behavioral_2018 shows that these non-independent preferences can influence other borrowers
+
+-   Therefore, we investigate P2P behavioural biases from a structural perspective
+
+***What behavioural mechanisms affect the structure of borrower-to-loan-use connections?***
+
+### ERGM
+
+@herzenstein_strategic_2011 shows that familiarity bias can exhibit itself through clustering, or "relational herding". Borrowers gravitate towards socially-validated or popular choices, resulting in overlapping decisions
+
+**Hypothesis 3: Borrowers who share one loan purpose are likely to share another**
+
+Theory of Perceived Diversification shows that borrowers' distress increases with perceived distinctiveness of each loan type [@ayal_perceived_2009]. Borrowers prefer to minimize this distress.
+
+**Hypothesis 4: Borrowers exhibit preferences for minimal debt distinctiveness, selecting one loan use**
+
+@cooper_consumption_2023 show that younger borrowers have fundamentally different credit use mix than older individuals due to how their access to credit shapes their consumption habits. Therefore:
+
+**Hypothesis 5: Younger borrowers have different loan use mixes than older borrowers**
+
+@aliano_role_2023 show a significant gender effect on different loan uses and @croson_gender_2009 explain this can be due to differences in risk perception and self-selection effects:
+
+**Hypothesis 6: Gender differences lead to different loan use mixes**
+:::
+
+## Summary of Hypotheses {.smaller}
+
+::: panel-tabset
+### Study 1
+
+-   LR QAP modelling effect of shared attributes on the frequency and type of same loan use shared
+
+<!-- -->
+
+-   $Y=$ Weighted adjacency matrix of shared loan use
+
++------------------------------------------------------------------------------+---------------------+----------------------------------------------------------+
+| Hypothesis                                                                   | Expected Result     | Specific Method                                          |
++==============================================================================+=====================+==========================================================+
+| H~1~^a^ : Borrowers with the same credit ratings choose similar loan uses    | $\hat{\beta}_{1}>0$ | $X_1=$ Weighted adjacency matrix of shared credit rating |
++------------------------------------------------------------------------------+---------------------+----------------------------------------------------------+
+| H~2~^a^ : Borrowers sharing the same occupation area tend to share loan uses | $\hat{\beta}_{2}>0$ | $X_2=$ Binary adjacency matrix of shared occupation area |
++------------------------------------------------------------------------------+---------------------+----------------------------------------------------------+
+| \-                                                                           | \-                  | $+$ $X_{2,3,..,n}=$ Controls                             |
++------------------------------------------------------------------------------+---------------------+----------------------------------------------------------+
+
+### Study 2
+
+-   Studied using **Bipartite ERGMs** with binary edges
+
++--------------------------------------------------------------------------------------------------+---------------------+---------------------------------+
+| Hypothesis                                                                                       | Expected Result     | ERGM Term                       |
++==================================================================================================+=====================+=================================+
+| H~3~^a^ : Borrowers who share one loan purpose are likely to share another                       | $\hat{\theta}>0$    | `cycle(4)`                      |
++--------------------------------------------------------------------------------------------------+---------------------+---------------------------------+
+| H~4~^a^ : Borrowers exhibit preferences for minimal debt distinctiveness, selecting one loan use | $\hat{\theta}>0$    | `b1degree(1)`                   |
++--------------------------------------------------------------------------------------------------+---------------------+---------------------------------+
+| H~5~^a^ : Younger borrowers have different loan use mixes than older borrowers                   | $\hat{\theta}\neq0$ | `b1cov("b1_age")`               |
++--------------------------------------------------------------------------------------------------+---------------------+---------------------------------+
+| H~6~^a^ : Gender differences lead to different loan use mixes                                    | $\hat{\theta}\neq0$ | `b1factor("gender")`            |
++--------------------------------------------------------------------------------------------------+---------------------+---------------------------------+
+:::
+
+## Data Preprocessing {.smaller}
+
+::: panel-tabset
+### Procedures
+
+-   Select subset of 112 attributes
+
+``` r
+keep_cols <- c("LoanId", "UserName","Age", "Gender", 
+               "Country", "Amount", "Interest","LoanDuration",
+              "UseOfLoan", "Rating", "Restructured", "MonthlyPayment",
+              "OccupationArea", "BiddingStartedOn")
+```
+
+-   Remove any loans with `NA` for any of the above features
+
+-   Most complete data is between 2014-2016, when `UseofLoan` was reported
+
+    -   Filter `BiddingStartedOn` between these dates
+
+-   Preserve original connections by not filtering any further. Instead, randomly sample 500 individuals to narrow dataset down
+
+-   Create incidence matrix of $n \times m$, where $n$ is the unique borrowers and $m$ is the reported loan use to construct partitions $\mathrm{B}_1$ and $\mathrm{B}_2$
+
+### Non-Network Descriptive Plots
+
+```{r}
+for (plt in list(h1, h2, h3, h4, h5, br1, br2)) {
+  replayPlot(plt)
+}
+```
+:::
+
+## Basic Network Statistics {.smaller}
+
+::: panel-tabset
+### Network Visualisation
+
+```{r}
+replayPlot(ergm_plt)
+```
+
+### Descriptive Statistics Plot
+
+```{r}
+snafun::plot_centralities(net)
+```
+:::
+
+## Study 1 \| Preliminary QAP Results {.smaller}
+
+```{r include=FALSE}
+
+```
+
+::: panel-tabset
+### Notes
+
+-   Linear QAP Regression used to study how borrowers with the same loan type choice are affected by having the same credit rating
+
+-   The adjacency matrices used are **weighted** **by count** to give this study a level of detail we do not have with ERGM
+
+    -   Because the weights vary significantly, **standardised** results are more meaningful to compare
+
+-   Intercept has very significant impact: *not all effects can be accounted for and are missing*
+
+### Parameters
+
++--------------------------+------------------------------------------------------------------+
+| Variable Type            | Variable Name                                                    |
++==========================+==================================================================+
+| **Dependent Variable**   | Weighted Adjacency Matrix of Borrowers with same Loan Type       |
++--------------------------+------------------------------------------------------------------+
+| **Explanatory Variable** | Weighted Adjacency Matrix of Borrowers of the same Credit Rating |
++--------------------------+------------------------------------------------------------------+
+| Control Variable         | Weighted Adjacency Matrix of Mean Loan Amount Differences        |
++--------------------------+------------------------------------------------------------------+
+| Control Variable         | Weighted Adjacency Matrix of Age Differences                     |
++--------------------------+------------------------------------------------------------------+
+| Control Variable         | Binary Adjacency Matrix of Homophily in Gender                   |
++--------------------------+------------------------------------------------------------------+
+| Control Variable         | Weighted Adjacency Matrix of Mean Loan Duration Differences      |
++--------------------------+------------------------------------------------------------------+
+| Control Variable         | Weighted Adjacency Matrix of Homophily in Loan Restructuring     |
++--------------------------+------------------------------------------------------------------+
+
+### Specification & Results
+
+``` r
+qap_m1 <- sna::netlm(y = loan_use_mat,
+                     x = list(rating_mat, amt_diffs_mat, age_diffs_mat,
+                              gender_mat, loandur_diffs_mat, rest_mat),
+                     nullhyp = "qapspp", reps = 2500)
+
+# Standardised QAP Linear Regression
+scaled_dep <- scale(loan_use_mat)
+scaled_pred <- lapply(pred_vars, scale)
+
+qap_m2 <- sna::netlm(y = scaled_dep,
+                     x = scaled_pred,
+                     nullhyp = "qapspp", reps = 2500)
+```
+
+```{r}
+
+```
+
+### Estimates Plot
+
+```{r fig.width=20, fig.height=8}
+replayPlot(qap_plt)
+```
+:::
+
+## Study 2 \| ERGM \| `edges` {.smaller}
+
+::: panel-tabset
+### Summary
+
+### Specification
+
+``` r
+formula_base_model <- bondora_net ~ edges
+base_ergm <- ergm::ergm(formula_base_model)
+```
+
+```{r}
+texreg::screenreg(list(base_ergm$model))
+```
+
+### GOF
+
+```{r}
+snafun::stat_plot_gof(base_ergm$gof)
+```
+:::
+
+## Study 2 \| ERGM \| `b1degree(1)` {.smaller}
+
+::: panel-tabset
+### Summary
+
+**Modelling Notes**
+
+**Results**
+
+### Specification
+
+``` r
+```
+
+### Results
+
+```{r}
+texreg::screenreg(list(
+  base_ergm$model, ergm_m1$model))
+```
+
+### MCMC
+
+```{r fig.height=10, fig.width=10}
+ergm::mcmc.diagnostics(ergm_m1$model)
+```
+
+### GOF
+
+```{r}
+snafun::stat_plot_gof(ergm_m1$gof)
+```
+:::
+
+## Study 2 \| ERGM \| `cycle(4)` {.smaller}
+
+::: panel-tabset
+### Summary
+
+**Modelling Notes**
+
+**Results**
+
+### Specification
+
+``` r
+```
+
+### Results
+
+```{r}
+texreg::screenreg(list(base_ergm$model, ergm_m1$model, 
+                       ergm_m2$model))
+```
+
+### MCMC
+
+```{r fig.height=10, fig.width=10}
+ergm::mcmc.diagnostics(ergm_m2$model)
+```
+
+### GOF
+
+```{r}
+snafun::stat_plot_gof(ergm_m2$gof)
+```
+:::
+
+## Study 2 \| ERGM \| `b1factor("gender")` {.smaller}
+
+::: panel-tabset
+### Summary
+
+**Modelling Notes**
+
+**Results**
+
+### Specification
+
+``` r
+```
+
+### Results
+
+```{r}
+texreg::screenreg(list(base_ergm$model, ergm_m1$model, 
+                       ergm_m2$model,ergm_m3$model))
+```
+
+### MCMC
+
+```{r fig.height=10, fig.width=10}
+ergm::mcmc.diagnostics(ergm_m3$model)
+```
+
+### GOF
+
+```{r}
+snafun::stat_plot_gof(ergm_m3$gof)
+```
+:::
+
+## Study 2 \| ERGM \| `b1cov("age")` {.smaller}
+
+::: panel-tabset
+### Summary
+
+**Modelling Notes**
+
+**Results**
+
+### Specification
+
+``` r
+```
+
+### Results
+
+```{r}
+texreg::screenreg(list(base_ergm$model, ergm_m1$model, 
+                       ergm_m2$model, ergm_m3$model, 
+                       ergm_m4$model))
+```
+
+### MCMC
+
+```{r fig.height=10, fig.width=10}
+ergm::mcmc.diagnostics(ergm_m4$model)
+```
+
+### GOF
+
+```{r}
+snafun::stat_plot_gof(ergm_m4$gof)
+```
+:::
+
+## References
+
+::: {#refs}
+:::
