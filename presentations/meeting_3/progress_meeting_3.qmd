@@ -23,35 +23,14 @@ format:
 #install.packages("here") # if you do not have this installed already
 
 net <- readRDS(here::here("resources","objects","preprocessing","bondora_net.Rds"))
-
-base_ergm <- readRDS(here::here("resources","objects","ergm","ergm_base_panel.Rds"))
-ergm_m1 <- readRDS(here::here("resources","objects","ergm","ergm_m1_panel.Rds"))
-ergm_m2 <- readRDS(here::here("resources","objects","ergm","ergm_m2_panel.Rds"))
-ergm_m3 <- readRDS(here::here("resources","objects","ergm","ergm_m3_panel.Rds"))
-ergm_m4 <- readRDS(here::here("resources","objects","ergm","ergm_m4_panel.Rds"))
-
-qap_m1 <- readRDS(here::here("resources","objects","qap","qap_m1.Rds"))
-qap_m2 <- readRDS(here::here("resources","objects","qap","qap_m2.Rds"))
-
-h1 <- readRDS(here::here("resources","objects","preprocessing","hist_amt.Rds"))
-h2 <- readRDS(here::here("resources","objects","preprocessing","hist_int.Rds"))
-h3 <- readRDS(here::here("resources","objects","preprocessing","hist_loandur.Rds"))
-h4 <- readRDS(here::here("resources","objects","preprocessing","hist_monpmt.Rds"))
-h5 <- readRDS(here::here("resources","objects","preprocessing","hist_age.Rds"))
-
-br1 <- readRDS(here::here("resources","objects","preprocessing","bar_loanuse.Rds"))
-br2 <- readRDS(here::here("resources","objects","preprocessing","bar_rating.Rds"))
-
-qap_plt <- readRDS(here::here("resources","objects","qap","unstd_std_plot.Rds"))
-ergm_plt <- readRDS(here::here("resources","objects","ergm","network_plot.Rds"))
 ```
 
 ```{r include=FALSE}
 prob <- function(input) {
-  return(unname(round(exp(input)/(1+exp(input))),2))
+  return(unname(round(exp(input)/(1+exp(input))),3))
 }
 odds <- function(input) {
-  return(unname(round(exp(input)/(1+exp(input)),2)))
+  return(unname(round(exp(input)/(1+exp(input)),3)))
 }
 ```
 
@@ -199,7 +178,7 @@ keep_cols <- c("LoanId", "UserName","Age", "Gender",
 
 -   Remove any loans with `NA` for any of the above features
 
--   Most complete data is between 2014-2016, when `UseofLoan` was reported
+-   Most complete data is between 2014-2016, when `UseofLoan` was reported (see user counts plot)
 
     -   Filter `BiddingStartedOn` between these dates
 
@@ -207,10 +186,37 @@ keep_cols <- c("LoanId", "UserName","Age", "Gender",
 
 -   Create incidence matrix of $n \times m$, where $n$ is the unique borrowers and $m$ is the reported loan use to construct partitions $\mathrm{B}_1$ and $\mathrm{B}_2$
 
+### User Counts Plot
+
+```{r fig.width=20, fig.height=8}
+replayPlot(readRDS(here::here("resources","objects","preprocessing",
+                              "user_cnt_plt.Rds")))
+```
+
 ### Non-Network Descriptive Plots
 
-```{r}
-for (plt in list(h1, h2, h3, h4, h5, br1, br2)) {
+```{r fig.width=20, fig.height=8}
+#| warning: false
+
+h1 <- readRDS(here::here("resources","objects","preprocessing",
+                         "hist_amt.Rds"))
+h2 <- readRDS(here::here("resources","objects","preprocessing",
+                         "hist_int.Rds"))
+h3 <- readRDS(here::here("resources","objects","preprocessing",
+                         "hist_loandur.Rds"))
+h4 <- readRDS(here::here("resources","objects","preprocessing",
+                         "hist_monpmt.Rds"))
+h5 <- readRDS(here::here("resources","objects","preprocessing",
+                         "hist_age.Rds"))
+
+br1 <- readRDS(here::here("resources","objects","preprocessing",
+                          "bar_loanuse.Rds"))
+br2 <- readRDS(here::here("resources","objects","preprocessing",
+                          "bar_rating.Rds"))
+br3 <- readRDS(here::here("resources","objects","preprocessing",
+                          "bar_occupation.Rds"))
+
+for (plt in list(h1, h2, h3, h4, h5, br1, br2, br3)) {
   replayPlot(plt)
 }
 ```
@@ -221,22 +227,28 @@ for (plt in list(h1, h2, h3, h4, h5, br1, br2)) {
 ::: panel-tabset
 ### Network Visualisation
 
+```{r fig.width=20, fig.height=8}
+#| warning: false
+net_plt <- readRDS(here::here("resources","objects","ergm","network_plot.Rds"))
+
+replayPlot(net_plt)
+```
+
+### Descriptive Statistics
+
 ```{r}
-replayPlot(ergm_plt)
+knitr::kable(readRDS(here::here("resources","objects","ergm",
+                                "net_summary.Rds")))
 ```
 
 ### Descriptive Statistics Plot
 
-```{r}
+```{r fig.width=20, fig.height=8}
 snafun::plot_centralities(net)
 ```
 :::
 
-## Study 1 \| Preliminary QAP Results {.smaller}
-
-```{r include=FALSE}
-
-```
+## Study 1 \| QAP Results {.smaller}
 
 ::: panel-tabset
 ### Notes
@@ -249,51 +261,98 @@ snafun::plot_centralities(net)
 
 -   Intercept has very significant impact: *not all effects can be accounted for and are missing*
 
-### Parameters
-
-+--------------------------+------------------------------------------------------------------+
-| Variable Type            | Variable Name                                                    |
-+==========================+==================================================================+
-| **Dependent Variable**   | Weighted Adjacency Matrix of Borrowers with same Loan Type       |
-+--------------------------+------------------------------------------------------------------+
-| **Explanatory Variable** | Weighted Adjacency Matrix of Borrowers of the same Credit Rating |
-+--------------------------+------------------------------------------------------------------+
-| Control Variable         | Weighted Adjacency Matrix of Mean Loan Amount Differences        |
-+--------------------------+------------------------------------------------------------------+
-| Control Variable         | Weighted Adjacency Matrix of Age Differences                     |
-+--------------------------+------------------------------------------------------------------+
-| Control Variable         | Binary Adjacency Matrix of Homophily in Gender                   |
-+--------------------------+------------------------------------------------------------------+
-| Control Variable         | Weighted Adjacency Matrix of Mean Loan Duration Differences      |
-+--------------------------+------------------------------------------------------------------+
-| Control Variable         | Weighted Adjacency Matrix of Homophily in Loan Restructuring     |
-+--------------------------+------------------------------------------------------------------+
-
-### Specification & Results
+### Specification
 
 ``` r
-qap_m1 <- sna::netlm(y = loan_use_mat,
-                     x = list(rating_mat, amt_diffs_mat, age_diffs_mat,
-                              gender_mat, loandur_diffs_mat, rest_mat),
-                     nullhyp = "qapspp", reps = 2500)
+# Make function to run QAPs automatically
+run_QAP <- function(y_mat, xlist, varnames, model_name) {
+  
+  # Run QAP Linear Regression
+  model <- sna::netlm(y = y_mat, x = xlist, nullhyp = "qapspp", reps = 1000)
+  model$names <- varnames
+  summary(model)
+  
+  # Obtain results from Model and Name them
+  results <- model$coefficients
+  names(results) <- varnames
+  
+  # Add significance stars to model results
+  results_sig <- paste(round(results,3), t_to_stars(model$tstat))
+  
+  # Save Model
+  saveRDS(model, here::here("resources","objects","qap",
+                            paste0(model_name,".Rds")))
+  
+  # Prepare function output
+  list_names <- c("model","results","results_sig")
+  items <- list(model, results, results_sig)
+  names(items) <- list_names
+  
+  return(items)
+}
 
-# Standardised QAP Linear Regression
+# -----------------------------------------------------------------------------#
+
+# Basic QAP Linear Regression 1 - Unstandardised + No Controls
+qap_m1 <- run_QAP(loan_use_mat, main_pred_vars, main_pred_names, "qap_m1")
+
+# Basic QAP Linear Regression 1 - Standardised + No Controls
 scaled_dep <- scale(loan_use_mat)
-scaled_pred <- lapply(pred_vars, scale)
+scaled_pred <- lapply(main_pred_vars, scale)
 
-qap_m2 <- sna::netlm(y = scaled_dep,
-                     x = scaled_pred,
-                     nullhyp = "qapspp", reps = 2500)
+qap_m2 <- run_QAP(scaled_dep, scaled_pred, main_pred_names, "qap_m2")
+
+# Basic QAP Linear Regression 2 - Unstandardised + Controls
+qap_m3 <- run_QAP(loan_use_mat, all_pred_vars, var_names, "qap_m3")
+
+# Basic QAP Linear Regression 2 - Standardised + Controls
+scaled_pred_2 <- lapply(all_pred_vars, scale)
+
+qap_m4 <- run_QAP(scaled_dep, scaled_pred_2, var_names, "qap_m4")
+```
+
+### Results
+
+```{r include=FALSE}
+qap_m1 <- readRDS(here::here("resources","objects","qap","qap_m1.Rds"))
+qap_m2 <- readRDS(here::here("resources","objects","qap","qap_m2.Rds"))
+qap_m3 <- readRDS(here::here("resources","objects","qap","qap_m3.Rds"))
+qap_m4 <- readRDS(here::here("resources","objects","qap","qap_m4.Rds"))
+
+diag_1 <- readRDS(here::here("resources","objects","qap","qap_m1_diags.Rds"))
+diag_2 <- readRDS(here::here("resources","objects","qap","qap_m2_diags.Rds"))
+diag_3 <- readRDS(here::here("resources","objects","qap","qap_m3_diags.Rds"))
+diag_4 <- readRDS(here::here("resources","objects","qap","qap_m4_diags.Rds"))
+
+qap_table_items <- readRDS(here::here("resources","objects","qap",                                 "qap_tables.Rds"))
 ```
 
 ```{r}
-
+#| asis: true
+texreg::screenreg(qap_table_items[[1]], 
+               custom.model.names = qap_table_items[[2]],
+               digits = 3)
 ```
 
 ### Estimates Plot
 
 ```{r fig.width=20, fig.height=8}
-replayPlot(qap_plt)
+#| warning: false
+qap_nocntrl_plt <- readRDS(here::here("resources","objects","qap",
+                                      "qap_nocontrols_plots.Rds"))
+qap_cntrl_plt <- readRDS(here::here("resources","objects","qap",
+                              "qap_controls_plots.Rds"))
+replayPlot(qap_nocntrl_plt)
+replayPlot(qap_cntrl_plt)
+```
+
+### Diagnostics
+
+```{r fig.width=20, fig.height=8}
+replayPlot(diag_1)
+replayPlot(diag_2)
+replayPlot(diag_3)
+replayPlot(diag_4)
 ```
 :::
 
@@ -302,9 +361,23 @@ replayPlot(qap_plt)
 ::: panel-tabset
 ### Summary
 
+```{r include=FALSE}
+base_ergm <- readRDS(here::here("resources","objects","ergm",
+                                "ergm_base_panel.Rds"))
+```
+
+-   Significant negative coefficient indicates large amount of sparsity
+
+-   Low SE
+
+-   Loan use mix is likely not random
+
+-   $\Rightarrow$ Base ERGM model looks as expected
+
 ### Specification
 
 ``` r
+# Base Model + GOF
 formula_base_model <- bondora_net ~ edges
 base_ergm <- ergm::ergm(formula_base_model)
 ```
@@ -325,20 +398,63 @@ snafun::stat_plot_gof(base_ergm$gof)
 ::: panel-tabset
 ### Summary
 
+```{r include=FALSE}
+ergm_m1 <- readRDS(here::here("resources","objects","ergm","ergm_m1_panel.Rds"))
+```
+
 **Modelling Notes**
 
+-   Quick convergence within 5-10 iterations
+
 **Results**
+
+-   Good MCMC + GOF
+
+-   Significant and positive coefficient `r round(ergm_m1$model$coefficients[2],3)` translates into probability of `r prob(ergm_m1$model$coefficients[2])`.
+
+-   Low SE
+
+-   Increases `edges` coefficient
+
+-   Significantly better AIC & BIC in Model 2
+
+    -   Given MCMC + GOF, considered better model
+
+-   $\Rightarrow$ Individuals generally choose single loan use categories and modelling this improves the model significantly over the base ERGM
 
 ### Specification
 
 ``` r
+# Iteration 1 + MCMC Diagnostics + GOF
+model_1_params <- bondora_net ~ edges + 
+  # See if individuals tend to pick one loan type
+  b1degree(1) 
+
+model_1 <- ergm::ergm(
+  model_1_params,
+  #constraints = ~ bd(minout = 0, maxout = 80),
+  
+  control = ergm::control.ergm(
+    # Greater burn-in for cleaner result
+    MCMC.burnin = 20000,
+    # Greater sample size for greater stability
+    MCMC.samplesize = 100000,
+    seed = 42,
+    MCMC.interval = 1000,
+    # Only needed for convergence pvals to improve
+    MCMLE.maxit = 45,
+    # Smaller steps for stability
+    MCMLE.steplength = 0.25,
+    parallel = n_cores,
+    parallel.type = "PSOCK"
+  )
+)
 ```
 
 ### Results
 
 ```{r}
-texreg::screenreg(list(
-  base_ergm$model, ergm_m1$model))
+texreg::screenreg(list(base_ergm$model, ergm_m1$model))
 ```
 
 ### MCMC
@@ -359,13 +475,55 @@ snafun::stat_plot_gof(ergm_m1$gof)
 ::: panel-tabset
 ### Summary
 
+```{r include=FALSE}
+ergm_m2 <- readRDS(here::here("resources","objects","ergm","ergm_m2_panel.Rds"))
+```
+
 **Modelling Notes**
 
+-   Quick convergence within 5-10 iterations
+
 **Results**
+
+-   Good MCMC + GOF
+
+-   Insignificant estimate, but low SE
+
+-   Lowers `edges` quite a lot
+
+-   Does not impact `b1degree(1)` estimate magnitude large amount
+
+-   No significant change in AIC/BIC between Model 2 to Model 3
+
+-   $\Rightarrow$ Individuals have common loan uses among them and the term's inclusion improves the model significantly
 
 ### Specification
 
 ``` r
+# Iteration 2 + MCMC Diagnostics + GOF
+model_2_params <- bondora_net ~ edges + b1degree(1) + 
+  # See if there is clustering around pairs of loan types
+  cycle(4)
+  
+model_2 <- ergm::ergm(
+  model_2_params,
+  #constraints = ~ bd(minout = 0, maxout = 80),
+  
+  control = ergm::control.ergm(
+    # Greater burn-in for cleaner result
+    MCMC.burnin = 20000,
+    # Greater sample size for greater stability
+    MCMC.samplesize = 100000,
+    seed = 42,
+    MCMC.interval = 1000,
+    # Only needed for convergence pvals to improve
+    MCMLE.maxit = 45,
+    # Smaller steps for stability
+    MCMLE.steplength = 0.25,
+    parallel = n_cores,
+    parallel.type = "PSOCK"
+    )
+  )
 ```
 
 ### Results
@@ -393,13 +551,60 @@ snafun::stat_plot_gof(ergm_m2$gof)
 ::: panel-tabset
 ### Summary
 
+```{r include=FALSE}
+ergm_m3 <- readRDS(here::here("resources","objects","ergm","ergm_m3_panel.Rds"))
+```
+
 **Modelling Notes**
 
+-   Originally, we wanted to test `b1nodematch("gender")`, however this fails to mix
+
+-   Gender effect can be indirectly observed with `b1factor("gender")` as well
+
+    -   Since this converges without issue, we chose this as a replacement term
+
+-   Term change does not impact original hypothesis significantly
+
 **Results**
+
+-   Good MCMC + GOF
+
+-   Gender term insignificant and with low SE
+
+-   AIC/BIC not changed significantly
+
+-   $\Rightarrow$ Gender does not impact loan use choice significantly and the model does not significantly improve explanatory power
 
 ### Specification
 
 ``` r
+# Iteration 3 + MCMC Diagnostics + GOF
+model_3_params <- bondora_net ~ edges + b1degree(1) + cycle(4) +
+  
+  # See if there is gender effect
+  b1factor("b1_gender")
+
+model_3 <- ergm::ergm(
+  model_3_params,
+  #constraints = ~ bd(minout = 0, maxout = 80),
+  
+  control = ergm::control.ergm(
+    # Greater burn-in for cleaner result
+    # Cycles mixed with the rest of the terms requires more burnin samples
+    MCMC.burnin = 20000,
+    # Greater sample size for greater stability
+    MCMC.samplesize = 100000,
+    seed = 42,
+    # Reducing interval to reduce complexity between intervals
+    MCMC.interval = 1000,
+    # Only needed for convergence pvals to improve
+    MCMLE.maxit = 25,
+    # Smaller steps for stability
+    MCMLE.steplength = 0.25,
+    parallel = n_cores,
+    parallel.type = "PSOCK"
+  )
+)
 ```
 
 ### Results
@@ -427,13 +632,53 @@ snafun::stat_plot_gof(ergm_m3$gof)
 ::: panel-tabset
 ### Summary
 
+```{r include=FALSE}
+ergm_m4 <- readRDS(here::here("resources","objects","ergm","ergm_m4_panel.Rds"))
+```
+
 **Modelling Notes**
 
+-   No issues with convergence
+
 **Results**
+
+-   Good MCMC + GOF
+
+-   Insignificant term but with low SE
+
+-   Increases `edges` term more strongly than model with just `b1factor("gender")`
+
+-   $\Rightarrow$ Age is not a significant factor in the formation of loan use mix and its inclusion does not improve model's explanatory power significantly
 
 ### Specification
 
 ``` r
+# Iteration 4 + MCMC Diagnostics + GOF
+model_4_params <- bondora_net ~ edges + b1degree(1) + cycle(4) +
+  b1factor("b1_gender") +
+  
+  # See if higher ages make a difference
+  b1cov("b1_age")
+
+model_4 <- ergm::ergm(
+  model_4_params,
+  #constraints = ~ bd(minout = 0, maxout = 80),
+  
+  control = ergm::control.ergm(
+    # Greater burn-in for cleaner result
+    MCMC.burnin = 20000,
+    # Greater sample size for greater stability
+    MCMC.samplesize = 100000,
+    seed = 42,
+    MCMC.interval = 1000,
+    # Only needed for convergence pvals to improve
+    MCMLE.maxit = 45,
+    # Smaller steps for stability
+    MCMLE.steplength = 0.25,
+    parallel = n_cores,
+    parallel.type = "PSOCK"
+  )
+)
 ```
 
 ### Results

@@ -96,6 +96,28 @@ plot_QAP_coefs <- function(m1_results, m1_sig, m1_title, m2_results, m2_sig,
   par(mfrow=c(1,1))
 
 }
+# Make Function to Plot Diagnostics
+qap_diags <- function(model, title, filename) {
+  resid <- model$model$residuals
+  fitted <- model$model$fitted.values
+  
+  # Set viewing window to two plots
+  par(mfrow=c(1,2))
+  
+  # Residuals Plot
+  hist(resid, xlab="Residuals", 
+       main=title)
+  
+  # Fitted vs Residuals
+  plot(fitted, resid, xlab="Fitted Values", ylab="Residuals",
+       main=title)
+  
+  # Capture and Save the Plot
+  save_qap_plot(filename)
+  
+  # Reset plot view
+  par(mfrow=c(1,1))
+}
 
 var_names <- c("Intercept", "Rating", "Occupation","Loan Amount", "Age",
                "Gender", "Loan Duration", "Restructured")
@@ -105,21 +127,16 @@ all_pred_vars <- list(rating_mat, occup_mat, amt_diffs_mat, age_diffs_mat,
                   gender_mat, loandur_diffs_mat, rest_mat)
 # --------------------------------------------------------------------------- #
 # Basic QAP Linear Regression 1 - Unstandardised + No Controls
-
 qap_m1 <- run_QAP(loan_use_mat, main_pred_vars, main_pred_names, "qap_m1")
+
 summary(qap_m1$model)
 
 # Run Diagnostics
 qap_m1_resid <- qap_m1$model$residuals
 qap_m1_fitted <- qap_m1$model$fitted.values
 
-# Residuals Plot
-hist(qap_m1_resid, xlab="Residuals", 
-     main="QAP LR - Unstandardised + No Controls")
-
-# Fitted vs Residuals
-plot(qap_m1_fitted, qap_m1_resid, xlab="Fitted Values", ylab="Residuals",
-     main="QAP LR - Unstandardised + No Controls")
+# Run Diagnostics Plots
+qap_diags(qap_m1,"QAP LR - Unstandardised + No Controls","qap_m1_diags")
 
 # --------------------------------------------------------------------------- #
 # Basic QAP Linear Regression 1 - Standardised + No Controls
@@ -129,17 +146,8 @@ scaled_pred <- lapply(main_pred_vars, scale)
 qap_m2 <- run_QAP(scaled_dep, scaled_pred, main_pred_names, "qap_m2")
 summary(qap_m2$model)
 
-# Run Diagnostics
-qap_m2_resid <- qap_m2$model$residuals
-qap_m2_fitted <- qap_m2$model$fitted.values
-
-# Residuals Plot
-hist(qap_m2_resid, xlab="Residuals", 
-     main="QAP LR - Standardised + No Controls")
-
-# Fitted vs Residuals
-plot(qap_m2_fitted, qap_m2_resid, xlab="Fitted Values", ylab="Residuals",
-     main="QAP LR - Standardised + No Controls")
+# Run Diagnostics Plots
+qap_diags(qap_m2,"QAP LR - Standardised + No Controls","qap_m2_diags")
 
 # --------------------------------------------------------------------------- #
 # Plot the result for Model 1 Unstandardised vs Standardised
@@ -152,22 +160,12 @@ plot_QAP_coefs(qap_m1$results, qap_m1$results_sig,
 
 # --------------------------------------------------------------------------- #
 # Basic QAP Linear Regression 2 - Unstandardised + Controls
-
 qap_m3 <- run_QAP(loan_use_mat, all_pred_vars, var_names, "qap_m3")
+
 summary(qap_m3$model)
 
-# Run Diagnostics
-qap_m3_resid <- qap_m3$model$residuals
-qap_m3_fitted <- qap_m3$model$fitted.values
-
-# Residuals Plot
-hist(qap_m3_resid, xlab="Residuals", 
-     main="QAP LR - Unstandardised + Controls")
-
-# Fitted vs Residuals
-plot(qap_m3_fitted, qap_m3_resid, xlab="Fitted Values", ylab="Residuals",
-     main="QAP LR - Unstandardised + Controls")
-
+# Run Diagnostics Plots
+qap_diags(qap_m3,"QAP LR - Unstandardised + Controls","qap_m3_diags")
 
 # --------------------------------------------------------------------------- #
 # Basic QAP Linear Regression 2 - Standardised + Controls
@@ -176,17 +174,8 @@ scaled_pred_2 <- lapply(all_pred_vars, scale)
 qap_m4 <- run_QAP(scaled_dep, scaled_pred_2, var_names, "qap_m4")
 summary(qap_m4$model)
 
-# Run Diagnostics
-qap_m4_resid <- qap_m4$model$residuals
-qap_m4_fitted <- qap_m4$model$fitted.values
-
-# Residuals Plot
-hist(qap_m4_resid, xlab="Residuals", 
-     main="QAP LR - Unstandardised + Controls")
-
-# Fitted vs Residuals
-plot(qap_m4_fitted, qap_m4_resid, xlab="Fitted Values", ylab="Residuals",
-     main="QAP LR - Unstandardised + Controls")
+# Run Diagnostics Plots
+qap_diags(qap_m4,"QAP LR - Unstandardised + Controls","qap_m4_diags")
 
 # --------------------------------------------------------------------------- #
 # Plot results for models with Controls
@@ -195,7 +184,7 @@ plot_QAP_coefs(qap_m3$results, qap_m3$results_sig,
                "QAP LR - Unstd. + Controls", 
                qap_m4$results, qap_m4$results_sig,
                "QAP LR - Std. + Controls", 
-               "qap_nocontrols_plots")
+               "qap_controls_plots")
 
 # --------------------------------------------------------------------------- #
 # Collect Results in Table
@@ -229,8 +218,7 @@ extract.netlm <- function(model) {
 
 # View the Table of Results
 titles <- c("M1 | Unstd.","M2 | Std.","M3 | Unstd.","M4 | Std.")
-extracted_models <- lapply(list(qap_m1$model, qap_m2$model, qap_m3$model,
-                                qap_m4$model), extract.netlm)
+extracted_models <- lapply(list(qap_m1, qap_m2, qap_m3, qap_m4), extract.netlm)
 texreg::screenreg(extracted_models, custom.model.names = titles, digits = 3)
 
 # Save the table for use in the Report

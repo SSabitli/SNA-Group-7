@@ -213,7 +213,7 @@ texreg::screenreg(models)
 # Iteration 3 + MCMC Diagnostics + GOF
 model_3_params <- bondora_net ~ edges + b1degree(1) + cycle(4) +
   
-  # See if there is heterophily in gender (given negative effect)
+  # See if there is gender effect
   b1factor("b1_gender")
 
 model_3 <- ergm::ergm(
@@ -295,7 +295,7 @@ pad <- function(x, max) {
 max_ergms <- length(model_4$coefficients)
 df_prob <- data.frame(
   Terms = names(model_4$coefficients),
-  "Base ERGM" = pad(round(lodds_to_prob(base_ergm$coefficients),3),max_ergms),
+  "Base" = pad(round(lodds_to_prob(base_ergm$coefficients),3),max_ergms),
   "b1degree(1)" = pad(round(lodds_to_prob(model_1$coefficients),3),max_ergms),
   "cycle(4)" = pad(round(lodds_to_prob(model_2$coefficients),3),max_ergms),
   "Age" = pad(round(lodds_to_prob(model_3$coefficients),3),max_ergms),
