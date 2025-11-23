@@ -1,7 +1,6 @@
 /.quarto/
 .Rproj.user
 .Rhistory
-.gitattributes
 .DS_Store
 _cache/
 _output/resources
@@ -11,4 +10,4 @@ presentations/meeting_2/progress_meeting_2_cache/
 presentations/meeting_3/progress_meeting_3_cache/
 SNA_Group7_cache/
 quarto_templates/
-dataset/
+dataset/bondora_older_dataset.xlsx
