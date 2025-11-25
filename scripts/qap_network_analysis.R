@@ -44,7 +44,7 @@ save_qap_plot <- function(plt_nam) {
 run_QAP <- function(y_mat, xlist, varnames, model_name) {
   
   # Run QAP Linear Regression
-  model <- sna::netlm(y = y_mat, x = xlist, nullhyp = "qapspp", reps = 1000)
+  model <- sna::netlm(y = y_mat, x = xlist, nullhyp = "qapspp", reps = 5000)
   model$names <- varnames
   summary(model)
   
@@ -128,26 +128,10 @@ all_pred_vars <- list(rating_mat, occup_mat, amt_diffs_mat, age_diffs_mat,
 # --------------------------------------------------------------------------- #
 # Basic QAP Linear Regression 1 - Unstandardised + No Controls
 qap_m1 <- run_QAP(loan_use_mat, main_pred_vars, main_pred_names, "qap_m1")
-
 summary(qap_m1$model)
 
-# Run Diagnostics
-qap_m1_resid <- qap_m1$model$residuals
-qap_m1_fitted <- qap_m1$model$fitted.values
-
-# Run Diagnostics Plots
-qap_diags(qap_m1,"QAP LR - Unstandardised + No Controls","qap_m1_diags")
-
-# --------------------------------------------------------------------------- #
-# Basic QAP Linear Regression 1 - Standardised + No Controls
-scaled_dep <- scale(loan_use_mat)
-scaled_pred <- lapply(main_pred_vars, scale)
-
-qap_m2 <- run_QAP(scaled_dep, scaled_pred, main_pred_names, "qap_m2")
-summary(qap_m2$model)
-
-# Run Diagnostics Plots
-qap_diags(qap_m2,"QAP LR - Standardised + No Controls","qap_m2_diags")
+# Run Diagnostics Plots - DEPRECATED SINCE PROGRESS MEETING 3 SUGGESTIONS
+#qap_diags(qap_m1,"QAP LR - Unstandardised + No Controls","qap_m1_diags")
 
 # --------------------------------------------------------------------------- #
 # Plot the result for Model 1 Unstandardised vs Standardised
@@ -164,18 +148,8 @@ qap_m3 <- run_QAP(loan_use_mat, all_pred_vars, var_names, "qap_m3")
 
 summary(qap_m3$model)
 
-# Run Diagnostics Plots
-qap_diags(qap_m3,"QAP LR - Unstandardised + Controls","qap_m3_diags")
-
-# --------------------------------------------------------------------------- #
-# Basic QAP Linear Regression 2 - Standardised + Controls
-scaled_pred_2 <- lapply(all_pred_vars, scale)
-
-qap_m4 <- run_QAP(scaled_dep, scaled_pred_2, var_names, "qap_m4")
-summary(qap_m4$model)
-
-# Run Diagnostics Plots
-qap_diags(qap_m4,"QAP LR - Unstandardised + Controls","qap_m4_diags")
+# Run Diagnostics Plots - DEPRECATED SINCE PROGRESS MEETING 3 SUGGESTIONS
+#qap_diags(qap_m3,"QAP LR - Unstandardised + Controls","qap_m3_diags")
 
 # --------------------------------------------------------------------------- #
 # Plot results for models with Controls
@@ -217,8 +191,8 @@ extract.netlm <- function(model) {
 }
 
 # View the Table of Results
-titles <- c("M1 | Unstd.","M2 | Std.","M3 | Unstd.","M4 | Std.")
-extracted_models <- lapply(list(qap_m1, qap_m2, qap_m3, qap_m4), extract.netlm)
+titles <- c("M1 | No Controls", "M2 | Controls")
+extracted_models <- lapply(list(qap_m1, qap_m3), extract.netlm)
 texreg::screenreg(extracted_models, custom.model.names = titles, digits = 3)
 
 # Save the table for use in the Report

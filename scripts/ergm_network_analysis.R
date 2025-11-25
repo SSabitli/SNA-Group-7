@@ -136,7 +136,51 @@ auto_ergm <- function(model, mcmc, name) {
   
   return(result)
 }
-
+# Make Function to do Coefficient Plot
+plot_coef <- function(model,
+                      model_name = "Model Estimates", 
+                      x_axis_label = "Coefficient Estimate") {
+  
+  # Extract Coefficients and SEs from ERGM 
+  coefs <- coef(model)
+  ses <- sqrt(diag(vcov(model)))
+  
+  # Make DF
+  df <- data.frame(
+    term = names(coefs),
+    estimate = coefs,
+    se = ses
+  )
+  
+  # 95% Conf. Interval calculation (z-score 1.96)
+  df$lower <- df$estimate - 1.96 * df$se
+  df$upper <- df$estimate + 1.96 * df$se
+  
+  # Significance indicator: CI does not cross zero
+  df$sig <- df$lower * df$upper > 0
+  df$sig <- as.character(df$sig) # Convert to character to make it work
+  
+  # 3. Reorder terms by estimate (Base R factor reordering)
+  order_index <- order(df$estimate)
+  df$term <- factor(df$term, levels = df$term[order_index])
+  
+  # 4. Create the ggplot (Uses ggplot2:: explicitly, as requested)
+  ggplot2::ggplot(df, ggplot2::aes(x = estimate, y = term)) +
+    ggplot2::geom_vline(xintercept = 0, linetype = "dashed", color = "grey40") +
+    ggplot2::geom_errorbarh(ggplot2::aes(xmin = lower, xmax = upper), 
+                            height = 0.2) +
+    ggplot2::geom_point(size = 3) +
+    ggplot2::theme_bw() + 
+    ggplot2::theme(
+      panel.grid.major.x = ggplot2::element_blank(), 
+      panel.grid.minor.x = ggplot2::element_blank()) +
+    ggplot2::labs(
+      x = x_axis_label,
+      y = "Variable",
+      title = model_name
+      #color = "Significance"
+    )
+}
 # --------------------------------------------------------------------------- #
 # Find max degree
 (max_deg <- max(summary(bondora_net ~ b2factor("b2_loantype"))))
@@ -178,6 +222,9 @@ model_1_panel <- auto_ergm(model=model_1, mcmc=TRUE, name="ergm_m1")
 model_1_panel$gof
 snafun::stat_plot_gof(model_1_panel$gof) 
 texreg::screenreg(list(base_ergm, model_1))
+
+# Plot Coefficients
+plot_coef(ergm_m1$model, model_name = "Baseline + b1degree")
 # --------------------------------------------------------------------------- #
 # Iteration 2 + MCMC Diagnostics + GOF
 model_2_params <- bondora_net ~ edges + b1degree(1) + 
@@ -209,6 +256,9 @@ snafun::stat_plot_gof(model_2_panel$gof)
 model_2_panel$gof
 models <- list(base_ergm, model_1, model_2)
 texreg::screenreg(models)
+
+# Plot Coefficients
+plot_coef(model_2_panel$model, model_name = "Baseline + b1degree + cycle(4)")
 # --------------------------------------------------------------------------- #
 # Iteration 3 + MCMC Diagnostics + GOF
 model_3_params <- bondora_net ~ edges + b1degree(1) + cycle(4) +
@@ -243,6 +293,10 @@ snafun::stat_plot_gof(model_3_panel$gof)
 model_3_panel$gof
 models <- list(base_ergm, model_1, model_2, model_3)
 texreg::screenreg(models)
+
+# Plot Coefficients
+plot_coef(model_3_panel$model,
+          model_name = "Baseline + b1degree + cycle(4) + b1factor(gender)")
 # --------------------------------------------------------------------------- #
 # Iteration 4 + MCMC Diagnostics + GOF
 model_4_params <- bondora_net ~ edges + b1degree(1) + cycle(4) +
@@ -276,6 +330,15 @@ model_4_panel$gof
 snafun::stat_plot_gof(model_4_panel$gof) 
 models <- list(base_ergm, model_1, model_2, model_3, model_4)
 texreg::screenreg(models)
+
+# Plot Coefficients
+m4_ergm_coef_plot <- plot_coef(model_4_panel$model,
+          model_name = "Complete Model")
+# Save Plot
+ggplot2::ggsave("mr_coef_plot.png",
+                plot = m4_ergm_coef_plot,
+                device = "png",
+                path = here::here("resources","objects","ergm"))
 # --------------------------------------------------------------------------- #
 # Collect Models in Table 1: Raw results
 headers <- c("Base ERGM","b1degree(1)","cycle(4)","Age","Gender")
