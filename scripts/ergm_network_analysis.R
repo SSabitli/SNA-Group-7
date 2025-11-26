@@ -335,7 +335,9 @@ texreg::screenreg(models)
 m4_ergm_coef_plot <- plot_coef(model_4_panel$model,
           model_name = "Complete Model")
 # Save Plot
-ggplot2::ggsave("mr_coef_plot.png",
+saveRDS(m4_ergm_coef_plot,
+        here::here("resources","objects","ergm","m4_coef_plot.Rds"))
+ggplot2::ggsave("m4_coef_plot.png",
                 plot = m4_ergm_coef_plot,
                 device = "png",
                 path = here::here("resources","objects","ergm"))

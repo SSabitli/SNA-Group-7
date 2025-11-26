@@ -87,6 +87,7 @@ editor:
 set.seed(42)
 knitr::opts_chunk$set(cache.extra = knitr::rand_seed)
 #install.packages("here")
+#install.packages("gridExtra")
 ```
 
 ```{r}
@@ -434,6 +435,18 @@ covariate age effects as in hypothesis 5.
 
 ### Study 1 - QAP Linear Regression
 
+@fig-qap-coef
+
+```{r fig.width=10, fig.height=5}
+#| label: fig-qap-coef
+#| fig-cap: "QAP Coefficient Plots"
+
+p1 <- readRDS(here::here("resources","objects","qap","qap_m1_coef_plot.Rds"))
+p2 <- readRDS(here::here("resources","objects","qap","qap_m3_coef_plot.Rds"))
+
+gridExtra::grid.arrange(p1, p2, ncol = 2)
+```
+
 Table \ref{tab-qap-results}
 
 ```{r}
@@ -455,6 +468,15 @@ texreg::texreg(qap_table_items[[1]],
 ```
 
 ### Study 2 - ERGM
+
+@fig-ergm-coef
+
+```{r fig.width=10, fig.height=5}
+#| label: fig-ergm-coef
+#| fig-cap: "ERGM Coefficient Plots"
+
+readRDS(here::here("resources","objects","ergm","m4_coef_plot.Rds"))
+```
 
 Table \ref{tab-ergm-results}
 

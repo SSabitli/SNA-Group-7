@@ -4,6 +4,7 @@
 # If not already Installed
 install.packages("viridis") # For Colours
 install.packages("here")    # To locate files from RProj
+install.packages("gridExtra") # For multiple ggplot2 plots
 
 # Set colour palette
 cols <- viridis::viridis(30)
@@ -44,7 +45,7 @@ save_qap_plot <- function(plt_nam) {
 run_QAP <- function(y_mat, xlist, varnames, model_name) {
   
   # Run QAP Linear Regression
-  model <- sna::netlm(y = y_mat, x = xlist, nullhyp = "qapspp", reps = 5000)
+  model <- sna::netlm(y = y_mat, x = xlist, nullhyp = "qapspp", reps = 3000)
   model$names <- varnames
   summary(model)
   
@@ -68,35 +69,52 @@ run_QAP <- function(y_mat, xlist, varnames, model_name) {
 }
 
 # Make function to Plot QAP Coefficients
-plot_QAP_coefs <- function(m1_results, m1_sig, m1_title, m2_results, m2_sig,
-                           m2_title, file_name) {
-  # Set viewing window to two plots
-  par(mfrow=c(1,2))
+plot_coef_qap <- function(model,
+                      model_name = "Model Estimates", 
+                      x_axis_label = "Coefficient Estimate") {
   
-  m1_plot <- barplot(m1_results, col = cols[15],  border = cols[10], 
-                     ylim = c(min(m1_results) - 0.1*diff(range(m1_results)), 
-                              max(m1_results) + 0.1*diff(range(m1_results))),
-                     main=m1_title)
-  text(x = m1_plot, 
-       y = m1_results + sign(m1_results)*(0.025*diff(range(m1_results))), 
-       labels = m1_sig, font = 2)
+  # Extract Coefficients and SEs from ERGM 
+  coefs <- model$coefficients
+  ses <- model$coefficients / model$tstat
   
+  # Make DF
+  df <- data.frame(
+    term = model$names,
+    estimate = coefs,
+    se = ses
+  )
   
-  m2_plot <- barplot(m2_results, col = cols[15],  border = cols[10], 
-                     ylim = c(min(m2_results) - 0.1*diff(range(m2_results)), 
-                              max(m2_results) + 0.1*diff(range(m2_results))),
-                     main=m2_title)
-  text(x = m2_plot, 
-       y = m2_results + sign(m2_results)*(0.025*diff(range(m2_results))), 
-       labels = m2_sig, font = 2)
+  # 95% Conf. Interval calculation (z-score 1.96)
+  df$lower <- df$estimate - 1.96 * df$se
+  df$upper <- df$estimate + 1.96 * df$se
   
-  save_qap_plot(file_name)
+  # Significance indicator: CI does not cross zero
+  df$sig <- df$lower * df$upper > 0
+  df$sig <- as.character(df$sig) # Convert to character to make it work
   
-  # Reset plot view
-  par(mfrow=c(1,1))
-
+  # 3. Reorder terms by estimate (Base R factor reordering)
+  order_index <- order(df$estimate)
+  df$term <- factor(df$term, levels = df$term[order_index])
+  
+  # 4. Create the ggplot (Uses ggplot2:: explicitly, as requested)
+  ggplot2::ggplot(df, ggplot2::aes(x = estimate, y = term)) +
+    ggplot2::geom_vline(xintercept = 0, linetype = "dashed", color = "grey40") +
+    ggplot2::geom_errorbarh(ggplot2::aes(xmin = lower, xmax = upper), 
+                            height = 0.2) +
+    ggplot2::geom_point(size = 3) +
+    ggplot2::theme_bw() + 
+    ggplot2::theme(
+      panel.grid.major.x = ggplot2::element_blank(), 
+      panel.grid.minor.x = ggplot2::element_blank()) +
+    ggplot2::labs(
+      x = x_axis_label,
+      y = "Variable",
+      title = model_name
+      #color = "Significance"
+    )
 }
 # Make Function to Plot Diagnostics
+# DEPRECATED SINCE PROGRESS MEETING 3
 qap_diags <- function(model, title, filename) {
   resid <- model$model$residuals
   fitted <- model$model$fitted.values
@@ -130,17 +148,13 @@ all_pred_vars <- list(rating_mat, occup_mat, amt_diffs_mat, age_diffs_mat,
 qap_m1 <- run_QAP(loan_use_mat, main_pred_vars, main_pred_names, "qap_m1")
 summary(qap_m1$model)
 
+# Plot the QAP Model Coefficients and Save it
+qap_m1_coef_plot <- plot_coef_qap(qap_m1$model)
+saveRDS(qap_m1_coef_plot,
+        here::here("resources","objects","qap","qap_m1_coef_plot.Rds"))
+
 # Run Diagnostics Plots - DEPRECATED SINCE PROGRESS MEETING 3 SUGGESTIONS
 #qap_diags(qap_m1,"QAP LR - Unstandardised + No Controls","qap_m1_diags")
-
-# --------------------------------------------------------------------------- #
-# Plot the result for Model 1 Unstandardised vs Standardised
-
-plot_QAP_coefs(qap_m1$results, qap_m1$results_sig, 
-               "QAP LR - Unstd. + No Controls", 
-               qap_m2$results, qap_m2$results_sig,
-               "QAP LR - Std. + No Controls", 
-               "qap_nocontrols_plots")
 
 # --------------------------------------------------------------------------- #
 # Basic QAP Linear Regression 2 - Unstandardised + Controls
@@ -148,17 +162,20 @@ qap_m3 <- run_QAP(loan_use_mat, all_pred_vars, var_names, "qap_m3")
 
 summary(qap_m3$model)
 
+# Plot the QAP Model Coefficients and Save it
+qap_m3_coef_plot <- plot_coef_qap(qap_m3$model)
+saveRDS(qap_m3_coef_plot,
+        here::here("resources","objects","qap","qap_m3_coef_plot.Rds"))
+
+# Arrange the Plots together
+qap_coef_plots <- gridExtra::grid.arrange(qap_m1_coef_plot, qap_m3_coef_plot,
+                        ncol = 2)
+# Save the Plots
+saveRDS(qap_coef_plots,
+        here::here("resources","objects","qap","qap_coef_plots.Rds"))
+
 # Run Diagnostics Plots - DEPRECATED SINCE PROGRESS MEETING 3 SUGGESTIONS
 #qap_diags(qap_m3,"QAP LR - Unstandardised + Controls","qap_m3_diags")
-
-# --------------------------------------------------------------------------- #
-# Plot results for models with Controls
-
-plot_QAP_coefs(qap_m3$results, qap_m3$results_sig, 
-               "QAP LR - Unstd. + Controls", 
-               qap_m4$results, qap_m4$results_sig,
-               "QAP LR - Std. + Controls", 
-               "qap_controls_plots")
 
 # --------------------------------------------------------------------------- #
 # Collect Results in Table
