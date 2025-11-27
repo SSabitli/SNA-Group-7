@@ -5,6 +5,7 @@
 install.packages("viridis")     # For Colours
 install.packages("Rglpk")       # Additional solver for ERGMs
 install.packages("here")        # To locate files from RProj
+install.packages("gridExtra")   # To display multiple ggplots side by side
 
 # Import the Network and Other Object
 ergm_path <- "resources/objects/ergm/"
@@ -224,7 +225,9 @@ snafun::stat_plot_gof(model_1_panel$gof)
 texreg::screenreg(list(base_ergm, model_1))
 
 # Plot Coefficients
-plot_coef(ergm_m1$model, model_name = "Baseline + b1degree")
+m1_coef_plot <- plot_coef(model_1, model_name = "Baseline + b1degree")
+saveRDS(m1_coef_plot, 
+        here::here("resources","objects","ergm","m1_coef_plot.Rds"))
 # --------------------------------------------------------------------------- #
 # Iteration 2 + MCMC Diagnostics + GOF
 model_2_params <- bondora_net ~ edges + b1degree(1) + 
@@ -258,7 +261,10 @@ models <- list(base_ergm, model_1, model_2)
 texreg::screenreg(models)
 
 # Plot Coefficients
-plot_coef(model_2_panel$model, model_name = "Baseline + b1degree + cycle(4)")
+m2_coef_plot <- plot_coef(model_2_panel$model, 
+                          model_name = "Baseline + b1degree + cycle(4)")
+saveRDS(m2_coef_plot, 
+        here::here("resources","objects","ergm","m2_coef_plot.Rds"))
 # --------------------------------------------------------------------------- #
 # Iteration 3 + MCMC Diagnostics + GOF
 model_3_params <- bondora_net ~ edges + b1degree(1) + cycle(4) +
@@ -295,8 +301,10 @@ models <- list(base_ergm, model_1, model_2, model_3)
 texreg::screenreg(models)
 
 # Plot Coefficients
-plot_coef(model_3_panel$model,
+m3_coef_plot <- plot_coef(model_3_panel$model,
           model_name = "Baseline + b1degree + cycle(4) + b1factor(gender)")
+saveRDS(m3_coef_plot, 
+        here::here("resources","objects","ergm","m3_coef_plot.Rds"))
 # --------------------------------------------------------------------------- #
 # Iteration 4 + MCMC Diagnostics + GOF
 model_4_params <- bondora_net ~ edges + b1degree(1) + cycle(4) +
@@ -342,6 +350,11 @@ ggplot2::ggsave("m4_coef_plot.png",
                 device = "png",
                 path = here::here("resources","objects","ergm"))
 # --------------------------------------------------------------------------- #
+# Collect Plots Together
+gridExtra::grid.arrange(m1_coef_plot, m2_coef_plot,
+                        m3_coef_plot, m4_ergm_coef_plot,
+                        nrow = 2, ncol = 2)
+
 # Collect Models in Table 1: Raw results
 headers <- c("Base ERGM","b1degree(1)","cycle(4)","Age","Gender")
 texreg::knitreg(models, custom.model.names = headers,
