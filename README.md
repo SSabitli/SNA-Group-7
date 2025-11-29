@@ -20,12 +20,14 @@ The project contributors are
 
 ### Study 1
 
-The first study aims to uncover how similarities across borrowers' loan uses are explained by their personal and loan characteristics. To understand this, Linear Quadratic Assignment Problem (QAP) regression models were utilised for their ability to explain networks as a linear function of other related networks. In the following table we describe the construction and use of each variable within the Linear QAP framework.
+The first study aims to uncover how similarities across borrowers' loan uses are explained by their personal and loan characteristics. To understand this, Linear Quadratic Assignment Problem (QAP) regression models were utilised for their ability to explain networks as a linear function of other related networks. Therefore, we formulate the following research question
 
-Under `Variable Name`, we list the original attribute used from the raw dataset, however, its transformation into the appropriate data structure is described under the `Construction` column
+> ***Research Question 1:** Do borrowers vary in their loan use type and frequency based on their individual and loan characteristics?*
+
+In the following table we describe the construction and use of each variable within the Linear QAP framework. Under `Variable Name`, we list the original attribute used from the raw dataset, however, its transformation into the appropriate data structure is described under the `Construction` column
 
 | Variable Name | Variable Type | Construction |
-|----------------|----------------|-----------------------------------------|
+|-----------------|-----------------|--------------------------------------|
 | `UseOfLoan` | Dependent | $n\times n$ adjacency matrix of $n$ borrowers given a common reported `UseofLoan`. Obtained by transforming the $n\times m$ incidence matrix of $m$ loan types by $\mathbf{X} \cdot \mathbf{X}^T$ weighted by unique loan count. |
 | `Rating` | Main Predictor | $n \times n$ adjacency matrix of $n$ borrowers given a commonly reported credit rating across their portfolio of loans. Obtained by transforming the $n \times m$ incidence matrix of $m$ credit ratings by $\mathbf{X\cdot X^T}$, weighted by unique loan count. |
 | `OccupationArea` | Main Predictor | Binary $n\times n$ adjacency matrix of $n$ borrowers given a common occupation area reported across their portfolio of loans. Obtained by transforming the $n\times m$ incidence matrix of occupation areas by $\mathbf{X\cdot X^T}$, replacing weighted values by ones. |
@@ -33,6 +35,12 @@ Under `Variable Name`, we list the original attribute used from the raw dataset,
 | `Age` | Control Variable | $n\times n$ adjacency matrix of differences across borrowers' ages constructed by transforming the $n \times m$ incidence matrix of $m$ ages by $\mathbf{D}=\left[|x_i-x_j|\right]^n_{i,j=1}$. |
 | `LoanDuration` | Control Variable | $n\times m$ adjacency matrix of differences across borrowers' average loan duration by transforming the $n\times m$ matrix of $m$ average loan durations by $\mathbf{D}=\left[|x_i-x_j|\right]^n_{i,j=1}$. |
 | `Amount` | Control Variable | $n\times m$ adjacency matrix of differences across average loan amounts per borrower by transforming the $n\times m$ matrix of $m$ average loan amounts by $\mathbf{D}=\left[|x_i-x_j|\right]^n_{i,j=1}$. |
+
+### Study 2
+
+The second study aims to understand how behavioural biases affect the structure of borrower-to-loan-use connections. This can be studied effectively with the use of Exponential Random Graph Models (ERGM), which can take into account the properties of two-mode networks. Ultimately, we formulate the following research question:
+
+> ***Research Question 2:** What behavioural mechanisms affect the structure of borrower-to-loan-use connections?*
 
 ## Methodology
 
@@ -149,7 +157,7 @@ The project has been constructed as such:
 -   The `R` objects utilised are saved as `.RDS` files under `resources/objects/` corresponding to each appropriate part of the analysis
 -   A series of progress meeting RevealJS presentations explain the progress made throughout the project at various stages
 -   The main report was written and compiled by Quarto.
--   The .pdf of the main report can be located at `_output/SNA_Group7.pdf`
+-   The `.pdf` of the main report can be located at `_output/SNA_Group7.pdf`
 -   The R scripts utilised to process the dataset and conduct network analyses can be found under `scripts/`
     -   `bondora_preprocessing.R` outlines the steps needed to transform the raw dataset into a usable network
     -   `qap_network_analysis.R` outlines the analysis using the QAP Linear Regression
@@ -158,7 +166,7 @@ The project has been constructed as such:
 ## R Package Requirements
 
 -   The `snafun` package that can be remotely downloaded from the [SNAfun GitHub Repo](https://github.com/SNAnalyst/SNAfun)
-    -   The dependencies of `snafun` are required for the proper functioning of the scripts
+    -   The dependencies of `snafun` are also required for the proper functioning of the scripts
 -   `here` package to locate relevant directories using the local `.Rpoj` file
 -   `igraph`, `sna`, and `network` to undertake network modelling
 -   `viridis` for the colour palette
