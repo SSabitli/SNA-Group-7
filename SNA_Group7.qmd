@@ -50,7 +50,7 @@ csl: resources/apa-6th-edition.csl
 toc: true
 link-citations: true
 toc-title: "Table of Contents"
-toc-depth: 2
+toc-depth: 4
 format:
   pdf: 
     pdf-engine: xelatex
@@ -731,6 +731,64 @@ replayPlot(readRDS(here::here("resources","objects","preprocessing",
 #| tbl-cap: "ERGM Results in Probability Scale"
 knitr::kable(readRDS(
   here::here("resources","objects","ergm","ergm_prob_tables.Rds")))
+```
+
+\clearpage
+
+### ERGM Diagnostics Plots
+
+#### Base Model
+
+```{r fig.width=10, fig.height=5}
+
+base <- readRDS(here::here("resources","objects","ergm","ergm_base_panel.Rds"))
+
+snafun::stat_plot_gof(base$gof)
+base$gof
+```
+
+#### Model 1
+
+```{r fig.width=10, fig.height=5}
+
+em1 <- readRDS(here::here("resources","objects","ergm","ergm_m1_panel.Rds"))
+
+ergm::mcmc.diagnostics(em1$model)
+snafun::stat_plot_gof(em1$gof)
+em1$gof
+```
+
+#### Model 2
+
+```{r fig.width=10, fig.height=5}
+
+em2 <- readRDS(here::here("resources","objects","ergm","ergm_m2_panel.Rds"))
+
+ergm::mcmc.diagnostics(em2$model)
+snafun::stat_plot_gof(em2$gof)
+em2$gof
+```
+
+#### Model 3
+
+```{r fig.width=10, fig.height=5}
+
+em3 <- readRDS(here::here("resources","objects","ergm","ergm_m3_panel.Rds"))
+
+ergm::mcmc.diagnostics(em3$model)
+snafun::stat_plot_gof(em3$gof)
+em3$gof
+```
+
+#### Model 4
+
+```{r fig.width=10, fig.height=5}
+
+em4 <- readRDS(here::here("resources","objects","ergm","ergm_m4_panel.Rds"))
+
+ergm::mcmc.diagnostics(em4$model)
+snafun::stat_plot_gof(em4$gof)
+em4$gof
 ```
 
 \clearpage

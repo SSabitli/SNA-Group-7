@@ -154,19 +154,15 @@ plot_coef <- function(model,
     se = ses
   )
   
-  # 95% Conf. Interval calculation (z-score 1.96)
   df$lower <- df$estimate - 1.96 * df$se
   df$upper <- df$estimate + 1.96 * df$se
   
-  # Significance indicator: CI does not cross zero
   df$sig <- df$lower * df$upper > 0
   df$sig <- as.character(df$sig) # Convert to character to make it work
   
-  # 3. Reorder terms by estimate (Base R factor reordering)
   order_index <- order(df$estimate)
   df$term <- factor(df$term, levels = df$term[order_index])
   
-  # 4. Create the ggplot (Uses ggplot2:: explicitly, as requested)
   ggplot2::ggplot(df, ggplot2::aes(x = estimate, y = term)) +
     ggplot2::geom_vline(xintercept = 0, linetype = "dashed", color = "grey40") +
     ggplot2::geom_errorbarh(ggplot2::aes(xmin = lower, xmax = upper), 
@@ -191,7 +187,9 @@ plot_coef <- function(model,
 # Base Model + GOF
 formula_base_model <- bondora_net ~ edges
 base_ergm <- ergm::ergm(formula_base_model)
+
 base_ergm_panel <- auto_ergm(base_ergm, mcmc = FALSE, name = "ergm_base")
+
 snafun::stat_plot_gof(base_ergm_panel$gof) 
 models = list(base_ergm)
 texreg::screenreg(models)
@@ -223,7 +221,10 @@ model_1 <- ergm::ergm(
 
 model_1_panel <- auto_ergm(model=model_1, mcmc=TRUE, name="ergm_m1")
 model_1_panel$gof
-snafun::stat_plot_gof(model_1_panel$gof) 
+
+snafun::stat_plot_gof(model_1_panel$gof)
+save_ergm_plot("m1_gof")
+
 texreg::screenreg(list(base_ergm, model_1))
 
 # Plot Coefficients

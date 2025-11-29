@@ -85,19 +85,15 @@ plot_coef_qap <- function(model,
     se = ses
   )
   
-  # 95% Conf. Interval calculation (z-score 1.96)
   df$lower <- df$estimate - 1.96 * df$se
   df$upper <- df$estimate + 1.96 * df$se
   
-  # Significance indicator: CI does not cross zero
   df$sig <- df$lower * df$upper > 0
   df$sig <- as.character(df$sig) # Convert to character to make it work
-  
-  # 3. Reorder terms by estimate (Base R factor reordering)
+
   order_index <- order(df$estimate)
   df$term <- factor(df$term, levels = df$term[order_index])
   
-  # 4. Create the ggplot (Uses ggplot2:: explicitly, as requested)
   ggplot2::ggplot(df, ggplot2::aes(x = estimate, y = term)) +
     ggplot2::geom_vline(xintercept = 0, linetype = "dashed", color = "grey40") +
     ggplot2::geom_errorbarh(ggplot2::aes(xmin = lower, xmax = upper), 
