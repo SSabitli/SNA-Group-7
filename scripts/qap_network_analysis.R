@@ -215,7 +215,7 @@ extract.netlm <- function(model) {
 
 # View the Table of Results
 titles <- c("M1 | No Controls", "M2 | Controls")
-extracted_models <- lapply(list(qap_m1, qap_m3), extract.netlm)
+extracted_models <- lapply(list(qap_m1$model, qap_m3$model), extract.netlm)
 texreg::screenreg(extracted_models, custom.model.names = titles, digits = 3)
 
 # Save the table for use in the Report

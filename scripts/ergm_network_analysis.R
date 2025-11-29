@@ -140,6 +140,7 @@ auto_ergm <- function(model, mcmc, name) {
 # Make Function to do Coefficient Plot
 plot_coef <- function(model,
                       model_name = "Model Estimates", 
+                      sub = "Subtitle",
                       x_axis_label = "Coefficient Estimate") {
   
   # Extract Coefficients and SEs from ERGM 
@@ -178,7 +179,8 @@ plot_coef <- function(model,
     ggplot2::labs(
       x = x_axis_label,
       y = "Variable",
-      title = model_name
+      title = model_name,
+      subtitle = sub
       #color = "Significance"
     )
 }
@@ -225,7 +227,8 @@ snafun::stat_plot_gof(model_1_panel$gof)
 texreg::screenreg(list(base_ergm, model_1))
 
 # Plot Coefficients
-m1_coef_plot <- plot_coef(model_1, model_name = "Baseline + b1degree")
+m1_coef_plot <- plot_coef(model_1, model_name = "Model 1",
+                          sub = "b1degree")
 saveRDS(m1_coef_plot, 
         here::here("resources","objects","ergm","m1_coef_plot.Rds"))
 # --------------------------------------------------------------------------- #
@@ -262,7 +265,8 @@ texreg::screenreg(models)
 
 # Plot Coefficients
 m2_coef_plot <- plot_coef(model_2_panel$model, 
-                          model_name = "Baseline + b1degree + cycle(4)")
+                          model_name = "Model 2",
+                          sub = "b1degree + cycle(4)")
 saveRDS(m2_coef_plot, 
         here::here("resources","objects","ergm","m2_coef_plot.Rds"))
 # --------------------------------------------------------------------------- #
@@ -302,7 +306,9 @@ texreg::screenreg(models)
 
 # Plot Coefficients
 m3_coef_plot <- plot_coef(model_3_panel$model,
-          model_name = "Baseline + b1degree + cycle(4) + b1factor(gender)")
+          model_name = "Model 3",
+          sub = "b1degree + cycle(4) + b1factor(gender)")
+# Save Plot
 saveRDS(m3_coef_plot, 
         here::here("resources","objects","ergm","m3_coef_plot.Rds"))
 # --------------------------------------------------------------------------- #
@@ -341,14 +347,11 @@ texreg::screenreg(models)
 
 # Plot Coefficients
 m4_ergm_coef_plot <- plot_coef(model_4_panel$model,
-          model_name = "Complete Model")
+                               model_name = "Model 4",
+                               sub = "Unrestricted Model")
 # Save Plot
 saveRDS(m4_ergm_coef_plot,
         here::here("resources","objects","ergm","m4_coef_plot.Rds"))
-ggplot2::ggsave("m4_coef_plot.png",
-                plot = m4_ergm_coef_plot,
-                device = "png",
-                path = here::here("resources","objects","ergm"))
 # --------------------------------------------------------------------------- #
 # Collect Plots Together
 gridExtra::grid.arrange(m1_coef_plot, m2_coef_plot,

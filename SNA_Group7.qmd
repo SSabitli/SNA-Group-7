@@ -499,7 +499,7 @@ texreg::texreg(ergm_table_items[[1]],
                booktabs = TRUE,
                float.pos = "!h",
                use.packages = FALSE,
-               scalebox = 0.8,
+               scalebox = 0.85,
                dcolumn = TRUE)
 ```
 
