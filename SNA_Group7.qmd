@@ -475,7 +475,12 @@ texreg::texreg(qap_table_items[[1]],
 #| label: fig-ergm-coef
 #| fig-cap: "ERGM Coefficient Plots"
 
-readRDS(here::here("resources","objects","ergm","m4_coef_plot.Rds"))
+ep1 <- readRDS(here::here("resources","objects","ergm","m1_coef_plot.Rds"))
+ep2 <- readRDS(here::here("resources","objects","ergm","m2_coef_plot.Rds"))
+ep3 <- readRDS(here::here("resources","objects","ergm","m3_coef_plot.Rds"))
+ep4 <- readRDS(here::here("resources","objects","ergm","m4_coef_plot.Rds"))
+
+gridExtra::grid.arrange(ep1, ep2, ep3, ep4, nrow = 2, ncol = 2)
 ```
 
 Table \ref{tab-ergm-results}

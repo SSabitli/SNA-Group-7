@@ -71,6 +71,7 @@ run_QAP <- function(y_mat, xlist, varnames, model_name) {
 # Make function to Plot QAP Coefficients
 plot_coef_qap <- function(model,
                       model_name = "Model Estimates", 
+                      sub = "Subtitle",
                       x_axis_label = "Coefficient Estimate") {
   
   # Extract Coefficients and SEs from ERGM 
@@ -109,7 +110,8 @@ plot_coef_qap <- function(model,
     ggplot2::labs(
       x = x_axis_label,
       y = "Variable",
-      title = model_name
+      title = model_name,
+      subtitle = sub
       #color = "Significance"
     )
 }
@@ -149,7 +151,9 @@ qap_m1 <- run_QAP(loan_use_mat, main_pred_vars, main_pred_names, "qap_m1")
 summary(qap_m1$model)
 
 # Plot the QAP Model Coefficients and Save it
-qap_m1_coef_plot <- plot_coef_qap(qap_m1$model)
+qap_m1_coef_plot <- plot_coef_qap(qap_m1$model,
+                                  model_name = "MRQAP Model 1",
+                                  sub = "No Controls")
 saveRDS(qap_m1_coef_plot,
         here::here("resources","objects","qap","qap_m1_coef_plot.Rds"))
 
@@ -163,7 +167,9 @@ qap_m3 <- run_QAP(loan_use_mat, all_pred_vars, var_names, "qap_m3")
 summary(qap_m3$model)
 
 # Plot the QAP Model Coefficients and Save it
-qap_m3_coef_plot <- plot_coef_qap(qap_m3$model)
+qap_m3_coef_plot <- plot_coef_qap(qap_m3$model,
+                                  model_name = "MRQAP Model 2",
+                                  sub = "With Controls")
 saveRDS(qap_m3_coef_plot,
         here::here("resources","objects","qap","qap_m3_coef_plot.Rds"))
 
