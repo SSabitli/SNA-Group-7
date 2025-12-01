@@ -27,7 +27,7 @@ The first study aims to uncover how similarities across borrowers' loan uses are
 In the following table we describe the construction and use of each variable within the Linear QAP framework. Under `Variable Name`, we list the original attribute used from the raw dataset, however, its transformation into the appropriate data structure is described under the `Construction` column
 
 | Variable Name | Variable Type | Construction |
-|-----------------|-----------------|--------------------------------------|
+|------------------|------------------|-------------------------------------|
 | `UseOfLoan` | Dependent | $n\times n$ adjacency matrix of $n$ borrowers given a common reported `UseofLoan`. Obtained by transforming the $n\times m$ incidence matrix of $m$ loan types by $\mathbf{X} \cdot \mathbf{X}^T$ weighted by unique loan count. |
 | `Rating` | Main Predictor | $n \times n$ adjacency matrix of $n$ borrowers given a commonly reported credit rating across their portfolio of loans. Obtained by transforming the $n \times m$ incidence matrix of $m$ credit ratings by $\mathbf{X\cdot X^T}$, weighted by unique loan count. |
 | `OccupationArea` | Main Predictor | Binary $n\times n$ adjacency matrix of $n$ borrowers given a common occupation area reported across their portfolio of loans. Obtained by transforming the $n\times m$ incidence matrix of occupation areas by $\mathbf{X\cdot X^T}$, replacing weighted values by ones. |
@@ -128,11 +128,13 @@ SNA4DS_Group7_Project
     │       ├── progress_meeting_3.qmd
     │       └── references.bib
     ├── resources
-    │   ├── images/
     │   ├── objects
     │   │   ├── ergm/
     │   │   ├── preprocessing/
     │   │   └── qap/
+    │   │       ├── deprecated/
+    │   ├── quarto_templates
+    │   │   └── SNA4DSprojectTemplate2025.qmd
     │   ├── apa-6th-edition.csl
     │   └── r-references.bib
     ├── scripts
