@@ -141,11 +141,9 @@ SNA4DS_Group7_Project
     │   └── qap_network_analysis.R
     ├── SNA_Group7_files
     │   └── figure-pdf/
-    ├── tex_tables/
     ├── _quarto.yml
     ├── .gitattributes
     ├── .gitignore
-    ├── .RData
     ├── README.md
     ├── SNA_Group7.qmd
     └── SNA_Group7.Rproj
