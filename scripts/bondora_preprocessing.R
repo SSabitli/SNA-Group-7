@@ -1,6 +1,9 @@
 # --------------------------------------------------------------------------- #
-install.packages("viridis") # For Colours
-install.packages("here") # To locate files from RProj
+# If not already installed
+install.packages("viridis")  # For Colours
+install.packages("here")     # To locate files from RProj
+
+# Ensure repeatability
 set.seed(42)
 # --------------------------------------------------------------------------- #
 # Import the Bondora P2P Dataset

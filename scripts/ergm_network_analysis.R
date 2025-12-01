@@ -1,6 +1,4 @@
 # --------------------------------------------------------------------------- #
-# NOTE: NOT THE LATEST ERGM ANALYSIS! FOR REFERENCE ONLY
-
 # If not already Installed
 install.packages("viridis")     # For Colours
 install.packages("Rglpk")       # Additional solver for ERGMs

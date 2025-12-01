@@ -1,7 +1,7 @@
 ---
 title: "Credit Allocation Mix in Peer-to-Peer Lending: A Network Study on Bondora"
 subtitle: "Social Network Analysis - Group 7"
-date: 2025-11-16
+date: 2025-12-14
 author:
   - name: Floris 	Vermeulen
     affiliations:
@@ -103,6 +103,18 @@ cent_plots <- readRDS(here::here("resources","objects","ergm",
 ```
 
 {{< pagebreak >}}
+
+\renewcommand{\thesection}{\Roman{section}}
+\pagenumbering{roman}
+
+## Abstract
+
+This is the Abstract
+
+\clearpage
+\pagenumbering{arabic}
+\setcounter{section}{0}
+\renewcommand{\thesection}{\arabic{section}}
 
 ## Introduction {#sec-intro}
 
@@ -276,12 +288,12 @@ lending platform primarily operating in the Baltics and Spain. The
 dataset contains detailed information on defaulted and non-defaulted
 loans granted to users between February 2009 and July 2021.
 Specifically, contained is a range of numeric, binary, categorical, and
-time-series attributes across 85,087 unique users and 179,235 individual
-loans. Since the company's API is no longer accessible, we utilised a
-publicly available repository compiled by @manu_siddhartha_bondora_2021
-on kaggle.com. The user made a series of API calls to collect the data.
-Following this, the dataset was processed according to Appendix
-\ref{sec:preprocessing}.
+time-series attributes across `85,087` unique users and `179,235`
+individual loans. Since the company's API is no longer accessible, we
+utilised a publicly available repository compiled by
+@manu_siddhartha_bondora_2021 on kaggle.com. The user made a series of
+API calls to collect the data. Following this, the dataset was processed
+according to Appendix Section \ref{sec:preprocessing}.
 
 ### Pre-Processing & Network Formation
 
@@ -292,9 +304,9 @@ formed with unique users as the first partition and the purpose of loans
 as the second. This allows us to evaluate how borrowers interact with
 loan purposes; a one-mode projection onto users is not meaningful for
 P2P networks as it produces no discernible structure. For model
-efficiency and performance, we randomly sample 500 individuals from the
-larger sample. Ultimately, we have 500 and 9 nodes in the first and
-second partitions, respectively.
+efficiency and performance, we randomly sample `500` individuals from
+the larger sample. Ultimately, we have `500` and `9` nodes in the first
+and second partitions, respectively.
 
 ### Descriptive Statistics & Preliminary Analysis
 
@@ -302,18 +314,18 @@ second partitions, respectively.
 larger samples. First, borrowers take out relatively small loans with
 fairly high interest rates, possibly reflecting that the average
 borrower is deemed fairly risky. The average loan is quite long, at
-approximately 46 months out of a maximum 60. @fig-bar-rating shows that
-the largest credit category is HR[^1], which is the lowest possible
-rating. So, the typical borrower is relatively uncreditworthy. Moreover,
-the largest categories of loan use are "Other" and "Home Improvement",
-suggesting these are largely personal. We observe minimal differences
-between the random sampling and the larger sample of individuals, per
-@tbl-desc-table and @fig-bar-rating, however, the study may be biased by
-the fact that the dataset contains only granted loans, rather than all
-bids for loans. This means our inferences about how borrowers behave is
-limited to successful bids. Further, the time period is relatively
-distant, meaning that recent structural changes to the P2P sector cannot
-be accounted for.
+approximately `46` months out of a maximum `60`. @fig-bar-rating shows
+that the largest credit category is `HR`[^1], which is the lowest
+possible rating. So, the typical borrower is relatively uncreditworthy.
+Moreover, the largest categories of loan use are `Other` and
+`Home Improvement`, suggesting these are largely personal. We observe
+minimal differences between the random sampling and the larger sample of
+individuals, per @tbl-desc-table and @fig-bar-rating, however, the study
+may be biased by the fact that the dataset contains only granted loans,
+rather than all bids for loans. This means our inferences about how
+borrowers behave is limited to successful bids. Further, the time period
+is relatively distant, meaning that recent structural changes to the P2P
+sector cannot be accounted for.
 
 [^1]: Bondora uses their own proprietary credit rating system where the
     best rating is AA and worst is HR [@bondora_how_2024]. The company
@@ -328,15 +340,15 @@ be accounted for.
 knitr::kable(sum_tab)
 ```
 
-@tbl-net-stats shows a network density of 0.12, indicating that only 12%
-of all possible borrower–loan-type connections exist. This density
+@tbl-net-stats shows a network density of `0.12`, indicating that only
+12% of all possible borrower–loan-type connections exist. This density
 suggests that borrowers typically engage with few loan types, reflecting
-specialization in borrowing behaviour. The centralization value of 0.47
-further indicates an uneven distribution across loan types, where a few
-popular categories attract many borrowers while most remain peripheral.
-The mean distance of approximately three implies that borrowers are
-closely connected, typically separated by only three-to-four loan-use
-steps.
+specialization in borrowing behaviour. The centralization value of
+`0.47` further indicates an uneven distribution across loan types, where
+a few popular categories attract many borrowers while most remain
+peripheral. The mean distance of approximately three implies that
+borrowers are closely connected, typically separated by only
+three-to-four loan-use steps.
 
 Centrality distributions reinforce this structure [@fig-network-plots].
 Betweenness is highest among loan-type nodes, though several borrowers
@@ -503,13 +515,16 @@ texreg::texreg(ergm_table_items[[1]],
                dcolumn = TRUE)
 ```
 
+## Conclusion
+
+This is the conclusion
+
 \clearpage
 \appendix
 
-## Supplements
+## Appendix
 
 \label{sec:supp}
-
 \definecolor{dkgreen}{rgb}{0,0.6,0}
 \definecolor{gray}{rgb}{0.5,0.5,0.5}
 \definecolor{mauve}{rgb}{0.58,0,0.82}
@@ -560,7 +575,7 @@ keep_cols <- c("LoanId", "UserName","Age", "Gender",
     ensure that we have a complete dataset
 
 -   Observing @fig-user-counts, we see that between 2017-2021, there
-    exists many -1 values for `UseofLoan`. This is because Bondora no
+    exists many `-1` values for `UseofLoan`. This is because Bondora no
     longer provided this detail in later datasets. However, between 2014
     and 2016 this data is available. Because of this, we restrict the
     time period to have the least noisy data. `BiddingStartedOn` was
@@ -574,9 +589,9 @@ keep_cols <- c("LoanId", "UserName","Age", "Gender",
 replayPlot(readRDS(here::here("resourceS","objects","preprocessing","user_cnt_plt.Rds")))
 ```
 
--   Then, we sampled 500 individuals out of the filtered dataset to
+-   Then, we sampled `500` individuals out of the filtered dataset to
     ensure that our models run sufficiently well and converge. By
-    choosing 500 individuals, we preserve importance structures within
+    choosing `500` individuals, we preserve importance structures within
     the network while adding sufficient statistical power.
 
 <!-- -->
@@ -620,35 +635,35 @@ replayPlot(readRDS(here::here("resourceS","objects","preprocessing","user_cnt_pl
             to ensure that there are no loops within the network.
 
     -   In accordance with this procedure, we create adjacency matrices
-        for Credit Rating and Occupation Area which will be used as the
-        main predictors in the QAP models.
+        for `Credit Rating` and `Occupation Area` which will be used as
+        the main predictors in the QAP models.
 
-        -   Credit Rating is a weighted adjacency matrix based on the
+        -   `Credit Rating` is a weighted adjacency matrix based on the
             loan count belonging to each user for each credit rating
             category
 
-        -   Occupation Area is a binary adjacency matrix based on which
-            occupation each user has reported to have held in the past
-            when applying for each of their loans.
+        -   `Occupation Area` is a binary adjacency matrix based on
+            which occupation each user has reported to have held in the
+            past when applying for each of their loans.
 
     -   Additionally, we create a set of control variables to improve
-        the validity and performance of the linear regression using Loan
-        Amounts, Age, Gender, Loan Duration, and whether the loans have
-        been restructured.
+        the validity and performance of the linear regression using
+        `Loan Amounts`, `Age`, `Gender`, `Loan Duration`, and whether
+        the loans have been restructured.
 
-        -   Loan Amounts is a weighted adjacency matrix based on five
+        -   `Loan Amounts` is a weighted adjacency matrix based on five
             bins across the range of possible loan amounts
 
-        -   Age is an adjacency matrix based on differences in users'
+        -   `Age` is an adjacency matrix based on differences in users'
             ages
 
-        -   Gender is a binary adjacency matrix based on users' shared
+        -   `Gender` is a binary adjacency matrix based on users' shared
             gender.
 
-        -   Loan Duration is an adjacency matrix based on the
+        -   `Loan Duration` is an adjacency matrix based on the
             differences in users' loans average durations
 
-        -   Restructured is a binary adjacency matrix based on whether
+        -   `Restructured` is a binary adjacency matrix based on whether
             the users share the fact that they have defaulted on any
             loans in the past. The users can either have shared both
             defaults and non-defaults, or both.
@@ -739,6 +754,9 @@ knitr::kable(readRDS(
 
 #### Base Model
 
+\begingroup
+\scriptsize
+
 ```{r fig.width=10, fig.height=5}
 
 base <- readRDS(here::here("resources","objects","ergm","ergm_base_panel.Rds"))
@@ -792,6 +810,7 @@ em4$gof
 ```
 
 \clearpage
+\endgroup
 
 ### Source Code - Data Preprocessing
 
@@ -812,22 +831,15 @@ em4$gof
 \clearpage
 \linespread{1.15}
 
-## References {.unnumbered}
-
-::: {#refs}
-:::
-
-\clearpage
-
 ## Technology Statement
 
 > During the preparation of this work, we used ChatGPT in order to
-> generate select parts of the R script utilised to process the dataset.
-> Specifically, the tool was used to transform the processed dataset
-> into a format that `igraph` would accept as a network object.
-> Additionally, some R functions written by the group were improved with
-> ChatGPT's suggestions. No AI tool was utilised to independently write
-> parts of the report. The following parts of the assignment were
+> generate select parts of the `R` script utilised to process the
+> dataset. Specifically, the tool was used to transform the processed
+> dataset into a format that `igraph` would accept as a network object.
+> Additionally, some `R` functions written by the group were improved
+> with ChatGPT's suggestions. No AI tool was utilised to independently
+> write parts of the report. The following parts of the assignment were
 > affected/generated by AI tool usage: **INTRODUCTION;** The tool was
 > utilised to evaluate the validity of certain theoretical concepts and
 > refine them. **DATASET;** the data described within this section was
@@ -837,3 +849,8 @@ em4$gof
 > AI tools have used, and edited the content as needed. As a
 > consequence, **Group 7** takes full responsibility for the content of
 > their work.
+
+## References {.unnumbered}
+
+::: {#refs}
+:::
