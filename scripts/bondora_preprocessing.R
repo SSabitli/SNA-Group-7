@@ -15,7 +15,7 @@ raw_cols <- colnames(bondora_raw)
 keep_cols <- c("LoanId", "UserName","Age", "Gender", 
                "Country", "Amount", "Interest","LoanDuration",
               "UseOfLoan", "Rating", "Restructured", "MonthlyPayment",
-              "OccupationArea", "BiddingStartedOn")
+              "OccupationArea", "BiddingStartedOn","Country")
 
 bondora <- bondora_raw[keep_cols]
 
@@ -223,6 +223,9 @@ save_plot("bar_rating")
 
 plot_desc_bar(bondora_test, bondora_clean,"occupation_label","Occupation")
 save_plot("bar_occupation")
+
+plot_desc_bar(bondora_test, bondora_clean, "Country","Country")
+save_plot("bar_country")
 
 # Get Tabular Summary Statistics
 tab_comps <- function(df1, df2, cols) {
