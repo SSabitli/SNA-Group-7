@@ -123,8 +123,8 @@ asserts that borrowers sharing the same occupation area should share
 loan uses with a lower count as well. Here, we do not find a meaningful
 effect. The second study concerns which behavioural phenomena affect how
 borrowers decide which combination of loan purposes to request. We ask,
-"What behavioural mechanisms affect the structure of
-borrower-to-loan-use connections". With the use of Exponential Random
+*"What behavioural mechanisms affect the structure of
+borrower-to-loan-use connections"*. With the use of Exponential Random
 Graph Models (ERGM), we first determine whether there is co-affiliation
 between borrowers overlapping on loan choices. We find that there is no
 systematic aggregate overlapping effect. Further, we evaluate whether
