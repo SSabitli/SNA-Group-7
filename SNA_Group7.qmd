@@ -110,30 +110,30 @@ cent_plots <- readRDS(here::here("resources","objects","ergm",
 ## Abstract
 
 In this study we investigate the behavioural phenomena that influence
-individual borrowers' choice of loan uses. In the first study, we
-evaluate how loan counts within each loan use choice are influenced by
-borrowers' individual characteristics by asking "*Do borrowers vary in
-their loan use type and frequency based on the irindividual and loan
-characteristics?".* Using the Quadratic Assignment Procedure (QAP)
-linear regression framework, our first hypothesis asserts that borrowers
-sharing the same credit rating should choose similar loan uses, but with
-a preference for a lower loan count. We found that while this is a
+individual borrowers' choice of loan purposes. In the first study, we
+evaluate how loan counts within each loan purpose choice are influenced
+by borrowers' individual characteristics by asking "*Do borrowers vary
+in their loan purpose type and frequency based on the individual and
+loan characteristics?".* Using the Quadratic Assignment Procedure (QAP)
+linear regression framework. Our first hypothesis asserts that borrowers
+sharing the same credit rating should choose similar loan purposes, but
+with a preference for a lower loan count. We found that while this is a
 significant effect, the impact on loan count is minimal. The second
 asserts that borrowers sharing the same occupation area should share
-loan uses with a lower count as well. Here, we do not find a meaningful
-effect. The second study concerns which behavioural phenomena affect how
-borrowers decide which combination of loan purposes to request. We ask,
-*"What behavioural mechanisms affect the structure of
+loan purposes with a lower count as well. Here, we do not find a
+meaningful effect. The second study examines which behavioural phenomena
+affect how borrowers decide which combination of loan purposes to
+request. We ask, *"What behavioural mechanisms affect the structure of
 borrower-to-loan-use connections"*. With the use of Exponential Random
 Graph Models (ERGM), we first determine whether there is co-affiliation
-between borrowers overlapping on loan choices. We find that there is no
-systematic aggregate overlapping effect. Further, we evaluate whether
-there is an individual behavioural effect where borrowers minimise their
-loan types. The results indicate that there is a systematic individual
-behavioural bias. Assessing whether younger borrowers have different
-loan use selections, we fail to find evidence for this assertion.
-Similarly, we fail to find support for the idea that there are gender
-differences in how borrowers choose loan types.
+between borrowers who overlap in their loan choices. We find that there
+is no systematic aggregate overlapping effect. Further, we evaluate
+whether there is an individual behavioural effect where borrowers
+minimise the number of loan types. The results indicate a systematic
+individual behavioural bias. Assessing whether younger borrowers have
+different loan purpose selections, we fail to find evidence for this
+assertion. Similarly, we fail to find support for the idea that there
+are gender differences in how borrowers choose loan types.
 
 \clearpage
 \pagenumbering{arabic}
@@ -150,7 +150,7 @@ presents new realities for individuals disenfranchised by the
 traditional financial system [@alistair_milne_business_2017].
 Traditional financial literature shows that individually, investors
 exhibit behavioural biases [@agrawal_managing_2012; @ayal_two_2011] in
-how they choose their investments, however, numerous studies demonstrate
+how they choose their investments. However, numerous studies demonstrate
 that these behavioural biases are present among non-professional P2P
 borrowers. For example, @herzenstein_strategic_2011 and
 @lee_herding_2012 suggest that users cluster around popular loans,
@@ -158,7 +158,7 @@ exhibiting 'herding' behaviour. Literature focuses predominantly on
 funding success [@yao_relationship_2019], however, @ayal_behavioral_2018
 suggests that there is insufficient attention on how borrowers form
 their loan portfolios. As the authors indicate, this area of research is
-important in understanding why less professional investors deviate from
+important in understanding why non-professional investors deviate from
 known models of rational investor behaviour. Our study aims to model and
 understand how P2P borrowers' behaviours influence what kinds of loans
 they acquire. In subsequent discussions, we consider investors as
@@ -172,98 +172,98 @@ lead to undiversified portfolios. Evidence with P2P platforms supports
 the familiarity bias in lenders, as @galak_micro-finance_2010
 demonstrate that lenders choose borrowers who are similar across
 demographic attributes such as gender, occupation, and ethnicity.
-Moreover, @amar_winning_2011 explains that borrowers show an aversion to
+Moreover, @amar_winning_2011 explain that borrowers show an aversion to
 holding a *large number of debts,* preferring to first reduce debt
 count, even if they had other debts with higher interest rates. This
 irrational behaviour demonstrates that individual borrowers face
 behavioural biases on the *type* and *number* of debts they select.
 Based on these notions, we formulate our first study, asking:
 
-***Research Question 1:** Do borrowers vary in their loan use type and
-frequency based on their individual and loan characteristics?*
+***Research Question 1:** Do borrowers vary in their loan purpose type
+and frequency based on their individual and loan characteristics?*
 
 This question is answered using linear Quadratic Assignment Procedure
-(QAP) regressions, as we can represent similarities across loan uses and
-attributes as matrices, weighted by loan use frequency, as inputs in the
-model.
+(QAP) regressions, as we can represent similarities across loan purposes
+and attributes as matrices, weighted by loan purpose frequency, as
+inputs in the model.
 
 Using data from LendingClub, @serrano-cinca_determinants_2015 study
-funding success, finding that the reported loan use is a significant
+funding success, finding that the reported loan purpose is a significant
 factor explaining differences in default rates. Specifically, the
 authors argue that there is heterogeneity in the credit riskiness of
 individuals seeking specific loan purposes, indicating that credit
-rating can explain some variation in borrowers' choice of loan use.
+rating can explain some variation in borrowers' choice of loan purpose.
 Considering the preference for lower loan counts as well, we formulate
 the following hypothesis:
 
 *Hypothesis 1: Borrowers with the same credit ratings choose fewer loans
 within their shared loan purpose*
 
-Supporting the familiarity bias, @ravina_love_2019 studies personal
+Supporting the familiarity bias, @ravina_love_2019 studied personal
 characteristics in P2P markets, finding that loans tend to be awarded to
 those sharing personal characteristics such as occupation. As
-@ayal_behavioral_2018 implies, this can be generalised to suggest that
+@ayal_behavioral_2018 imply, this can be generalised to suggest that
 lenders' loan grants reflect a wider network of similar borrower
-preferences, which can reflect the homogeneity in loan use observed by
-@serrano-cinca_determinants_2015. Therefore, we expect occupation to be
-a meaningful predictor, but per @amar_winning_2011, we expect a
-preference for smaller loan counts. Thus,
+preferences, which can reflect the homogeneity in loan purpose observed
+by @serrano-cinca_determinants_2015. Therefore, we expect occupation to
+be a meaningful predictor. However, per @amar_winning_2011, we expect a
+preference for smaller loan counts within borrowers' shared occupations.
+Thus,
 
 *Hypothesis 2: Borrowers sharing the same occupation area tend to share
-fewer loans for their shared loan purpose*
+fewer loans for their shared loan purpose.*
 
 Further, behavioural finance suggests that individuals' financial
 decisions are not independent, but rather, shaped by bounded rationality
 and psychological preferences [@kahneman_prospect_1979]. In the P2P
 context, @ayal_behavioral_2018 shows that these preferences can
 influence how borrowers choose loan types and how this can overlap with
-other borrowers' decisions. Using the Exponential Random Graph Model
-(ERGM) framework, we can identify how these behaviours manifest as
-structural regularities in a borrower-to-loan-use network. Therefore, we
-ask:
+other borrowers' decisions. Using the ERGM framework, we can identify
+how these behaviours manifest as structural regularities in a
+borrower-to-loan-use network. Therefore, we ask:
 
 ***Research Question 2:** What behavioural mechanisms affect the
 structure of borrower-to-loan-use connections?*
 
-The aforedescribed section outlined that the familiarity bias can lead
-to similarities across borrower portfolios in terms of their
+The previous section outlined that the familiarity bias can lead to
+similarities across borrower portfolios in terms of their
 characteristics. However, in P2P settings, this can manifest itself as
 familiarity *clustering*, wherein borrowers who have previously been
 granted certain loan types are more likely to repeat their choices, or
 select other categories that appear familiar to different borrowers.
 @herzenstein_strategic_2011, studying borrower decisions on Prosper.com,
-identifies a 'strategic herding' behaviour, where individuals, **in
+identified a 'strategic herding' behaviour, where individuals, **in
 aggregate,** gravitate towards popular or socially-validated loans.
 Considering that loan popularity is directly observable through its
-number of bids, we assert that we assert that the social validation of a
-loan purpose for one borrower positively reinforces the selection of
-that same loan purpose for other, **co-affiliated** borrowers.
+number of bids, we assert that that the social validation of a loan
+purpose for one borrower positively reinforces the selection of that
+same loan purpose for other, **co-affiliated** borrowers.
 
 In network terms, this aggregate herding behaviour generates a
 structural propensity for four-cycles to form, resulting in closed paths
 between overlapping nodes of each of the bipartite partitions, as
 suggested by @koskinen_modelling_2012. This structure represents the
-fact that two borrowers connected to a common loan use have a higher
-likelihood of also connecting to a *second* common loan use. We capture
-this specific form of bipartite closure through the ERGM term
+fact that two borrowers connected to a common loan purpose have a higher
+likelihood of also connecting to a *second* common loan purpose. We
+capture this specific form of bipartite closure through the ERGM term
 `cycle(4)`, formulating:
 
 *Hypothesis 3: Co-affiliated borrowers are more likely to overlap on a
-second loan purpose*
+second loan purpose.*
 
-Further, @ayal_perceived_2009, expands on the theory of Debt Account
+Further, @ayal_perceived_2009, expand on the theory of Debt Account
 Aversion with the Theory of Perceived Diversification, explaining that
-**individual** borrowers' distress increases with not just by the number
+**individual** borrowers' distress increases with not only with number
 of debts, but also the perceived *distinctiveness* of each debt type,
-suggesting that in the P2P context, debt mentally differentiated by
-purpose would also be seen as distressing. Therefore, we assert that if
-borrowers do not diversify, then they try to minimise loan
+suggesting that in the P2P context, debt that is mentally differentiated
+by its purpose would also be seen as distressing. Therefore, we assert
+that if borrowers do not diversify, then they try to minimise loan
 distinctiveness by requesting loans of a single type. This can be
 captured by the `b1degree(1)` term, which models whether borrowers are
 only linked to one loan purpose. Therefore, we formulate:
 
 *Hypothesis 4: Borrowers exhibit preferences for minimal debt
-distinctiveness, selecting one loan use*
+distinctiveness, selecting one loan purpose.*
 
 Notwithstanding, credit choices relate to non-structural factors.
 @cooper_consumption_2023 show that younger borrowers face constraints in
@@ -272,37 +272,37 @@ authors argue that this constraint shapes how these borrowers form loan
 portfolios, often concentrating around different use cases such as
 education, personal consumption, or small business loans. Considering
 the systemic differences in how age affects credit consumption, we
-assert that younger borrowers have different loan use portfolios. The
-ERGM term `b1cov("age")` can capture this by assessing how changes in
-age affect how borrowers form connections with different loan types.
+assert that younger borrowers have different loan purpose portfolios.
+The ERGM term `b1cov("age")` can capture this by assessing how changes
+in age affect how borrowers form connections with different loan types.
 Therefore:
 
-*Hypothesis 5: Younger borrowers have different loan use mixes than
-older borrowers*
+*Hypothesis 5: Younger borrowers have different loan purpose mixes than
+older ones.*
 
 Alongside age, the borrower's gender is known to be a significant factor
-in influencing credit use decisions. @aliano_role_2023 study the role of
-gender and other factors on borrowers' probability of default on the
-Bondora.com, finding a persistent gender effect on different loan uses;
-women tend to default less on health, home, and business loans.
-@croson_gender_2009 shows that these differences can be due to risk
-perception and self-selection effects, where women exhibit greater risk
-aversion, leading to different borrowing patterns. We expect that these
-differences in risk tolerance and perceived creditworthiness by lenders
-affect loan use composition in terms of gender. The term
+in influencing credit use decisions. @aliano_role_2023 studied the role
+of gender and other factors on borrowers' probability of default on
+Bondora.com, finding a persistent gender effect on different loan
+purposes; women tend to default less on health, home, and business
+loans. @croson_gender_2009 show that these differences can be due to
+risk perception and self-selection effects, where women exhibit greater
+risk aversion, leading to different borrowing patterns. We expect that
+these differences in risk tolerance and perceived creditworthiness by
+lenders affect loan purpose composition in terms of gender. The term
 `b1factor("gender")` captures this effect by assessing whether
-borrowers' connections with loan uses differ across genders. We would
-find support for this idea given a significant, non-zero effect
+borrowers' connections with loan purposes differ across genders. We
+would find support for this idea given a significant, non-zero effect
 estimate. Therefore:
 
-*Hypothesis 6: Gender differences lead to different loan use mixes*
+*Hypothesis 6: Gender differences lead to different loan purpose mixes.*
 
 | Hypothesis | Term | Explanation |
-|------------------------|------------------|------------------------------|
-| $H_3^a:$ Co-affiliated borrowers are more likely to overlap on a second loan purpose | *cycle(4)* | This captures the tendency of borrowers who are already affiliated through their links to the same loan type to have links to another type. With this term we capture **aggregate** borrower behaviour. |
-| $H_4^a:$ Borrowers exhibit preferences for minimal debt distinctiveness, selecting one loan use | *b1degree(1)* | This captures the tendency of borrowers to prefer minimal distinctiveness in their loan uses, preferring to hold only one distinct type to minimise their perceived risk. With this term, we capture **individual** borrower behaviour rather than an aggregation phenomenon. |
-| $H_5^a:$ Younger borrowers have different loan use mixes than older borrowers | *b1cov("age")* | This captures the tendency for younger borrowers to choose different kinds of loans based on how differently they consume credit. |
-| $H_6^a:$ Gender differences lead to different loan use mixes | *b1factor("gender")* | This captures the idea that there are systemic differences in what kinds of loan uses are preferred the genders due to their perceived riskiness and creditworthiness. |
+|----------------------|--------------|----------------------------------|
+| $H_3^a:$ Co-affiliated borrowers are more likely to overlap on a second loan purpose | *cycle(4)* | This captures the tendency of borrowers who are already affiliated through their connections to the same loan type to have connections to another type. With this term we capture **aggregate** borrower behaviour. |
+| $H_4^a:$ Borrowers exhibit preferences for minimal debt distinctiveness, selecting one loan purpose | *b1degree(1)* | This captures the tendency of borrowers to prefer minimal distinctiveness in their loan purposes, preferring to hold only one distinct type to minimise their perceived risk. With this term, we capture **individual** borrower behaviour rather than an aggregation phenomenon. |
+| $H_5^a:$ Younger borrowers have different loan purpose mixes than older borrowers | *b1cov("age")* | This captures the tendency for younger borrowers to choose different kinds of loans based on how differently they consume credit. |
+| $H_6^a:$ Gender differences lead to different loan purpose mixes | *b1factor("gender")* | There are systemic differences in what kinds of loan purposes are preferred the genders due to their perceived riskiness and creditworthiness. |
 
 : Hypotheses related to Study 2
 
@@ -320,51 +320,52 @@ specific data processing steps are shown in section \ref{sec:supp}.
 ## Dataset {#sec-methodology}
 
 The study utilises publicly-available data from Bondora, a European P2P
-lending platform primarily operating in the Baltics and Spain. The
+lending platform, primarily operating in the Baltics and Spain. The
 dataset contains detailed information on defaulted and non-defaulted
 loans granted to users between February 2009 and July 2021.
 Specifically, contained is a range of numeric, binary, categorical, and
 time-series attributes across `85,087` unique users and `179,235`
 individual loans. Since the company's API is no longer accessible, we
 utilised a publicly available repository compiled by
-@manu_siddhartha_bondora_2021 on kaggle.com. The user made a series of
-API calls to collect the data. Following this, the dataset was processed
-according to Appendix Section \ref{sec:preprocessing}.
+@manu_siddhartha_bondora_2021 on kaggle.com. The data compiler made a
+series of API calls to collect the data. Following this, the dataset was
+processed according to Appendix Section \ref{sec:preprocessing}.
 
 ### Pre-Processing & Network Formation
 
-Initially, the dataset was filtered loans between 2014 and 2016 since
+Initially, the dataset was filtered to loans between 2014 and 2016 since
 the data is incomplete during other periods. Since we are studying
 interactions across two distinct set of nodes, a bipartite network was
 formed with unique users as the first partition and the purpose of loans
 as the second. This allows us to evaluate how borrowers interact with
 loan purposes; a one-mode projection onto users is not meaningful for
 P2P networks as it produces no discernible structure. For model
-efficiency and performance, we randomly sample `500` individuals from
-the larger sample. Ultimately, we have `500` and `9` nodes in the first
-and second partitions, respectively.
+efficiency and performance, we randomly sampled `500` individuals from
+the larger sample. Ultimately, we have `500` nodes of users and `9`
+nodes of loan purposes, in the first and second partitions,
+respectively.
 
 ### Descriptive Statistics & Preliminary Analysis
 
-@tbl-desc-table summarises the numeric variables between the reduced and
+@tbl-desc-table summarises the numeric variables for the reduced and
 larger samples. First, borrowers take out relatively small loans with
 fairly high interest rates, possibly reflecting that the average
 borrower is deemed fairly risky. The average loan is quite long, at
-approximately `46` months out of a maximum `60`. @fig-bar-rating shows
-that the largest credit category is `HR`[^1], which is the lowest
-possible rating. So, the typical borrower is relatively uncreditworthy.
-Moreover, the largest categories of loan use are `Other` and
-`Home Improvement`, suggesting these are largely personal. Additionally,
-@fig-bar-country shows that the biggest borrower group is from Estonia,
-however, Spain and Finland are also highly represented. Conversely,
-Slovakia has minimal representation. We observe minimal differences
-between the random sampling and the larger sample of individuals, per
-@tbl-desc-table and @fig-bar-rating, however, the study may be biased by
-the fact that the dataset contains only granted loans, rather than all
-bids for loans. This means our inferences about how borrowers behave is
-limited to successful bids. Further, the time period is relatively
-distant, meaning that recent structural changes to the P2P sector cannot
-be accounted for.
+approximately `46` months out of a maximum of `60`. @fig-bar-rating
+shows that the largest credit category is `HR`[^1], which is the lowest
+possible rating. So, the typical borrower is rated as relatively
+uncreditworthy. Moreover, the largest categories of loan purpose are
+`Other` and `Home Improvement`, suggesting these are largely personal.
+Additionally, @fig-bar-country shows that the biggest borrower group is
+from Estonia. However, Spain and Finland are also highly represented.
+Conversely, Slovakia has minimal representation. We observe minimal
+differences between the random sampling and the larger sample of
+individuals, per @tbl-desc-table and @fig-bar-rating. However, the study
+may be biased by the fact that the dataset contains only granted loans,
+rather than all bids for loans. This means our inferences about how
+borrowers behave is limited to successful bids. Further, the time period
+is relatively distant, meaning that recent structural changes to the P2P
+sector cannot be accounted for.
 
 [^1]: Bondora uses their own proprietary credit rating system where the
     best rating is AA and worst is HR [@bondora_how_2024]. The company
@@ -389,16 +390,16 @@ peripheral. The mean distance of approximately three implies that
 borrowers are closely connected, typically separated by only
 three-to-four loan-use steps.
 
-Centrality distributions reinforce this structure [@fig-network-plots].
-Betweenness is highest among loan-type nodes, though several borrowers
-also bridge distinct loan clusters. Closeness centrality remains low but
-scattered, suggesting localized clustering constrained by the bipartite
-structure. Degree distributions show wide variation among loan types,
-consistent with a hub-like structure dominated by a few popular uses.
-However, the second partition has relatively small degree dispersion.
-Finally, the homogeneous eccentricity distribution indicates that no
-borrowers are highly isolated, reflecting a compact and moderately
-cohesive network overall.
+Centrality distributions reinforce this structure as shown in
+[@fig-network-plots]. Betweenness is highest among loan-type nodes,
+though several borrowers also bridge distinct loan clusters. Closeness
+centrality remains low but scattered, suggesting localised clustering
+constrained by the bipartite structure. Degree distributions show wide
+variation among loan types, consistent with a hub-like structure
+dominated by a few popular uses. However, the second partition has
+relatively small degree dispersion. Finally, the homogeneous
+eccentricity distribution indicates that no borrowers are highly
+isolated, reflecting a compact and moderately cohesive network overall.
 
 ```{r}
 #| label: tbl-net-stats
@@ -416,10 +417,10 @@ replayPlot(net_plot)
 
 \begin{footnotesize}
 \linespread{1}
-Note: Each colour represents a different partition of the network. The partitions' nodes are scaled to their relative degrees. Users with many different loan types are larger than those with single loan uses. Similarly, the size of second partition nodes represents how many users belong to each.
+Note: Each colour represents a different partition of the network. The partitions' nodes are scaled to their relative degrees. Users with many different loan types are larger than those with single loan purposes. Similarly, the size of second partition nodes represents how many users belong to each.
 \end{footnotesize}
 
-```{r fig.width=14, fig.height=7}
+```{r fig.width=14, fig.height=10}
 #| label: fig-network-plots
 #| fig-cap: "Network Centrality Distribution Plots"
 
@@ -428,17 +429,17 @@ replayPlot(cent_plots)
 
 ## Research Rationale
 
-Our overall study analyses borrowers' behaviours, however, the studies
-are differentiated in their scope; the first study observes dyad-level
+We investigate borrower behaviour, however, the studies are
+differentiated in their scope; the first study observes dyad-level
 relations among borrowers to understand how shared attributes affect
-borrowers' behaviours. This is inherently useful because behavioural
+borrowers' behaviour. This is inherently useful because behavioural
 finance aims to understand how individuals behave in *aggregate*
 [@ayal_behavioral_2018]. Typically, the Quadratic Assignment Procedure
 is selected for dyad-level observations because basic linear regressions
 such as Ordinary Least Squares are fundamentally flawed and biased when
 using non-independent observations [@simpson_qap_2001].
 
-Recognising this, studies such as @zuo_clustering_nodate assume that
+Recognising this, studies such as @zuo_clustering_2015 assume that
 groups of borrowers have dependencies, and accordingly, use clustering
 methods such as K-Means or Fuzzy Clustering to understand behaviour.
 However, these methods are unsuitable when we require a distribution of
@@ -452,24 +453,24 @@ the relationship between borrower similarities and loan-use behaviour.
 This makes it both theoretically and methodologically well-suited to our
 research objectives and dataset.
 
-The second study extends the analysis from a dyadic similarities to the
+The second study extends the analysis from dyadic similarities to the
 structural formation of borrower-to-loan-use connections, which can
 identify the behavioural mechanisms that influence borrowers' specific
-loan use mixes. While QAP can account for exogenous influences, it
+loan purpose mixes. While QAP can account for exogenous influences, it
 cannot analyse higher-order network patterns such as clustering while
 accounting for simultaneous interactions between borrowers and loan
-uses. Using the Exponential Random Graph Model allows us to analyse how
-local behavioural tendencies aggregates to a global network structure.
+purposes. Using ERGM allows us to analyse how local behavioural
+tendencies aggregate to a global network structure.
 
 Recent evidence highlights the need to focus on structural approaches in
-P2P lending. @liu_network_2024 studies borrowers' centrality with the
+P2P lending. @liu_network_2024 studied borrowers' centrality with the
 Bondora P2P dataset, modelling edges through borrower-to-borrower
 similarity metrics. Ultimately, they find that a borrower's position is
 highly significant for their probability of default, using centrality as
 an exogenous variable in a logistic regression. In contrast, ERGM allows
 us to move away from predictive association and instead account for
 endogenous factors, allowing us to understand the likelihood that
-borrowers' selection of loan uses are random. Consequently, we can
+borrowers' selections of loan purposes is random. Consequently, we can
 better understand how behavioural phenomena such as familiarity and debt
 account aversion can translate into *systemic* patterns of credit use.
 
@@ -480,7 +481,7 @@ bipartite approach is highly suitable. Specifically,
 partitions, as in hypothesis 3, whereas it would fail in a
 fully-connected one-mode projected networks. Furthermore, the
 flexibility of ERGM also allows for modelling exogenous impacts such
-gender-based differences in loan use mixes, as in hypothesis 6, and
+gender-based differences in loan purpose mixes, as in hypothesis 6, and
 covariate age effects as in hypothesis 5.
 
 ## Results
@@ -496,19 +497,19 @@ strength of omitted variable bias.
 
 Assessing hypothesis 1, in the unrestricted model, borrowers sharing the
 same credit rating once leads to a `0.083` increase in the number of
-loans they share within the same loan use category, holding all other
-effects fixed. While this effect is statistically significant at 1%,
-notably, it is not economically significant because the effect magnitude
-is very small. In essence, having the same credit rating as another
-borrower does not mean that the borrower will have meaningfully
+loans they share within the same loan purpose category, holding all
+other effects fixed. While this effect is statistically significant at
+1%, notably, it is not economically significant because the effect
+magnitude is very small. In essence, having the same credit rating as
+another borrower does not mean that the borrower will have meaningfully
 different amounts of loans taken out for the same reason. Without
 controls, this effect was slightly larger, meaning that other predictors
 capture some of this effect. Our results corroborate aspects of
 @serrano-cinca_determinants_2015; similarly, we find that there is a
-non-zero effect of creditworthiness on loan use, however, they find a
-stronger effect. This can be due to borrowers' aversion to holding large
-numbers of debt, as explained by @ayal_two_2011, where borrowers attempt
-to minimize debt counts independently of the loan use type.
+non-zero effect of creditworthiness on loan purpose, however, they find
+a stronger effect. This can be due to borrowers' aversion to holding
+large numbers of debt, as explained by @ayal_two_2011, where borrowers
+attempt to minimize debt counts independently of the loan purpose type.
 
 ```{r fig.width=10, fig.height=5}
 #| label: fig-qap-coef
@@ -523,10 +524,10 @@ gridExtra::grid.arrange(p1, p2, ncol = 2)
 Further, assessing hypothesis 2, borrowers sharing the same occupation
 area does not have a significant impact on the outcome. This indicates
 that the number of loans taken out for the same reason as another
-borrower does not vary given that pairs of borrowers have the same kind
+borrower does not vary, given that pairs of borrowers have the same kind
 of job. The omission of control variables does not change this effect,
 meaning that its insignificance is not due to other correlated effects.
-The result is contrary to @ravina_love_2019, who finds that certain
+The result is contrary to @ravina_love_2019, who found that certain
 occupation areas have a higher likelihood of loan success. As the author
 states, these effects are likely present in markets with sophisticated
 decision makers. It is possible that Bondora lenders do not conform to
@@ -540,7 +541,7 @@ economically meaningful. Moreover, the model diagnostics show an
 $R^2=0.035$, suggesting that the linear QAP only explains 3.5% of the
 variation observed in the data. This is rather small, indicating that
 the linear model is not a good fit for this specific study. We argue
-that borrowers are not biased against large debt counts per loan use
+that borrowers are not biased against large debt counts per loan purpose
 type as *dyads*, but rather, as part of a more complex network
 structure. This is indicated by the low $R^2$, showing that this dyadic
 relationship cannot be captured as a linear effect.
@@ -575,23 +576,23 @@ the fitted models.
 
 In Model 4, the inclusion of `b1factor("gender")` has pushed the `edges`
 term towards zero, making it insignificant. This suggests that the
-combination of individual borrowers' loan use formation is likely random
-in the presence of other terms, indicating that the edge formation
-effect is instead captured jointly by the rest of the terms. We consider
-this a good result since it suggests that our final model may be fully
-saturated.
+combination of individual borrowers' loan purpose formation is likely
+random in the presence of other terms, indicating that the edge
+formation effect is instead captured jointly by the rest of the terms.
+We consider this a good result since it suggests that our final model
+may be fully saturated.
 
 Evaluating hypothesis 4, we determine whether borrowers exhibit a
 preference for minimal debt distinctiveness by choosing only one loan
 type. In Model 4, `b1degree(1)` is highly significant and positive with
 a log-odds of `3.271`, suggesting that the odds of a borrower connected
-to exactly one loan use is approximately `26.34` times higher than the
-odds of observing a configuration where the degree is not one. In other
-words, in this Bondora sample, it is highly likely that borrowers select
-only one loan type. This effect size or error has not deviated strongly
-across the four model permutations, indicating its stability. This
-result shows support for the Theory of Perceived Diversification by
-@ayal_perceived_2009 as see that on an **individual level,** borrowers
+to exactly one loan purpose is approximately `26.34` times higher than
+the odds of observing a configuration where the degree is not one. In
+other words, in this Bondora sample, it is highly likely that borrowers
+select only one loan type. This effect size or error has not deviated
+strongly across the four model permutations, indicating its stability.
+This result shows support for the Theory of Perceived Diversification by
+@ayal_perceived_2009 because on an **individual level,** borrowers
 prefer to hold minimal *distinct* debt types.
 
 Further, the third hypothesis asserts that borrowers affiliated by a
@@ -600,38 +601,39 @@ familiarity bias on an **aggregated** level. In Model 4, four-cycles are
 insignificant, meaning that we have not found sufficient evidence to
 reject the null hypothesis that there are no systematic co-affiliation
 effects. In other words, borrowers who are affiliated by the same loan
-use do not overlap on a second loan purpose. This finding is contrary to
-@herzenstein_strategic_2011, who argues that borrowers aggregate around
-popular, or familiar loans. This could be explained by the fact that the
-authors examine auction bids, rather than winning bids, as we have. The
-behaviours or characteristics of bidders, compared to winners, may be
-fundamentally different.
+purpose do not overlap on a second loan purpose. This finding is
+contrary to @herzenstein_strategic_2011, who argues that borrowers
+aggregate around popular, or familiar loans. This could be explained by
+the fact that the authors examine auction bids, rather than winning
+bids, as we have. The behaviours or characteristics of bidders, compared
+to winners, may be fundamentally different.
 
 Evaluating attribute-level effects, we see that neither age nor gender
-has a significant impact on loan use selection by borrowers.
+has a significant impact on loan purpose selection by borrowers.
 Specifically, we do not find sufficient evidence to conclude that
 borrowers being younger has any influence over how they select their
-loan uses. This indicates a lack of support for hypothesis 5, which
-asserts that younger borrowers should have different loan use
+loan purposes. This indicates a lack of support for hypothesis 5, which
+asserts that younger borrowers should have different loan purpose
 combinations than older borrowers. In this vein, we cannot corroborate
 @cooper_consumption_2023, however, this is likely due to the fact that
 their study focuses on credit consumption of U.S. young adults, which is
-fundamentally than credit consumption in Europe @jentzsch_consumer_2006.
-Moreover, they study traditional credit markets such as personal credit
-lines from banks rather than peer-to-peer lending services, which also
-vary fundamentally.
+fundamentally different than credit consumption in Europe
+@jentzsch_consumer_2006. Moreover, they studied traditional credit
+markets such as personal credit lines from banks rather than
+peer-to-peer lending services, which also vary fundamentally.
 
 In the same vein, we do not observe sufficient evidence to determine
-that borrowers' gender affects how they select their specific loan uses.
-Similarly, this is contrary to hypothesis 6, which states that there is
-a gender difference in how borrowers select loan uses. The lack of
-effect is contrary to @aliano_role_2023, who finds gender to be a
-significant predictor of loan use heterogeneity. They argue that gender
-differences across credit risk perception and self-selection effects are
-responsible, however, it is likely that these behavioural factors are
-already captured by the `b1degree(1)` term; as @ayal_perceived_2009
-argues, similar risk-related phenomena are responsible for Prospect
-Theory, which in turn drives the Theory of Perceived Diversification.
+that borrowers' gender affects how they select their specific loan
+purposes. Similarly, this is contrary to hypothesis 6, which states that
+there is a gender difference in how borrowers select loan purposes. The
+lack of effect is contrary to @aliano_role_2023, who finds gender to be
+a significant predictor of loan purpose heterogeneity. They argue that
+gender differences across credit risk perception and self-selection
+effects are responsible, however, it is likely that these behavioural
+factors are already captured by the `b1degree(1)` term; as
+@ayal_perceived_2009 argued, similar risk-related phenomena are
+responsible for Prospect Theory, which in turn drives the Theory of
+Perceived Diversification.
 
 ```{r fig.width=10, fig.height=5}
 #| label: fig-ergm-coef
@@ -644,36 +646,6 @@ ep4 <- readRDS(here::here("resources","objects","ergm","m4_coef_plot.Rds"))
 
 gridExtra::grid.arrange(ep1, ep2, ep3, ep4, nrow = 2, ncol = 2)
 ```
-
-Evaluating model fit, we must first evaluate the MCMC simulations seen
-in Appendix Section \ref{sec:ergm_diags}. Observing Model 4, we see that
-all terms have mixed sufficiently well. While `edges`, `b1degree(1)`,
-`b1factor("gender")`, and `b1cov("age")` are well centred at zero,
-`cycle(4)` is slightly right-skewed, indicating minor mixing issues.
-Additionally, the trace plots appear to resemble a "fuzzy" shape,
-supporting this. We find this diagnostic acceptable.
-
-Further, the GOF measures indicate how well simulation iterations match
-our observed network. Across the GOF measures, p-values close to `1`
-resemble a close match with reality. All geodesic distances except for
-`Inf` and `2` are well-modelled. The former is expected, as our
-bipartite mode restricts any possibility of links within each partition,
-meaning that `Inf` distances can never be modelled. For `b1degree(1)`,
-all degrees except for zero and two are highly insignificant. It is
-expected that zero degrees is poorly modelled because our observed
-network has no isolates. Degree three is arguably poorly modelled since
-there are only `7` observations of it, limiting the simulations. The
-term `b2degree()` is not modelled well, however, this term is very
-difficult to capture statistically; there is no meaningful statistical
-variation with respect how many borrowers each loan use has, so the GOF
-test cannot reliably evaluate it. Moreover, edge-wise shared partners
-are all well modelled. Overall, we consider the GOF tests to be
-sufficient.
-
-Finally, we evaluate the optimal statistical model configuration by
-observing the minimum AIC/BIC values across the models. AIC prefers
-Model 3 whereas BIC chooses Model 1; this is expected, as BIC penalizes
-less informative model terms more strongly.
 
 ```{r}
 #| output: asis
@@ -692,21 +664,61 @@ texreg::texreg(ergm_table_items[[1]],
                dcolumn = TRUE)
 ```
 
+Evaluating model fit, we must first evaluate the MCMC simulations seen
+in Figure below. Observing Model 4, we see that all terms have mixed
+sufficiently well. While `edges`, `b1degree(1)`, `b1factor("gender")`,
+and `b1cov("age")` are well centred at zero, `cycle(4)` is slightly
+right-skewed, indicating minor mixing issues. Additionally, the trace
+plots appear to resemble a "fuzzy" shape, supporting this. We find this
+diagnostic acceptable.
+
+Further, the GOF measures indicate how well simulation iterations match
+our observed network. Across the GOF measures, p-values close to `1`
+resemble a close match with reality. All geodesic distances except for
+`Inf` and `2` are well-modelled. The former is expected, as our
+bipartite configuration restricts any possibility of links within each
+partition, meaning that `Inf` distances can never be modelled. For
+`b1degree(1)`, all degrees except for zero and two are highly
+insignificant. It is expected that zero degrees is poorly modelled
+because our observed network has no isolates. Degree three is arguably
+poorly modelled since there are only `7` observations of it, limiting
+the simulations. The term `b2degree()` is not modelled well, however,
+this term is very difficult to capture statistically; there is no
+meaningful statistical variation with respect how many borrowers each
+loan purpose has, so the GOF test cannot reliably evaluate it. Moreover,
+edge-wise shared partners are all well modelled. Overall, we consider
+the GOF tests to be sufficient.
+
+Finally, we evaluate the optimal statistical model configuration by
+observing the minimum AIC/BIC values across the models. AIC prefers
+Model 3 whereas BIC chooses Model 1; this is expected, as BIC penalizes
+less informative model terms more strongly.
+
+```{r fig.width=10, fig.height=5, echo=FALSE,results='hide',fig.keep='all'}
+#| label: fig-m4-diags
+#| fig-cap: "Model 4 Diagnostics Plots"
+
+em4 <- readRDS(here::here("resources","objects","ergm","ergm_m4_panel.Rds"))
+
+invisible(ergm::mcmc.diagnostics(em4$model))
+invisible(snafun::stat_plot_gof(em4$gof))
+```
+
 ## Conclusion
 
 This study aimed to assess the prevalence of behavioural biases in a
 peer-to-peer lending context by assessing how connections across
 borrowers and loan types varied; by answering the question *"Do
-borrowers vary in their loan use type and frequency based on their
+borrowers vary in their loan purpose type and frequency based on their
 individual and loan characteristics"*, we can determine the extent that
-borrowers have an aversion to large loan counts within loan use
+borrowers have an aversion to large loan counts within loan purpose
 categories, per @ayal_two_2011, and by answering *"What behavioural
 mechanisms affect the structure of borrower-to-loan-use connections?"*
-in a network setting, we can see how loan use choices vary with
+in a network setting, we can see how loan purpose choices vary with
 structural factors.
 
-To evaluate how loan counts are affected within loan use selections, we
-utilised the QAP linear regression framework. Within this study,
+To evaluate how loan counts are affected within loan purpose selections,
+we utilised the QAP linear regression framework. Within this study,
 borrowers are studied as dyads rather than a whole network. Firstly, it
 was found that borrowers having the same credit rating was significant
 in explaining variations in the number of loans they took out for a
@@ -740,12 +752,12 @@ does not extend to how *winners* of auctions behave.
 Further, examining borrowers' attribute effects, we found that neither
 gender nor age have significant effects on how borrowers choose loan
 types. Specifically, gender differences do not account for a difference
-in loan use formation. We argue that this could be due to the idea that
-the same gender differences that affect risk perception are also
+in loan purpose formation. We argue that this could be due to the idea
+that the same gender differences that affect risk perception are also
 responsible for the underlying behavioural phenomena behind the Theory
 of Perceived Diversification. Consequently, the use of `b1degree(1)` had
 already captured this process. Finally, we do not find that younger
-borrowers have a different loan use mix than older borrowers. This
+borrowers have a different loan purpose mix than older borrowers. This
 theory was derived from @cooper_consumption_2023, who studied young
 adults in the U.S. However, considering the fundamental differences
 across credit markets between the U.S. and Europe, it is likely that
@@ -773,6 +785,13 @@ focus on singular P2P platforms. We recommend that studies focus on
 concurrent analyses of a combination of P2P platforms because individual
 platforms may have idiosyncrasies that make analyses difficult to
 generalise to the wider P2P lending market.
+
+\clearpage
+
+## References {.unnumbered}
+
+::: {#refs}
+:::
 
 \clearpage
 \appendix
@@ -848,40 +867,42 @@ replayPlot(readRDS(here::here("resourceS","objects","preprocessing","user_cnt_pl
 
 <!-- -->
 
--   When adding labels to each loan use and occupation area, we keep any
-    possible missing values because these do not indicate lower quality
-    data. Instead, they can carry information about lenders distribute
-    loans according to the quality of information presented by borrowers
-    [@yao_relationship_2019]. Additionally, keeping missing labels is
-    important to ensure that the edges are not superficially limited and
-    that nodes can be isolates if they are indeed that way in reality.
+-   When adding labels to each loan purpose and occupation area, we keep
+    any possible missing values because these do not indicate lower
+    quality data. Instead, they can carry information about lenders
+    distribute loans according to the quality of information presented
+    by borrowers [@yao_relationship_2019]. Additionally, keeping missing
+    labels is important to ensure that the edges are not superficially
+    limited and that nodes can be isolates if they are indeed that way
+    in reality.
 
 -   To create the network object for ERGM models:
 
     -   We first create an incidence matrix of size $n \times m$,
-        borrower usernames by the loan use, where the values are the
-        number of loans the user obtained for each loan use category.
-        These values are then turned into binary because our modelling
-        does not support the use of weighted edges.
+        borrower usernames by the loan purpose, where the values are the
+        number of loans the user obtained for each loan purpose
+        category. These values are then turned into binary because our
+        modelling does not support the use of weighted edges.
 
     -   A bipartite network is created from this incidence matrix, where
         the first partition are unique users, and the second partition
-        is the loan use associated among all loans of the user. Users
-        can share more than more loan use type.
+        is the loan purpose associated among all loans of the user.
+        Users can share more than more loan purpose type.
 
     -   We add age and gender attributes to each node of the first
         partition
 
 -   To create the relevant networks/matrices for QAP Regressions:
 
-    -   We first re-create the loan use incidence matrix, however, we
-        keep the counts as the linear regression supports this.
+    -   We first re-create the loan purpose incidence matrix, however,
+        we keep the counts as the linear regression supports this.
 
-        -   We then convert the loan use incidence matrix into an
+        -   We then convert the loan purpose incidence matrix into an
             adjacency matrix of shape $n\times n$ through the
             transformation $\mathbf{X}\cdot\mathbf{X^T}$, which results
-            in a matrix of shared loan uses weighted by the frequency of
-            each user's loan count within each loan use category.
+            in a matrix of shared loan purposes weighted by the
+            frequency of each user's loan count within each loan purpose
+            category.
 
         -   We then set the diagonal values of $\mathbf{X}$ to be zero
             to ensure that there are no loops within the network.
@@ -1052,23 +1073,26 @@ em2$gof
 
 #### Model 3
 
-```{r fig.width=10, fig.height=5}
+```{r fig.width=10, fig.height=10}
 
 em3 <- readRDS(here::here("resources","objects","ergm","ergm_m3_panel.Rds"))
 
 ergm::mcmc.diagnostics(em3$model)
+```
+
+```{r fig.width=10, fig.height=5}
+
 snafun::stat_plot_gof(em3$gof)
 em3$gof
 ```
 
 #### Model 4
 
-```{r fig.width=10, fig.height=5}
+This section contains only the console output for the GOF diagnostics
+for Model 4. The main diagnostics are contained in the Results section.
 
-em4 <- readRDS(here::here("resources","objects","ergm","ergm_m4_panel.Rds"))
+```{r fig.width=10, fig.height=10}
 
-ergm::mcmc.diagnostics(em4$model)
-snafun::stat_plot_gof(em4$gof)
 em4$gof
 ```
 
@@ -1112,8 +1136,3 @@ em4$gof
 > AI tools have used, and edited the content as needed. As a
 > consequence, **Group 7** takes full responsibility for the content of
 > their work.
-
-## References {.unnumbered}
-
-::: {#refs}
-:::
