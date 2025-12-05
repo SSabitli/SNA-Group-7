@@ -306,6 +306,13 @@ estimate. Therefore:
 
 : Hypotheses related to Study 2
 
+This study makes a specific contribution to behavioral finance by
+leveraging Linear QAP Regression and the ERGM to empirically isolate the
+structural and individual behavioral biases, such as familiarity
+clustering and debt account aversion, that drive non-professional P2P
+borrower portfolio construction, thereby offering actionable insights
+for platform risk management and regulatory policy stakeholders.
+
 Following this section, we outline the methodology, explaining our
 dataset and network construction. To facilitate this, descriptive
 statistics are analysed for both the dataset and resulting network.
