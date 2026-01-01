@@ -14,7 +14,7 @@ The project contributors are
 
 ## Project Abstract
 
-> TBD
+> In this study we investigate the behavioural phenomena that influence individual borrowers' choice of loan purposes. In the first study, we evaluate how loan counts within each loan purpose choice are influenced by borrowers' individual characteristics by asking "*Do borrowers vary in their loan purpose type and frequency based on the individual and loan characteristics?".* Using the Quadratic Assignment Procedure (QAP) linear regression framework. Our first hypothesis asserts that borrowers sharing the same credit rating should choose similar loan purposes, but with a preference for a lower loan count. We found that while this is a significant effect, the impact on loan count is minimal. The second asserts that borrowers sharing the same occupation area should share loan purposes with a lower count as well. Here, we do not find a meaningful effect. The second study examines which behavioural phenomena affect how borrowers decide which combination of loan purposes to request. We ask, *"What behavioural mechanisms affect the structure of borrower-to-loan-use connections"*. With the use of Exponential Random Graph Models (ERGM), we first determine whether there is co-affiliation between borrowers who overlap in their loan choices. We find that there is no systematic aggregate overlapping effect. Further, we evaluate whether there is an individual behavioural effect where borrowers minimise the number of loan types. The results indicate a systematic individual behavioural bias. Assessing whether younger borrowers have different loan purpose selections, we fail to find evidence for this assertion. Similarly, we fail to find support for the idea that there are gender differences in how borrowers choose loan types.
 
 ## Research Problem
 
@@ -27,7 +27,7 @@ The first study aims to uncover how similarities across borrowers' loan uses are
 In the following table we describe the construction and use of each variable within the Linear QAP framework. Under `Variable Name`, we list the original attribute used from the raw dataset, however, its transformation into the appropriate data structure is described under the `Construction` column
 
 | Variable Name | Variable Type | Construction |
-|------------------|------------------|-------------------------------------|
+|------------------|------------------|------------------------------------|
 | `UseOfLoan` | Dependent | $n\times n$ adjacency matrix of $n$ borrowers given a common reported `UseofLoan`. Obtained by transforming the $n\times m$ incidence matrix of $m$ loan types by $\mathbf{X} \cdot \mathbf{X}^T$ weighted by unique loan count. |
 | `Rating` | Main Predictor | $n \times n$ adjacency matrix of $n$ borrowers given a commonly reported credit rating across their portfolio of loans. Obtained by transforming the $n \times m$ incidence matrix of $m$ credit ratings by $\mathbf{X\cdot X^T}$, weighted by unique loan count. |
 | `OccupationArea` | Main Predictor | Binary $n\times n$ adjacency matrix of $n$ borrowers given a common occupation area reported across their portfolio of loans. Obtained by transforming the $n\times m$ incidence matrix of occupation areas by $\mathbf{X\cdot X^T}$, replacing weighted values by ones. |

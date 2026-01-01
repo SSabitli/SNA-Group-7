@@ -298,7 +298,7 @@ estimate. Therefore:
 *Hypothesis 6: Gender differences lead to different loan purpose mixes.*
 
 | Hypothesis | Term | Explanation |
-|----------------------|--------------|----------------------------------|
+|----|----|----|
 | $H_3^a:$ Co-affiliated borrowers are more likely to overlap on a second loan purpose | *cycle(4)* | This captures the tendency of borrowers who are already affiliated through their connections to the same loan type to have connections to another type. With this term we capture **aggregate** borrower behaviour. |
 | $H_4^a:$ Borrowers exhibit preferences for minimal debt distinctiveness, selecting one loan purpose | *b1degree(1)* | This captures the tendency of borrowers to prefer minimal distinctiveness in their loan purposes, preferring to hold only one distinct type to minimise their perceived risk. With this term, we capture **individual** borrower behaviour rather than an aggregation phenomenon. |
 | $H_5^a:$ Younger borrowers have different loan purpose mixes than older borrowers | *b1cov("age")* | This captures the tendency for younger borrowers to choose different kinds of loans based on how differently they consume credit. |
@@ -805,8 +805,9 @@ generalise to the wider P2P lending market.
 
 ## Appendix
 
-\label{sec:supp}
- \definecolor{dkgreen}{rgb}{0,0.6,0} \definecolor{gray}{rgb}{0.5,0.5,0.5} \definecolor{mauve}{rgb}{0.58,0,0.82} \lstset{ %
+\label{sec:supp} \definecolor{dkgreen}{rgb}{0,0.6,0}
+\definecolor{gray}{rgb}{0.5,0.5,0.5}
+\definecolor{mauve}{rgb}{0.58,0,0.82} \lstset{ %
   language=R,                     % the language of the code
   basicstyle=\footnotesize,       % the size of the fonts that are used for the code
   numbers=left,                   % where to put the line-numbers
